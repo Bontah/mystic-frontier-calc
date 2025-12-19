@@ -1043,7 +1043,7 @@
 
       for (let dieIndex = 0; dieIndex < 3; dieIndex++) {
         const currentValue = dice[dieIndex];
-        let bestOption = null;
+        const passingValues = [];
 
         // Test all possible values for this die (1-6)
         for (let testValue = 1; testValue <= 6; testValue++) {
@@ -1053,31 +1053,28 @@
           const result = simulateResultDetailed(testDice, monsters, activeBonusItems);
 
           if (result.finalResult >= difficulty) {
-            // Found a passing value - keep the minimum
-            if (bestOption === null || testValue < bestOption.minNeeded) {
-              bestOption = {
-                minNeeded: testValue,
-                ...result
-              };
-            }
+            passingValues.push({
+              value: testValue,
+              ...result
+            });
           }
         }
 
-        // Calculate odds if a target exists
-        let odds = null;
-        if (bestOption !== null) {
-          const successFaces = 7 - bestOption.minNeeded;
-          odds = Math.round((successFaces / 6) * 100);
-        }
+        // Calculate odds based on how many values pass
+        const odds = passingValues.length > 0
+          ? Math.round((passingValues.length / 6) * 100)
+          : null;
+
+        // Check if current value is among passing values
+        const currentPasses = passingValues.some(p => p.value === currentValue);
 
         suggestions.push({
           dieIndex,
           dieName: `Dice ${dieIndex + 1}`,
           currentValue,
-          minNeeded: bestOption ? bestOption.minNeeded : null,
-          resultDetails: bestOption,
+          passingValues,
           odds,
-          alreadyPasses: currentResult >= difficulty
+          currentPasses
         });
       }
 
@@ -1102,25 +1099,21 @@
         let targetText = '';
         let breakdownHtml = '';
 
-        if (s.minNeeded === null) {
+        if (s.passingValues.length === 0) {
           // Impossible to pass by rerolling this die alone
           itemClass += ' impossible';
           targetClass += ' impossible';
           targetText = 'Impossible alone';
-        } else if (s.minNeeded <= s.currentValue) {
-          // Current value already meets target (but still failing due to other factors)
-          itemClass += ' not-needed';
-          targetClass += ' not-needed';
-          targetText = `Already at ${s.currentValue} ✓`;
         } else {
-          // Can reroll to pass
+          // Can reroll to pass - show which values work
           itemClass += ' can-reroll';
           targetClass += ' possible';
-          targetText = `Need ${s.minNeeded}+`;
 
-          // Build breakdown display
-          const r = s.resultDetails;
-          const successFaces = 7 - s.minNeeded;
+          const passingNums = s.passingValues.map(p => p.value);
+          targetText = `Need: ${passingNums.join(', ')}`;
+
+          // Use the first passing value for breakdown display
+          const r = s.passingValues[0];
 
           let breakdownParts = [];
           breakdownParts.push(`Dice: ${r.diceSum}`);
@@ -1134,7 +1127,7 @@
 
           breakdownHtml = `
             <div class="reroll-breakdown">${breakdownParts.join(' ')}</div>
-            <div class="reroll-odds">${s.odds}% chance (${successFaces}/6 faces)</div>
+            <div class="reroll-odds">${s.odds}% chance (${s.passingValues.length}/6 faces)</div>
           `;
 
           // Show which conditionals would activate

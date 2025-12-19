@@ -1097,7 +1097,7 @@
         let itemClass = 'reroll-item';
         let targetClass = 'reroll-target';
         let targetText = '';
-        let breakdownHtml = '';
+        let conditionalsHtml = '';
 
         if (s.passingValues.length === 0) {
           // Impossible to pass by rerolling this die alone
@@ -1112,27 +1112,10 @@
           const passingNums = s.passingValues.map(p => p.value);
           targetText = `Need: ${passingNums.join(', ')}`;
 
-          // Use the first passing value for breakdown display
-          const r = s.passingValues[0];
-
-          let breakdownParts = [];
-          breakdownParts.push(`Dice: ${r.diceSum}`);
-          if (r.totalFlat !== 0) {
-            breakdownParts.push(`Flat: ${r.totalFlat >= 0 ? '+' : ''}${r.totalFlat}`);
-          }
-          if (r.totalMultiplier !== null) {
-            breakdownParts.push(`×${r.totalMultiplier.toFixed(1)}`);
-          }
-          breakdownParts.push(`= ${r.finalResult}`);
-
-          breakdownHtml = `
-            <div class="reroll-breakdown">${breakdownParts.join(' ')}</div>
-            <div class="reroll-odds">${s.odds}% chance (${s.passingValues.length}/6 faces)</div>
-          `;
-
           // Show which conditionals would activate
+          const r = s.passingValues[0];
           if (r.activeConditionals.length > 0) {
-            breakdownHtml += `<div class="reroll-conditionals">Activates: ${r.activeConditionals.join(', ')}</div>`;
+            conditionalsHtml = `<div class="reroll-conditionals">Activates: ${r.activeConditionals.join(', ')}</div>`;
           }
         }
 
@@ -1141,7 +1124,7 @@
             <div class="reroll-die-name">${s.dieName}</div>
             <div class="reroll-current">Current: ${s.currentValue}</div>
             <div class="${targetClass}">${targetText}</div>
-            ${breakdownHtml}
+            ${conditionalsHtml}
           </div>
         `;
       }).join('');

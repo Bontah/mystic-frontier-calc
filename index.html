@@ -420,6 +420,20 @@
       color: #888;
       margin-top: 5px;
     }
+
+    .reroll-breakdown {
+      font-size: 12px;
+      color: #66ccff;
+      margin-top: 8px;
+      font-family: monospace;
+    }
+
+    .reroll-conditionals {
+      font-size: 11px;
+      color: #66ff66;
+      margin-top: 5px;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -953,17 +967,22 @@
     // REROLL LOGIC
     // ============================================
 
-    function simulateResult(testDice, monsters, activeBonusItems) {
+    function simulateResultDetailed(testDice, monsters, activeBonusItems) {
       // Calculate what the final result would be with given dice values
+      // Returns detailed breakdown including which conditionals activate
       const diceSum = testDice.reduce((a, b) => a + b, 0);
 
-      // Calculate flat bonuses
-      let totalFlat = 0;
+      // Calculate flat bonuses from items
+      let itemFlat = 0;
       activeBonusItems.forEach(item => {
-        totalFlat += item.flatBonus;
+        itemFlat += item.flatBonus;
       });
 
-      // From conditional bonuses
+      // Check conditional bonuses and track which ones activate
+      let conditionalFlat = 0;
+      let conditionalMult = 0;
+      const activeConditionals = [];
+
       conditionalBonuses.forEach(cond => {
         let isActive = false;
         try {
@@ -973,40 +992,50 @@
           // Invalid condition
         }
         if (isActive) {
-          totalFlat += cond.flatBonus;
+          activeConditionals.push(cond.name);
+          conditionalFlat += cond.flatBonus;
+          if (cond.multiplierBonus !== 0 && cond.multiplierBonus !== 1) {
+            conditionalMult += cond.multiplierBonus;
+          }
         }
       });
 
-      // Calculate multipliers
-      let totalMultiplier = 0;
+      // Calculate multipliers from items
+      let itemMult = 0;
       activeBonusItems.forEach(item => {
         if (item.multiplierBonus !== 0 && item.multiplierBonus !== 1) {
-          totalMultiplier += item.multiplierBonus;
+          itemMult += item.multiplierBonus;
         }
       });
 
-      conditionalBonuses.forEach(cond => {
-        let isActive = false;
-        try {
-          const condFn = new Function('dice', 'monsters', `return ${cond.condition}`);
-          isActive = condFn(testDice, monsters);
-        } catch (e) {
-          // Invalid condition
-        }
-        if (isActive && cond.multiplierBonus !== 0 && cond.multiplierBonus !== 1) {
-          totalMultiplier += cond.multiplierBonus;
-        }
-      });
+      const totalFlat = itemFlat + conditionalFlat;
+      const totalMultiplier = itemMult + conditionalMult;
 
       // Calculate final result
       const afterFlat = diceSum + totalFlat;
       let beforeRounding;
+      let finalMultiplier = null;
       if (totalMultiplier !== 0) {
-        beforeRounding = afterFlat * totalMultiplier;
+        finalMultiplier = totalMultiplier;
+        beforeRounding = afterFlat * finalMultiplier;
       } else {
         beforeRounding = afterFlat;
       }
-      return Math.floor(beforeRounding);
+      const finalResult = Math.floor(beforeRounding);
+
+      return {
+        diceSum,
+        totalFlat,
+        totalMultiplier: finalMultiplier,
+        finalResult,
+        activeConditionals,
+        breakdown: {
+          itemFlat,
+          conditionalFlat,
+          itemMult,
+          conditionalMult
+        }
+      };
     }
 
     function calculateRerollSuggestions(dice, monsters, activeBonusItems, difficulty, currentResult) {
@@ -1014,29 +1043,30 @@
 
       for (let dieIndex = 0; dieIndex < 3; dieIndex++) {
         const currentValue = dice[dieIndex];
-        let minNeeded = null;
-        let resultWithMin = null;
+        let bestOption = null;
 
         // Test all possible values for this die (1-6)
         for (let testValue = 1; testValue <= 6; testValue++) {
           const testDice = [...dice];
           testDice[dieIndex] = testValue;
 
-          const testResult = simulateResult(testDice, monsters, activeBonusItems);
+          const result = simulateResultDetailed(testDice, monsters, activeBonusItems);
 
-          if (testResult >= difficulty) {
-            if (minNeeded === null || testValue < minNeeded) {
-              minNeeded = testValue;
-              resultWithMin = testResult;
+          if (result.finalResult >= difficulty) {
+            // Found a passing value - keep the minimum
+            if (bestOption === null || testValue < bestOption.minNeeded) {
+              bestOption = {
+                minNeeded: testValue,
+                ...result
+              };
             }
           }
         }
 
         // Calculate odds if a target exists
         let odds = null;
-        if (minNeeded !== null) {
-          // How many faces on a d6 meet or exceed the target?
-          const successFaces = 7 - minNeeded; // e.g., need 5+ means 5,6 = 2 faces
+        if (bestOption !== null) {
+          const successFaces = 7 - bestOption.minNeeded;
           odds = Math.round((successFaces / 6) * 100);
         }
 
@@ -1044,8 +1074,8 @@
           dieIndex,
           dieName: `Dice ${dieIndex + 1}`,
           currentValue,
-          minNeeded,
-          resultWithMin,
+          minNeeded: bestOption ? bestOption.minNeeded : null,
+          resultDetails: bestOption,
           odds,
           alreadyPasses: currentResult >= difficulty
         });
@@ -1054,7 +1084,7 @@
       return suggestions;
     }
 
-    function renderRerollSuggestions(suggestions, passed) {
+    function renderRerollSuggestions(suggestions, passed, difficulty) {
       const section = document.getElementById('rerollSection');
       const container = document.getElementById('rerollSuggestions');
 
@@ -1070,7 +1100,7 @@
         let itemClass = 'reroll-item';
         let targetClass = 'reroll-target';
         let targetText = '';
-        let oddsText = '';
+        let breakdownHtml = '';
 
         if (s.minNeeded === null) {
           // Impossible to pass by rerolling this die alone
@@ -1087,7 +1117,30 @@
           itemClass += ' can-reroll';
           targetClass += ' possible';
           targetText = `Need ${s.minNeeded}+`;
-          oddsText = `${s.odds}% chance (${7 - s.minNeeded}/6 faces)`;
+
+          // Build breakdown display
+          const r = s.resultDetails;
+          const successFaces = 7 - s.minNeeded;
+
+          let breakdownParts = [];
+          breakdownParts.push(`Dice: ${r.diceSum}`);
+          if (r.totalFlat !== 0) {
+            breakdownParts.push(`Flat: ${r.totalFlat >= 0 ? '+' : ''}${r.totalFlat}`);
+          }
+          if (r.totalMultiplier !== null) {
+            breakdownParts.push(`×${r.totalMultiplier.toFixed(1)}`);
+          }
+          breakdownParts.push(`= ${r.finalResult}`);
+
+          breakdownHtml = `
+            <div class="reroll-breakdown">${breakdownParts.join(' ')}</div>
+            <div class="reroll-odds">${s.odds}% chance (${successFaces}/6 faces)</div>
+          `;
+
+          // Show which conditionals would activate
+          if (r.activeConditionals.length > 0) {
+            breakdownHtml += `<div class="reroll-conditionals">Activates: ${r.activeConditionals.join(', ')}</div>`;
+          }
         }
 
         return `
@@ -1095,7 +1148,7 @@
             <div class="reroll-die-name">${s.dieName}</div>
             <div class="reroll-current">Current: ${s.currentValue}</div>
             <div class="${targetClass}">${targetText}</div>
-            ${oddsText ? `<div class="reroll-odds">${oddsText}</div>` : ''}
+            ${breakdownHtml}
           </div>
         `;
       }).join('');
@@ -1266,7 +1319,7 @@
 
       // Calculate and display reroll suggestions
       const rerollSuggestions = calculateRerollSuggestions(dice, monsters, activeBonusItems, difficulty, finalResult);
-      renderRerollSuggestions(rerollSuggestions, passed);
+      renderRerollSuggestions(rerollSuggestions, passed, difficulty);
     }
 
     // ============================================

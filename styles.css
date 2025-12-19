@@ -1671,6 +1671,16 @@ select:focus, input:focus, textarea:focus {
   width: 100%;
 }
 
+.extraction-row input[type="text"] {
+  width: 100%;
+  padding: 6px 10px;
+  background: #2a2a4a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+}
+
 .extraction-row-text {
   grid-template-columns: 80px 1fr;
 }

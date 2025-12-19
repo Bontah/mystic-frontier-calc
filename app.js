@@ -1867,6 +1867,7 @@ const ImageScanner = {
     // Icon positions relative to card (percentages) - calibrated from examples
     elementIconRegion: { x: 0.89, y: 0.185, w: 0.065, h: 0.060 },  // Top-right, small icon
     typeIconRegion: { x: 0.895, y: 0.27, w: 0.063, h: 0.060 },     // Below element
+    nameRegion: { x: 0.05, y: 0.05, w: 0.75, h: 0.05 },            // Top-left, name text
     textRegion: { x: 0.03, y: 0.79, w: 0.94, h: 0.1 },
     debug: false  // Set to true to visualize extraction regions
   },
@@ -2013,9 +2014,14 @@ const ImageScanner = {
       // Step 4: Detect type from icon
       const typeResult = await this.detectType(croppedData);
 
-      status.textContent = 'Extracting text...';
+      status.textContent = 'Extracting name...';
 
-      // Step 5: OCR for conditional bonus
+      // Step 5: OCR for familiar name
+      const nameResult = await this.extractName(croppedData);
+
+      status.textContent = 'Extracting conditional...';
+
+      // Step 6: OCR for conditional bonus
       const conditionalResult = await this.extractConditionalText(croppedData);
 
       // Debug: Draw extraction regions on canvas
@@ -2034,14 +2040,16 @@ const ImageScanner = {
       console.log('Scanner Results:', {
         borderColor: croppedData.borderColor,
         bounds: croppedData.bounds,
+        name: nameResult,
         rank: rankResult,
         element: elementResult,
         type: typeResult,
         conditionalText: conditionalResult.rawText
       });
 
-      // Step 6: Show results modal
+      // Step 7: Show results modal
       this.showExtractionModal({
+        name: nameResult,
         rank: rankResult,
         element: elementResult,
         type: typeResult,
@@ -2503,6 +2511,50 @@ const ImageScanner = {
     return finalScore;
   },
 
+  async extractName(croppedData) {
+    // Initialize Tesseract if not already done
+    if (!this.tesseractWorker) {
+      if (typeof Tesseract === 'undefined') {
+        return '';
+      }
+
+      const status = document.getElementById('scannerStatus');
+      status.textContent = 'Loading OCR engine (first time only)...';
+
+      this.tesseractWorker = await Tesseract.createWorker('eng', 1, {
+        logger: (m) => {
+          if (m.status === 'recognizing text') {
+            status.textContent = `OCR: ${Math.round(m.progress * 100)}%`;
+          }
+        }
+      });
+    }
+
+    // Extract name region
+    const region = this.config.nameRegion;
+    const x = Math.floor(croppedData.width * region.x);
+    const y = Math.floor(croppedData.height * region.y);
+    const w = Math.floor(croppedData.width * region.w);
+    const h = Math.floor(croppedData.height * region.h);
+
+    const nameCanvas = document.createElement('canvas');
+    nameCanvas.width = w;
+    nameCanvas.height = h;
+    const nameCtx = nameCanvas.getContext('2d');
+
+    nameCtx.drawImage(croppedData.canvas, x, y, w, h, 0, 0, w, h);
+
+    // Preprocess for OCR
+    this.preprocessForOCR(nameCtx, w, h);
+
+    // Run OCR
+    const result = await this.tesseractWorker.recognize(nameCanvas);
+    const rawText = result.data.text.trim();
+
+    // Clean up the name - remove line breaks, extra spaces
+    return rawText.replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim();
+  },
+
   async extractConditionalText(croppedData) {
     // Initialize Tesseract if not already done
     if (!this.tesseractWorker) {
@@ -2840,6 +2892,9 @@ const ImageScanner = {
     // Set preview image
     document.getElementById('extractedCardPreview').src = results.croppedImage;
 
+    // Set name
+    document.getElementById('extractedName').value = results.name || '';
+
     // Set rank
     document.getElementById('extractedRank').value = results.rank.rank;
     this.setConfidence('rankConfidence', results.rank.confidence);
@@ -3101,6 +3156,16 @@ const ImageScanner = {
     ctx.fillStyle = 'blue';
     ctx.fillText('TYPE', w * typeRegion.x, h * typeRegion.y - 2);
 
+    // Draw name region (cyan)
+    const nameRegion = this.config.nameRegion;
+    ctx.strokeStyle = 'cyan';
+    ctx.strokeRect(
+      w * nameRegion.x, h * nameRegion.y,
+      w * nameRegion.w, h * nameRegion.h
+    );
+    ctx.fillStyle = 'cyan';
+    ctx.fillText('NAME', w * nameRegion.x, h * nameRegion.y - 2);
+
     // Draw text region (green)
     const textRegion = this.config.textRegion;
     ctx.strokeStyle = 'lime';
@@ -3123,13 +3188,14 @@ function confirmExtraction() {
   const modal = document.getElementById('extractionModal');
 
   // Get extracted values
+  const name = document.getElementById('extractedName').value;
   const rank = document.getElementById('extractedRank').value;
   const element = document.getElementById('extractedElement').value;
   const type = document.getElementById('extractedType').value;
   const conditionalSelect = document.getElementById('extractedConditionalMatch');
 
   // Populate the roster form
-  document.getElementById('rosterName').value = '';
+  document.getElementById('rosterName').value = name || '';
   document.getElementById('rosterRank').value = rank;
   document.getElementById('rosterElement').value = element;
   document.getElementById('rosterType').value = type;

@@ -1044,6 +1044,40 @@ select:focus, input:focus, textarea:focus {
   text-align: center;
 }
 
+.optimizer-progress {
+  background: #1a1a2e;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.optimizer-progress .progress-text {
+  color: #b8b8b8;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.optimizer-progress .progress-bar-container {
+  background: #2a2a4a;
+  border-radius: 10px;
+  height: 20px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.optimizer-progress .progress-bar {
+  background: linear-gradient(90deg, #ffcc00, #ffdd44);
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.1s ease-out;
+}
+
+.optimizer-progress .progress-percent {
+  color: #ffcc00;
+  font-weight: bold;
+  font-size: 16px;
+}
+
 .lineup-card {
   background: #1a1a2e;
   border-radius: 10px;

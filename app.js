@@ -781,6 +781,97 @@ function findBestForHighRolls(combinations, bonuses) {
   return best;
 }
 
+// Async versions with progress callback for UI updates
+async function findBestOverallAsync(combinations, bonuses, onProgress) {
+  let best = null;
+  let bestScore = -Infinity;
+
+  for (const combo of combinations) {
+    const maxDice = getMaxDiceForFamiliars(combo);
+    const avgDice = maxDice.map(max => Math.ceil((1 + max) / 2));
+    const result = evaluateLineup(combo, bonuses, avgDice);
+
+    // Calculate expected value across all roll combinations
+    let totalScore = 0;
+    let count = 0;
+    for (let d1 = 1; d1 <= maxDice[0]; d1++) {
+      for (let d2 = 1; d2 <= maxDice[1]; d2++) {
+        for (let d3 = 1; d3 <= maxDice[2]; d3++) {
+          const r = evaluateLineup(combo, bonuses, [d1, d2, d3]);
+          totalScore += r.score;
+          count++;
+        }
+      }
+    }
+    const expectedScore = totalScore / count;
+
+    if (expectedScore > bestScore) {
+      bestScore = expectedScore;
+      best = {
+        familiars: combo,
+        score: Math.round(expectedScore),
+        scoreLabel: 'Expected',
+        testDice: avgDice,
+        ...result
+      };
+    }
+
+    if (onProgress) await onProgress();
+  }
+
+  return best;
+}
+
+async function findBestForLowRollsAsync(combinations, bonuses, onProgress) {
+  let best = null;
+  let bestScore = -Infinity;
+
+  for (const combo of combinations) {
+    const dice = [1, 1, 1];
+    const result = evaluateLineup(combo, bonuses, dice);
+
+    if (result.score > bestScore) {
+      bestScore = result.score;
+      best = {
+        familiars: combo,
+        score: result.score,
+        scoreLabel: 'With 1-1-1',
+        testDice: dice,
+        ...result
+      };
+    }
+
+    if (onProgress) await onProgress();
+  }
+
+  return best;
+}
+
+async function findBestForHighRollsAsync(combinations, bonuses, onProgress) {
+  let best = null;
+  let bestScore = -Infinity;
+
+  for (const combo of combinations) {
+    const dice = getMaxDiceForFamiliars(combo);
+    const result = evaluateLineup(combo, bonuses, dice);
+
+    if (result.score > bestScore) {
+      bestScore = result.score;
+      best = {
+        familiars: combo,
+        score: result.score,
+        scoreLabel: `With ${dice.join('-')}`,
+        testDice: dice,
+        ...result
+      };
+    }
+
+    if (onProgress) await onProgress();
+  }
+
+  return best;
+}
+
 function getAllLibraryBonuses() {
   return configConditionalBonuses.bonuses || [];
 }
@@ -790,7 +881,7 @@ function toggleOptimizerHelp() {
   content.style.display = content.style.display === 'none' ? 'block' : 'none';
 }
 
-function runOptimizer() {
+async function runOptimizer() {
   const resultsContainer = document.getElementById('optimizerResults');
 
   // Get filter values
@@ -835,10 +926,34 @@ function runOptimizer() {
     }
   }
 
-  // Find best lineups for each strategy (only using familiars' own conditionals)
-  const bestOverall = findBestOverall(combinations, []);
-  const bestLow = findBestForLowRolls(combinations, []);
-  const bestHigh = findBestForHighRolls(combinations, []);
+  // Show progress indicator
+  const totalSteps = combinations.length * 3; // 3 strategies to evaluate
+  resultsContainer.innerHTML = `
+    <div class="optimizer-progress">
+      <div class="progress-text">Analyzing ${combinations.length.toLocaleString()} lineup combinations...</div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="optimizerProgressBar" style="width: 0%"></div>
+      </div>
+      <div class="progress-percent" id="optimizerProgressPercent">0%</div>
+    </div>
+  `;
+
+  // Helper to update progress and yield to UI
+  let currentStep = 0;
+  const updateProgress = async () => {
+    currentStep++;
+    if (currentStep % 50 === 0 || currentStep === totalSteps) {
+      const percent = Math.round((currentStep / totalSteps) * 100);
+      document.getElementById('optimizerProgressBar').style.width = percent + '%';
+      document.getElementById('optimizerProgressPercent').textContent = percent + '%';
+      await new Promise(resolve => setTimeout(resolve, 0)); // Yield to UI
+    }
+  };
+
+  // Find best lineups for each strategy with progress updates
+  const bestOverall = await findBestOverallAsync(combinations, [], updateProgress);
+  const bestLow = await findBestForLowRollsAsync(combinations, [], updateProgress);
+  const bestHigh = await findBestForHighRollsAsync(combinations, [], updateProgress);
 
   renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement, filterType });
 }
@@ -860,7 +975,7 @@ function renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement,
       let bonusHtml = '';
       if (breakdown && breakdown.conditionalTriggered) {
         const flatStr = breakdown.flatContribution !== 0 ? `+${breakdown.flatContribution}` : '';
-        const multStr = breakdown.multiplierContribution && breakdown.multiplierContribution !== 0 && breakdown.multiplierContribution !== 1 ? `x${breakdown.multiplierContribution}` : '';
+        const multStr = breakdown.multiplierContribution && breakdown.multiplierContribution !== 0 && breakdown.multiplierContribution !== 1 ? `x${parseFloat(breakdown.multiplierContribution.toFixed(2))}` : '';
         bonusHtml = `
           <div class="lineup-familiar-bonus active">
             <div class="bonus-name">${escapeHtml(breakdown.conditionalName)}</div>
@@ -900,7 +1015,7 @@ function renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement,
             <div class="breakdown-header">Bonus Breakdown</div>
             ${activeBreakdowns.map(b => {
               const flatStr = b.flatContribution !== 0 ? `+${b.flatContribution} flat` : '';
-              const multStr = b.multiplierContribution && b.multiplierContribution !== 0 && b.multiplierContribution !== 1 ? `x${b.multiplierContribution}` : '';
+              const multStr = b.multiplierContribution && b.multiplierContribution !== 0 && b.multiplierContribution !== 1 ? `x${parseFloat(b.multiplierContribution.toFixed(2))}` : '';
               const sourceName = b.name || `${b.element} ${b.type}`;
               return `
                 <div class="breakdown-row">
@@ -910,7 +1025,7 @@ function renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement,
               `;
             }).join('')}
             <div class="breakdown-totals">
-              <span>Total: +${result.totalFlat} flat${result.totalMult ? `, x${result.totalMult}` : ''}</span>
+              <span>Total: +${result.totalFlat} flat${result.totalMult ? `, x${parseFloat(result.totalMult.toFixed(2))}` : ''}</span>
             </div>
           </div>
         `;
@@ -1753,7 +1868,7 @@ const ImageScanner = {
     elementIconRegion: { x: 0.89, y: 0.185, w: 0.065, h: 0.060 },  // Top-right, small icon
     typeIconRegion: { x: 0.895, y: 0.27, w: 0.063, h: 0.060 },     // Below element
     textRegion: { x: 0.03, y: 0.79, w: 0.94, h: 0.1 },
-    debug: true  // Set to true to visualize extraction regions
+    debug: false  // Set to true to visualize extraction regions
   },
 
   // State
@@ -2442,12 +2557,44 @@ const ImageScanner = {
     const imageData = ctx.getImageData(0, 0, width, height);
     const pixels = imageData.data;
 
+    // Step 1: Calculate histogram for adaptive thresholding
+    const histogram = new Array(256).fill(0);
     for (let i = 0; i < pixels.length; i += 4) {
-      // Convert to grayscale
+      const gray = Math.round(pixels[i] * 0.299 + pixels[i + 1] * 0.587 + pixels[i + 2] * 0.114);
+      histogram[gray]++;
+    }
+
+    // Step 2: Find optimal threshold using Otsu's method
+    const totalPixels = width * height;
+    let sum = 0;
+    for (let i = 0; i < 256; i++) sum += i * histogram[i];
+
+    let sumB = 0, wB = 0, maxVariance = 0, threshold = 128;
+    for (let t = 0; t < 256; t++) {
+      wB += histogram[t];
+      if (wB === 0) continue;
+      const wF = totalPixels - wB;
+      if (wF === 0) break;
+
+      sumB += t * histogram[t];
+      const mB = sumB / wB;
+      const mF = (sum - sumB) / wF;
+      const variance = wB * wF * (mB - mF) * (mB - mF);
+
+      if (variance > maxVariance) {
+        maxVariance = variance;
+        threshold = t;
+      }
+    }
+
+    // Step 3: Apply contrast enhancement and adaptive threshold
+    for (let i = 0; i < pixels.length; i += 4) {
       const gray = pixels[i] * 0.299 + pixels[i + 1] * 0.587 + pixels[i + 2] * 0.114;
 
-      // Invert and threshold (assuming light text on dark background)
-      const value = gray > 100 ? 0 : 255;
+      // Invert if text is light on dark (threshold below midpoint means dark bg)
+      const value = (threshold < 128)
+        ? (gray > threshold ? 0 : 255)   // Light text on dark bg - invert
+        : (gray > threshold ? 255 : 0);  // Dark text on light bg - normal
 
       pixels[i] = value;
       pixels[i + 1] = value;
@@ -2455,6 +2602,21 @@ const ImageScanner = {
     }
 
     ctx.putImageData(imageData, 0, 0);
+  },
+
+  // Keywords with weights for matching
+  keywordWeights: {
+    // Elements (highest weight)
+    'fire': 10, 'ice': 10, 'lightning': 10, 'poison': 10, 'dark': 10, 'holy': 10,
+    'elemental': 8, 'non-elemental': 10,
+    // Types
+    'human': 10, 'beast': 10, 'plant': 10, 'aquatic': 10, 'fairy': 10,
+    'reptile': 10, 'devil': 10, 'undead': 10, 'machine': 10,
+    // Important condition words
+    'same': 8, 'different': 8, 'all': 6, 'three': 6, 'two': 6, 'one': 5,
+    'type': 5, 'element': 5, 'familiar': 3, 'familiars': 3,
+    // Low weight common words
+    'lineup': 1, 'active': 1, 'your': 0, 'is': 0, 'on': 0, 'if': 0, 'a': 0, 'an': 0, 'the': 0, 'have': 0
   },
 
   matchConditionalText(extractedText) {
@@ -2465,46 +2627,189 @@ const ImageScanner = {
       .replace(/\s+/g, ' ')
       .trim();
 
+    // Extract bonus values from OCR text (e.g., "+2", "x1.2", "1.5x")
+    const extractedBonus = this.extractBonusValues(normalized);
+
     let bestMatch = null;
     let bestScore = 0;
 
     for (const bonus of configConditionalBonuses.bonuses) {
       const bonusText = bonus.name.toLowerCase();
-      const similarity = this.calculateTextSimilarity(normalized, bonusText);
 
-      if (similarity > bestScore && similarity > 40) {
-        bestScore = similarity;
-        bestMatch = { ...bonus, matchScore: Math.round(similarity) };
+      // Calculate text similarity with keyword weighting
+      const textScore = this.calculateTextSimilarity(normalized, bonusText);
+
+      // Bonus value matching score (if we extracted values from OCR)
+      let bonusValueScore = 0;
+      if (extractedBonus.flat !== null || extractedBonus.mult !== null) {
+        bonusValueScore = this.calculateBonusValueMatch(extractedBonus, bonus);
+      }
+
+      // Combined score: 70% text, 30% bonus values (if available)
+      const finalScore = bonusValueScore > 0
+        ? textScore * 0.7 + bonusValueScore * 0.3
+        : textScore;
+
+      if (finalScore > bestScore && finalScore > 35) {
+        bestScore = finalScore;
+        bestMatch = { ...bonus, matchScore: Math.round(finalScore) };
       }
     }
 
     return bestMatch;
   },
 
+  extractBonusValues(text) {
+    const result = { flat: null, mult: null };
+
+    // Look for flat bonus patterns: +2, +1, -1, etc.
+    const flatMatch = text.match(/([+-]\d+)(?!\.\d)/);
+    if (flatMatch) {
+      result.flat = parseInt(flatMatch[1]);
+    }
+
+    // Look for multiplier patterns: x1.2, 1.5x, ×1.2, etc.
+    const multMatch = text.match(/[x×](\d+\.?\d*)|(\d+\.?\d*)[x×]/i);
+    if (multMatch) {
+      result.mult = parseFloat(multMatch[1] || multMatch[2]);
+    }
+
+    return result;
+  },
+
+  calculateBonusValueMatch(extracted, bonus) {
+    let score = 0;
+    let checks = 0;
+
+    if (extracted.flat !== null && bonus.flatBonus !== undefined) {
+      checks++;
+      if (extracted.flat === bonus.flatBonus) score += 100;
+      else if (Math.abs(extracted.flat - bonus.flatBonus) <= 1) score += 50;
+    }
+
+    if (extracted.mult !== null && bonus.multiplierBonus !== undefined) {
+      checks++;
+      if (Math.abs(extracted.mult - bonus.multiplierBonus) < 0.05) score += 100;
+      else if (Math.abs(extracted.mult - bonus.multiplierBonus) < 0.2) score += 50;
+    }
+
+    return checks > 0 ? score / checks : 0;
+  },
+
   calculateTextSimilarity(text1, text2) {
-    // Combined: word overlap + Levenshtein distance for better fuzzy matching
-    const words1 = text1.split(/\s+/).filter(w => w.length > 2);
-    const words2 = text2.split(/\s+/).filter(w => w.length > 2);
+    // Multi-factor similarity: keyword matching + n-gram + Jaro-Winkler
+
+    // 1. Keyword-weighted matching
+    const keywordScore = this.calculateKeywordScore(text1, text2);
+
+    // 2. Character n-gram similarity (trigrams)
+    const ngramScore = this.calculateNgramSimilarity(text1, text2, 3);
+
+    // 3. Jaro-Winkler for handling OCR errors
+    const jaroScore = this.jaroWinklerSimilarity(text1, text2) * 100;
+
+    // Weighted combination
+    return keywordScore * 0.5 + ngramScore * 0.3 + jaroScore * 0.2;
+  },
+
+  calculateKeywordScore(text1, text2) {
+    const words1 = text1.split(/\s+/).filter(w => w.length > 1);
+    const words2 = text2.split(/\s+/).filter(w => w.length > 1);
 
     if (words1.length === 0 || words2.length === 0) return 0;
 
-    // Word overlap score
-    let wordMatches = 0;
-    for (const w1 of words1) {
-      for (const w2 of words2) {
-        if (w1.includes(w2) || w2.includes(w1)) {
-          wordMatches++;
+    let totalWeight = 0;
+    let matchedWeight = 0;
+
+    // Check each word in the reference text
+    for (const w2 of words2) {
+      const weight = this.keywordWeights[w2] !== undefined ? this.keywordWeights[w2] : 2;
+      totalWeight += weight;
+
+      // Check if this keyword is found in extracted text
+      for (const w1 of words1) {
+        if (w1 === w2 || w1.includes(w2) || w2.includes(w1) ||
+            this.levenshteinDistance(w1, w2) <= Math.max(1, Math.floor(w2.length / 4))) {
+          matchedWeight += weight;
           break;
         }
       }
     }
-    const wordOverlapScore = (wordMatches / Math.max(words1.length, words2.length)) * 100;
 
-    // Levenshtein distance score
-    const levenScore = (1 - this.levenshteinDistance(text1, text2) / Math.max(text1.length, text2.length)) * 100;
+    return totalWeight > 0 ? (matchedWeight / totalWeight) * 100 : 0;
+  },
 
-    // Weighted combination: 60% word overlap, 40% levenshtein
-    return wordOverlapScore * 0.6 + levenScore * 0.4;
+  calculateNgramSimilarity(text1, text2, n) {
+    const getNgrams = (text) => {
+      const ngrams = new Set();
+      const cleaned = text.replace(/\s+/g, ' ');
+      for (let i = 0; i <= cleaned.length - n; i++) {
+        ngrams.add(cleaned.substring(i, i + n));
+      }
+      return ngrams;
+    };
+
+    const ngrams1 = getNgrams(text1);
+    const ngrams2 = getNgrams(text2);
+
+    if (ngrams1.size === 0 || ngrams2.size === 0) return 0;
+
+    let intersection = 0;
+    for (const ng of ngrams1) {
+      if (ngrams2.has(ng)) intersection++;
+    }
+
+    // Dice coefficient for n-grams
+    return (2 * intersection / (ngrams1.size + ngrams2.size)) * 100;
+  },
+
+  jaroWinklerSimilarity(s1, s2) {
+    if (s1 === s2) return 1;
+    if (s1.length === 0 || s2.length === 0) return 0;
+
+    const matchWindow = Math.floor(Math.max(s1.length, s2.length) / 2) - 1;
+    const s1Matches = new Array(s1.length).fill(false);
+    const s2Matches = new Array(s2.length).fill(false);
+
+    let matches = 0;
+    let transpositions = 0;
+
+    // Find matches
+    for (let i = 0; i < s1.length; i++) {
+      const start = Math.max(0, i - matchWindow);
+      const end = Math.min(i + matchWindow + 1, s2.length);
+
+      for (let j = start; j < end; j++) {
+        if (s2Matches[j] || s1[i] !== s2[j]) continue;
+        s1Matches[i] = true;
+        s2Matches[j] = true;
+        matches++;
+        break;
+      }
+    }
+
+    if (matches === 0) return 0;
+
+    // Count transpositions
+    let k = 0;
+    for (let i = 0; i < s1.length; i++) {
+      if (!s1Matches[i]) continue;
+      while (!s2Matches[k]) k++;
+      if (s1[i] !== s2[k]) transpositions++;
+      k++;
+    }
+
+    const jaro = (matches / s1.length + matches / s2.length +
+                  (matches - transpositions / 2) / matches) / 3;
+
+    // Winkler modification: boost for common prefix
+    let prefix = 0;
+    for (let i = 0; i < Math.min(4, s1.length, s2.length); i++) {
+      if (s1[i] === s2[i]) prefix++;
+      else break;
+    }
+
+    return jaro + prefix * 0.1 * (1 - jaro);
   },
 
   levenshteinDistance(str1, str2) {
@@ -2558,22 +2863,40 @@ const ImageScanner = {
     if (results.conditional.matched) {
       const opt = document.createElement('option');
       opt.value = JSON.stringify(results.conditional.matched);
-      opt.textContent = `${results.conditional.matched.name} (${results.conditional.matched.matchScore}% match)`;
+      const bonusStr = this.formatBonusValues(results.conditional.matched);
+      const rarity = results.conditional.matched.rarity || '';
+      opt.textContent = `[${rarity}] [${bonusStr}] ${results.conditional.matched.name} (${results.conditional.matched.matchScore}%)`;
       opt.selected = true;
       matchSelect.appendChild(opt);
       this.setConfidence('conditionalConfidence', results.conditional.matched.matchScore);
     } else {
-      document.getElementById('conditionalConfidence').textContent = '';
+      const confEl = document.getElementById('conditionalConfidence');
+      if (confEl) {
+        confEl.textContent = '';
+        if (!this.config.debug) confEl.style.display = 'none';
+      }
     }
 
-    // Add top matching bonuses as options
+    // Add all bonuses as options, sorted by: 1) matching rank first, 2) match score
     if (configConditionalBonuses.bonuses) {
-      const topMatches = this.findTopMatches(results.conditional.rawText, 5);
-      for (const match of topMatches) {
+      const detectedRank = results.rank.rank;
+      const allMatches = this.findTopMatches(results.conditional.rawText, 999);
+
+      // Sort: same rank first, then by match score
+      allMatches.sort((a, b) => {
+        const aMatchesRank = a.rarity === detectedRank ? 1 : 0;
+        const bMatchesRank = b.rarity === detectedRank ? 1 : 0;
+        if (aMatchesRank !== bMatchesRank) return bMatchesRank - aMatchesRank;
+        return b.matchScore - a.matchScore;
+      });
+
+      for (const match of allMatches) {
         if (!results.conditional.matched || match.id !== results.conditional.matched.id) {
           const opt = document.createElement('option');
           opt.value = JSON.stringify(match);
-          opt.textContent = `${match.name} (${match.matchScore}%)`;
+          const bonusStr = this.formatBonusValues(match);
+          const rarity = match.rarity || '';
+          opt.textContent = `[${rarity}] [${bonusStr}] ${match.name} (${match.matchScore}%)`;
           matchSelect.appendChild(opt);
         }
       }
@@ -2589,6 +2912,17 @@ const ImageScanner = {
     modal.style.display = 'flex';
   },
 
+  formatBonusValues(bonus) {
+    const parts = [];
+    if (bonus.flatBonus !== undefined && bonus.flatBonus !== 0) {
+      parts.push((bonus.flatBonus >= 0 ? '+' : '') + bonus.flatBonus);
+    }
+    if (bonus.multiplierBonus !== undefined && bonus.multiplierBonus !== 1) {
+      parts.push('x' + bonus.multiplierBonus);
+    }
+    return parts.length > 0 ? parts.join(', ') : '+0';
+  },
+
   updateBonusValuesDisplay() {
     const matchSelect = document.getElementById('extractedConditionalMatch');
     const bonusEl = document.getElementById('extractedBonusValues');
@@ -2600,20 +2934,20 @@ const ImageScanner = {
 
     try {
       const bonus = JSON.parse(matchSelect.value);
-      const parts = [];
-      if (bonus.flatBonus !== undefined && bonus.flatBonus !== 0) {
-        parts.push((bonus.flatBonus >= 0 ? '+' : '') + bonus.flatBonus);
-      }
-      if (bonus.multiplierBonus !== undefined && bonus.multiplierBonus !== 1) {
-        parts.push('x' + bonus.multiplierBonus);
-      }
-      bonusEl.textContent = parts.length > 0 ? parts.join(', ') : '-';
+      bonusEl.textContent = this.formatBonusValues(bonus);
     } catch (e) {
       bonusEl.textContent = '-';
     }
   },
 
   populateDebugSection(results) {
+    // Hide debug section when debug is off
+    const debugSection = document.querySelector('.debug-section');
+    if (debugSection) {
+      debugSection.style.display = this.config.debug ? '' : 'none';
+    }
+    if (!this.config.debug) return;
+
     // Draw extracted element icon
     const elemCanvas = document.getElementById('debugElementExtracted');
     if (elemCanvas && results.element.iconData) {
@@ -2705,6 +3039,13 @@ const ImageScanner = {
     const el = document.getElementById(elementId);
     if (!el) return;
 
+    // Hide confidence when debug is off
+    if (!this.config.debug) {
+      el.style.display = 'none';
+      return;
+    }
+
+    el.style.display = '';
     el.textContent = `${confidence}%`;
     el.className = 'confidence';
 
@@ -2729,7 +3070,6 @@ const ImageScanner = {
     }));
 
     return scored
-      .filter(b => b.matchScore > 20)
       .sort((a, b) => b.matchScore - a.matchScore)
       .slice(0, limit);
   },

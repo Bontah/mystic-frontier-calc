@@ -376,6 +376,25 @@
       </div>
     </div>
 
+    <!-- Image Scanner Section -->
+    <div class="section">
+      <h2>Scan Familiar Card</h2>
+      <p class="section-description">Upload a screenshot of a familiar card to automatically extract its details.</p>
+
+      <div class="scanner-upload-area" id="scannerDropZone">
+        <input type="file" id="cardImageInput" accept="image/*" style="display: none;">
+        <div class="upload-prompt">
+          <span class="upload-icon">+</span>
+          <span>Click, drag, or paste (Ctrl+V) a card screenshot</span>
+        </div>
+      </div>
+
+      <div id="scannerPreview" class="scanner-preview" style="display: none;">
+        <canvas id="scannerCanvas"></canvas>
+        <div class="scanner-status" id="scannerStatus">Processing...</div>
+      </div>
+    </div>
+
     <!-- Lineup Optimizer Section -->
     <div class="section">
       <h2>Lineup Optimizer</h2>
@@ -486,11 +505,106 @@
     </div>
   </div>
 
+  <!-- Extraction Results Modal -->
+  <div id="extractionModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h3>Extracted Familiar Data</h3>
+      <div class="modal-preview">
+        <img id="extractedCardPreview" src="" alt="Card Preview">
+      </div>
+      <div class="extraction-results">
+        <div class="extraction-row">
+          <label>Rank</label>
+          <select id="extractedRank">
+            <option value="Common">Common (d3)</option>
+            <option value="Rare">Rare (d4)</option>
+            <option value="Epic">Epic (d5)</option>
+            <option value="Unique">Unique (d6)</option>
+            <option value="Legendary">Legendary (d6)</option>
+          </select>
+          <span class="confidence" id="rankConfidence"></span>
+        </div>
+        <div class="extraction-row">
+          <label>Element</label>
+          <select id="extractedElement">
+            <option value="None">None</option>
+            <option value="Fire">Fire</option>
+            <option value="Poison">Poison</option>
+            <option value="Lightning">Lightning</option>
+            <option value="Ice">Ice</option>
+            <option value="Dark">Dark</option>
+            <option value="Holy">Holy</option>
+          </select>
+          <span class="confidence" id="elementConfidence"></span>
+        </div>
+        <div class="extraction-row">
+          <label>Type</label>
+          <select id="extractedType">
+            <option value="Human">Human</option>
+            <option value="Beast">Beast</option>
+            <option value="Plant">Plant</option>
+            <option value="Aquatic">Aquatic</option>
+            <option value="Fairy">Fairy</option>
+            <option value="Reptile">Reptile</option>
+            <option value="Devil">Devil</option>
+            <option value="Undead">Undead</option>
+            <option value="Machine">Machine</option>
+          </select>
+          <span class="confidence" id="typeConfidence"></span>
+        </div>
+        <div class="extraction-row extraction-row-text">
+          <label>Conditional Text</label>
+          <div id="extractedConditionalText" class="extracted-text"></div>
+        </div>
+        <div class="extraction-row">
+          <label>Match</label>
+          <select id="extractedConditionalMatch">
+            <option value="">-- No match found --</option>
+          </select>
+          <span class="confidence" id="conditionalConfidence"></span>
+        </div>
+        <div class="extraction-row">
+          <label>Bonus</label>
+          <span id="extractedBonusValues" class="bonus-values"></span>
+        </div>
+      </div>
+
+      <!-- Debug Section for Element/Type -->
+      <details class="debug-section">
+        <summary>Debug: Element & Type Detection</summary>
+        <div class="debug-icons-container">
+          <div class="debug-icon-section">
+            <h4>Element Detection</h4>
+            <div class="debug-extracted">
+              <span>Extracted:</span>
+              <canvas id="debugElementExtracted" width="64" height="64"></canvas>
+            </div>
+            <div class="debug-references" id="debugElementReferences"></div>
+          </div>
+          <div class="debug-icon-section">
+            <h4>Type Detection</h4>
+            <div class="debug-extracted">
+              <span>Extracted:</span>
+              <canvas id="debugTypeExtracted" width="64" height="64"></canvas>
+            </div>
+            <div class="debug-references" id="debugTypeReferences"></div>
+          </div>
+        </div>
+      </details>
+
+      <div class="modal-actions">
+        <button class="add-btn" onclick="confirmExtraction()">Add to Roster</button>
+        <button class="cancel-btn" onclick="closeExtractionModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <span>Built by <strong>Bonta</strong> · EU - Luna</span>
     <a href="https://buymeacoffee.com/bonta" target="_blank" class="coffee-link">Buy me a coffee</a>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

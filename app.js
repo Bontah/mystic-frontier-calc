@@ -1735,6 +1735,1087 @@ function calculate() {
 }
 
 // ============================================
+// IMAGE SCANNER MODULE
+// ============================================
+
+const ImageScanner = {
+  // Configuration
+  config: {
+    borderColors: {
+      // NOTE: Only Legendary is confirmed. Replace others with actual hex values when available.
+      Common: { r: 127, g: 127, b: 127 },    // Gray (placeholder - needs real value)
+      Rare: { r: 0, g: 150, b: 255 },        // Green-ish (placeholder - needs real value)
+      Epic: { r: 110, g: 75, b: 255 },       // Purple-ish (placeholder - needs real value)
+      Unique: { r: 205, g: 97, b: 9 },     // Orange-ish (placeholder - needs real value)
+      Legendary: { r: 80, g: 163, b: 2 }     // #50A302 - Lime green (confirmed)
+    },
+    // Icon positions relative to card (percentages) - calibrated from examples
+    elementIconRegion: { x: 0.89, y: 0.185, w: 0.065, h: 0.060 },  // Top-right, small icon
+    typeIconRegion: { x: 0.895, y: 0.27, w: 0.063, h: 0.060 },     // Below element
+    textRegion: { x: 0.03, y: 0.79, w: 0.94, h: 0.1 },
+    debug: true  // Set to true to visualize extraction regions
+  },
+
+  // State
+  canvas: null,
+  ctx: null,
+  currentImage: null,
+  referenceImages: { elements: {}, types: {} },
+  tesseractWorker: null,
+
+  async init() {
+    this.canvas = document.getElementById('scannerCanvas');
+    if (!this.canvas) return;
+    this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
+
+    await this.loadReferenceImages();
+    this.setupEventListeners();
+  },
+
+  async loadReferenceImages() {
+    const elements = ['Fire', 'Ice', 'Lightning', 'Poison', 'Dark', 'Holy', 'None'];
+    const types = ['Human', 'Beast', 'Plant', 'Aquatic', 'Fairy', 'Reptile', 'Devil', 'Undead', 'Machine'];
+
+    for (const element of elements) {
+      try {
+        this.referenceImages.elements[element] = await this.loadImage(`element/${element}.png`);
+      } catch (e) {
+        console.warn(`Could not load element reference: ${element}`);
+      }
+    }
+
+    for (const type of types) {
+      try {
+        this.referenceImages.types[type] = await this.loadImage(`type/${type}.png`);
+      } catch (e) {
+        console.warn(`Could not load type reference: ${type}`);
+      }
+    }
+  },
+
+  loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error(`Failed to load ${src}`));
+      img.src = src;
+    });
+  },
+
+  setupEventListeners() {
+    const dropZone = document.getElementById('scannerDropZone');
+    const fileInput = document.getElementById('cardImageInput');
+
+    if (!dropZone || !fileInput) return;
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length) {
+        this.processFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        this.processFile(e.target.files[0]);
+      }
+      e.target.value = '';
+    });
+
+    // Clipboard paste support (Ctrl+V anywhere on page)
+    document.addEventListener('paste', (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            // Switch to roster page if not already there
+            if (!document.getElementById('page-roster').classList.contains('active')) {
+              showPage('roster');
+            }
+            this.processFile(file);
+          }
+          break;
+        }
+      }
+    });
+  },
+
+  async processFile(file) {
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    const preview = document.getElementById('scannerPreview');
+    const status = document.getElementById('scannerStatus');
+    preview.style.display = 'block';
+    status.textContent = 'Loading image...';
+
+    try {
+      // Load the image
+      const imageUrl = URL.createObjectURL(file);
+      this.currentImage = await this.loadImage(imageUrl);
+      URL.revokeObjectURL(imageUrl);
+
+      // Draw to canvas
+      this.canvas.width = this.currentImage.width;
+      this.canvas.height = this.currentImage.height;
+      this.ctx.drawImage(this.currentImage, 0, 0);
+
+      status.textContent = 'Detecting border...';
+
+      // Step 1: Detect and crop card by border
+      const croppedData = await this.detectAndCropByBorder();
+
+      status.textContent = 'Detecting rank...';
+
+      // Step 2: Detect rank from border color
+      const rankResult = this.detectRank(croppedData.borderColor);
+
+      status.textContent = 'Detecting element...';
+
+      // Step 3: Detect element from icon
+      const elementResult = await this.detectElement(croppedData);
+
+      status.textContent = 'Detecting type...';
+
+      // Step 4: Detect type from icon
+      const typeResult = await this.detectType(croppedData);
+
+      status.textContent = 'Extracting text...';
+
+      // Step 5: OCR for conditional bonus
+      const conditionalResult = await this.extractConditionalText(croppedData);
+
+      // Debug: Draw extraction regions on canvas
+      if (this.config.debug) {
+        this.drawDebugOverlay(croppedData);
+        // Update croppedImageUrl AFTER drawing debug overlay
+        croppedData.croppedImageUrl = croppedData.canvas.toDataURL('image/png');
+      }
+
+      // Update scanner preview canvas to show the cropped result
+      this.canvas.width = croppedData.width;
+      this.canvas.height = croppedData.height;
+      this.ctx.drawImage(croppedData.canvas, 0, 0);
+
+      // Log debug info to console
+      console.log('Scanner Results:', {
+        borderColor: croppedData.borderColor,
+        bounds: croppedData.bounds,
+        rank: rankResult,
+        element: elementResult,
+        type: typeResult,
+        conditionalText: conditionalResult.rawText
+      });
+
+      // Step 6: Show results modal
+      this.showExtractionModal({
+        rank: rankResult,
+        element: elementResult,
+        type: typeResult,
+        conditional: conditionalResult,
+        croppedImage: croppedData.croppedImageUrl
+      });
+
+      status.textContent = 'Done! Review the extracted data above.';
+
+    } catch (error) {
+      console.error('Image processing error:', error);
+      status.textContent = 'Error: ' + error.message;
+    }
+  },
+
+  async detectAndCropByBorder() {
+    const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    const pixels = imageData.data;
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+
+    // Find which border color is present and locate the border bounds
+    const tolerance = 50;
+    const borderColors = this.config.borderColors;
+
+    // Check if a pixel matches any known border color
+    const matchesBorderColor = (r, g, b) => {
+      for (const [rank, color] of Object.entries(borderColors)) {
+        const dist = Math.sqrt(
+          Math.pow(r - color.r, 2) +
+          Math.pow(g - color.g, 2) +
+          Math.pow(b - color.b, 2)
+        );
+        if (dist < tolerance) {
+          return { match: true, rank, color };
+        }
+      }
+      return { match: false };
+    };
+
+    // Scan to find border bounds
+    let left = 0, right = width, top = 0, bottom = height;
+    let detectedColor = null;
+
+    // Find left edge - scan from left until we hit border color
+    leftScan: for (let x = 0; x < width / 2; x++) {
+      for (let y = Math.floor(height * 0.3); y < height * 0.7; y++) {
+        const idx = (y * width + x) * 4;
+        const result = matchesBorderColor(pixels[idx], pixels[idx + 1], pixels[idx + 2]);
+        if (result.match) {
+          left = x;
+          detectedColor = result.color;
+          break leftScan;
+        }
+      }
+    }
+
+    // Find right edge
+    rightScan: for (let x = width - 1; x > width / 2; x--) {
+      for (let y = Math.floor(height * 0.3); y < height * 0.7; y++) {
+        const idx = (y * width + x) * 4;
+        const result = matchesBorderColor(pixels[idx], pixels[idx + 1], pixels[idx + 2]);
+        if (result.match) {
+          right = x + 1;
+          break rightScan;
+        }
+      }
+    }
+
+    // Find top edge
+    topScan: for (let y = 0; y < height / 2; y++) {
+      for (let x = Math.floor(width * 0.3); x < width * 0.7; x++) {
+        const idx = (y * width + x) * 4;
+        const result = matchesBorderColor(pixels[idx], pixels[idx + 1], pixels[idx + 2]);
+        if (result.match) {
+          top = y;
+          break topScan;
+        }
+      }
+    }
+
+    // Find bottom edge
+    bottomScan: for (let y = height - 1; y > height / 2; y--) {
+      for (let x = Math.floor(width * 0.3); x < width * 0.7; x++) {
+        const idx = (y * width + x) * 4;
+        const result = matchesBorderColor(pixels[idx], pixels[idx + 1], pixels[idx + 2]);
+        if (result.match) {
+          bottom = y + 1;
+          break bottomScan;
+        }
+      }
+    }
+
+    const borderColor = detectedColor || { r: 128, g: 128, b: 128 };
+    const bounds = { left, right, top, bottom };
+
+    console.log('Border detection:', { bounds, borderColor });
+
+    // Crop the image
+    const cropWidth = bounds.right - bounds.left;
+    const cropHeight = bounds.bottom - bounds.top;
+
+    const croppedCanvas = document.createElement('canvas');
+    croppedCanvas.width = cropWidth;
+    croppedCanvas.height = cropHeight;
+    const croppedCtx = croppedCanvas.getContext('2d');
+
+    croppedCtx.drawImage(
+      this.canvas,
+      bounds.left, bounds.top, cropWidth, cropHeight,
+      0, 0, cropWidth, cropHeight
+    );
+
+    return {
+      borderColor,
+      canvas: croppedCanvas,
+      ctx: croppedCtx,
+      width: cropWidth,
+      height: cropHeight,
+      croppedImageUrl: croppedCanvas.toDataURL('image/png'),
+      bounds
+    };
+  },
+
+  detectRank(borderColor) {
+    const ranks = this.config.borderColors;
+    let bestMatch = { rank: 'Common', confidence: 0, distance: Infinity };
+
+    for (const [rank, targetColor] of Object.entries(ranks)) {
+      const distance = Math.sqrt(
+        Math.pow(borderColor.r - targetColor.r, 2) +
+        Math.pow(borderColor.g - targetColor.g, 2) +
+        Math.pow(borderColor.b - targetColor.b, 2)
+      );
+
+      if (distance < bestMatch.distance) {
+        const confidence = Math.max(0, 100 - (distance / 4.41));
+        bestMatch = { rank, confidence: Math.round(confidence), distance };
+      }
+    }
+
+    return bestMatch;
+  },
+
+  async detectElement(croppedData) {
+    const region = this.config.elementIconRegion;
+    const iconData = this.extractIconRegion(croppedData, region);
+
+    let bestMatch = { element: 'None', confidence: 0 };
+    const allScores = {};
+
+    for (const [element, refImage] of Object.entries(this.referenceImages.elements)) {
+      const similarity = this.calculateSimilarity(iconData, refImage);
+      allScores[element] = Math.round(similarity);
+      if (similarity > bestMatch.confidence) {
+        bestMatch = { element, confidence: Math.round(similarity) };
+      }
+    }
+
+    if (this.config.debug) {
+      console.log('Element detection scores:', allScores);
+    }
+
+    return { ...bestMatch, allScores, iconData };
+  },
+
+  async detectType(croppedData) {
+    const region = this.config.typeIconRegion;
+    const iconData = this.extractIconRegion(croppedData, region);
+
+    let bestMatch = { type: 'Human', confidence: 0 };
+    const allScores = {};
+
+    // Use Binary Mask + Hu Moments for types (same colors, different shapes)
+    for (const [type, refImage] of Object.entries(this.referenceImages.types)) {
+      const similarity = this.calculateTypeSimilarity(iconData, refImage);
+      allScores[type] = Math.round(similarity);
+      if (similarity > bestMatch.confidence) {
+        bestMatch = { type, confidence: Math.round(similarity) };
+      }
+    }
+
+    if (this.config.debug) {
+      console.log('Type detection scores:', allScores);
+    }
+
+    return { ...bestMatch, allScores, iconData };
+  },
+
+  extractIconRegion(croppedData, region) {
+    const x = Math.floor(croppedData.width * region.x);
+    const y = Math.floor(croppedData.height * region.y);
+    const w = Math.floor(croppedData.width * region.w);
+    const h = Math.floor(croppedData.height * region.h);
+
+    const iconCanvas = document.createElement('canvas');
+    iconCanvas.width = w;
+    iconCanvas.height = h;
+    const iconCtx = iconCanvas.getContext('2d');
+
+    iconCtx.drawImage(croppedData.canvas, x, y, w, h, 0, 0, w, h);
+
+    return { canvas: iconCanvas, ctx: iconCtx, width: w, height: h };
+  },
+
+  calculateSimilarity(sourceIcon, referenceImage) {
+    // Resize both to a standard size for comparison
+    const size = 32;
+
+    const srcCanvas = document.createElement('canvas');
+    srcCanvas.width = size;
+    srcCanvas.height = size;
+    const srcCtx = srcCanvas.getContext('2d');
+    srcCtx.drawImage(sourceIcon.canvas, 0, 0, size, size);
+    const srcData = srcCtx.getImageData(0, 0, size, size);
+
+    const refCanvas = document.createElement('canvas');
+    refCanvas.width = size;
+    refCanvas.height = size;
+    const refCtx = refCanvas.getContext('2d');
+    refCtx.drawImage(referenceImage, 0, 0, size, size);
+    const refData = refCtx.getImageData(0, 0, size, size);
+
+    // Background color to ignore (dark brownish from card background)
+    // Pixels similar to this will be skipped
+    const bgColor = { r: 58, g: 52, b: 47 };
+    const bgTolerance = 40;
+
+    const isBackground = (r, g, b) => {
+      const dist = Math.sqrt(
+        Math.pow(r - bgColor.r, 2) +
+        Math.pow(g - bgColor.g, 2) +
+        Math.pow(b - bgColor.b, 2)
+      );
+      return dist < bgTolerance;
+    };
+
+    // Color histogram comparison (8 bins per channel)
+    const bins = 8;
+    const binSize = 256 / bins;
+    const srcHist = { r: new Array(bins).fill(0), g: new Array(bins).fill(0), b: new Array(bins).fill(0) };
+    const refHist = { r: new Array(bins).fill(0), g: new Array(bins).fill(0), b: new Array(bins).fill(0) };
+
+    let srcPixelCount = 0;
+    let refPixelCount = 0;
+
+    for (let i = 0; i < srcData.data.length; i += 4) {
+      const srcR = srcData.data[i], srcG = srcData.data[i + 1], srcB = srcData.data[i + 2], srcA = srcData.data[i + 3];
+      const refR = refData.data[i], refG = refData.data[i + 1], refB = refData.data[i + 2], refA = refData.data[i + 3];
+
+      // Skip transparent pixels
+      if (srcA < 128) continue;
+
+      // For source: skip background pixels
+      if (!isBackground(srcR, srcG, srcB)) {
+        srcHist.r[Math.floor(srcR / binSize)]++;
+        srcHist.g[Math.floor(srcG / binSize)]++;
+        srcHist.b[Math.floor(srcB / binSize)]++;
+        srcPixelCount++;
+      }
+
+      // For reference: skip transparent pixels only (reference images should have clean backgrounds)
+      if (refA >= 128) {
+        refHist.r[Math.floor(refR / binSize)]++;
+        refHist.g[Math.floor(refG / binSize)]++;
+        refHist.b[Math.floor(refB / binSize)]++;
+        refPixelCount++;
+      }
+    }
+
+    if (srcPixelCount === 0 || refPixelCount === 0) return 0;
+
+    // Normalize histograms and calculate intersection (higher = more similar)
+    let intersection = 0;
+    for (let i = 0; i < bins; i++) {
+      srcHist.r[i] /= srcPixelCount;
+      srcHist.g[i] /= srcPixelCount;
+      srcHist.b[i] /= srcPixelCount;
+      refHist.r[i] /= refPixelCount;
+      refHist.g[i] /= refPixelCount;
+      refHist.b[i] /= refPixelCount;
+
+      intersection += Math.min(srcHist.r[i], refHist.r[i]);
+      intersection += Math.min(srcHist.g[i], refHist.g[i]);
+      intersection += Math.min(srcHist.b[i], refHist.b[i]);
+    }
+
+    // intersection ranges from 0 to 3 (sum of R, G, B channels)
+    // Convert to 0-100 percentage
+    return (intersection / 3) * 100;
+  },
+
+  // Binary Mask + Hu Moments for type icon detection
+  // Works well for grayscale silhouettes (same colors, different shapes)
+
+  createBinaryMask(imageData, width, height) {
+    const bgColor = { r: 58, g: 52, b: 47 };  // Dark card background
+    const bgTolerance = 45;
+    const mask = new Uint8Array(width * height);
+
+    for (let i = 0; i < width * height; i++) {
+      const idx = i * 4;
+      const r = imageData.data[idx];
+      const g = imageData.data[idx + 1];
+      const b = imageData.data[idx + 2];
+      const a = imageData.data[idx + 3];
+
+      const dist = Math.sqrt(
+        Math.pow(r - bgColor.r, 2) +
+        Math.pow(g - bgColor.g, 2) +
+        Math.pow(b - bgColor.b, 2)
+      );
+      mask[i] = (a > 128 && dist > bgTolerance) ? 1 : 0;
+    }
+    return mask;
+  },
+
+  calculateIoU(mask1, mask2) {
+    let intersection = 0, union = 0;
+    for (let i = 0; i < mask1.length; i++) {
+      if (mask1[i] && mask2[i]) intersection++;
+      if (mask1[i] || mask2[i]) union++;
+    }
+    return union > 0 ? intersection / union : 0;
+  },
+
+  calculateDice(mask1, mask2) {
+    let intersection = 0, sum1 = 0, sum2 = 0;
+    for (let i = 0; i < mask1.length; i++) {
+      if (mask1[i] && mask2[i]) intersection++;
+      sum1 += mask1[i];
+      sum2 += mask2[i];
+    }
+    return (sum1 + sum2) > 0 ? (2 * intersection) / (sum1 + sum2) : 0;
+  },
+
+  calculateHuMoments(mask, width, height) {
+    // Calculate raw moments
+    let m00 = 0, m10 = 0, m01 = 0;
+    let m11 = 0, m20 = 0, m02 = 0;
+    let m21 = 0, m12 = 0, m30 = 0, m03 = 0;
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const v = mask[y * width + x];
+        if (v === 0) continue;
+
+        m00 += v;
+        m10 += x * v;
+        m01 += y * v;
+        m11 += x * y * v;
+        m20 += x * x * v;
+        m02 += y * y * v;
+        m21 += x * x * y * v;
+        m12 += x * y * y * v;
+        m30 += x * x * x * v;
+        m03 += y * y * y * v;
+      }
+    }
+
+    if (m00 === 0) return new Array(7).fill(0);
+
+    // Centroid
+    const cx = m10 / m00;
+    const cy = m01 / m00;
+
+    // Central moments (translation invariant)
+    const mu20 = m20 / m00 - cx * cx;
+    const mu02 = m02 / m00 - cy * cy;
+    const mu11 = m11 / m00 - cx * cy;
+    const mu30 = m30 / m00 - 3 * cx * mu20 - cx * cx * cx;
+    const mu03 = m03 / m00 - 3 * cy * mu02 - cy * cy * cy;
+    const mu21 = m21 / m00 - 2 * cx * mu11 - cy * mu20 - cx * cx * cy;
+    const mu12 = m12 / m00 - 2 * cy * mu11 - cx * mu02 - cx * cy * cy;
+
+    // Normalized central moments (scale invariant)
+    const norm = (p, q) => Math.pow(m00, 1 + (p + q) / 2);
+    const nu20 = mu20 / norm(2, 0);
+    const nu02 = mu02 / norm(0, 2);
+    const nu11 = mu11 / norm(1, 1);
+    const nu30 = mu30 / norm(3, 0);
+    const nu03 = mu03 / norm(0, 3);
+    const nu21 = mu21 / norm(2, 1);
+    const nu12 = mu12 / norm(1, 2);
+
+    // 7 Hu moments (rotation invariant)
+    const hu = new Array(7);
+    hu[0] = nu20 + nu02;
+    hu[1] = Math.pow(nu20 - nu02, 2) + 4 * Math.pow(nu11, 2);
+    hu[2] = Math.pow(nu30 - 3 * nu12, 2) + Math.pow(3 * nu21 - nu03, 2);
+    hu[3] = Math.pow(nu30 + nu12, 2) + Math.pow(nu21 + nu03, 2);
+    hu[4] = (nu30 - 3 * nu12) * (nu30 + nu12) *
+            (Math.pow(nu30 + nu12, 2) - 3 * Math.pow(nu21 + nu03, 2)) +
+            (3 * nu21 - nu03) * (nu21 + nu03) *
+            (3 * Math.pow(nu30 + nu12, 2) - Math.pow(nu21 + nu03, 2));
+    hu[5] = (nu20 - nu02) * (Math.pow(nu30 + nu12, 2) - Math.pow(nu21 + nu03, 2)) +
+            4 * nu11 * (nu30 + nu12) * (nu21 + nu03);
+    hu[6] = (3 * nu21 - nu03) * (nu30 + nu12) *
+            (Math.pow(nu30 + nu12, 2) - 3 * Math.pow(nu21 + nu03, 2)) -
+            (nu30 - 3 * nu12) * (nu21 + nu03) *
+            (3 * Math.pow(nu30 + nu12, 2) - Math.pow(nu21 + nu03, 2));
+
+    return hu;
+  },
+
+  huMomentDistance(hu1, hu2) {
+    let distance = 0;
+    for (let i = 0; i < 7; i++) {
+      const sign1 = hu1[i] >= 0 ? 1 : -1;
+      const sign2 = hu2[i] >= 0 ? 1 : -1;
+      const log1 = hu1[i] !== 0 ? sign1 * Math.log10(Math.abs(hu1[i])) : 0;
+      const log2 = hu2[i] !== 0 ? sign2 * Math.log10(Math.abs(hu2[i])) : 0;
+      distance += Math.abs(log1 - log2);
+    }
+    return distance;
+  },
+
+  calculateTypeSimilarity(sourceIcon, referenceImage) {
+    const size = 32;
+
+    // Resize both to standard size
+    const srcCanvas = document.createElement('canvas');
+    srcCanvas.width = size;
+    srcCanvas.height = size;
+    const srcCtx = srcCanvas.getContext('2d');
+    srcCtx.drawImage(sourceIcon.canvas, 0, 0, size, size);
+    const srcData = srcCtx.getImageData(0, 0, size, size);
+
+    const refCanvas = document.createElement('canvas');
+    refCanvas.width = size;
+    refCanvas.height = size;
+    const refCtx = refCanvas.getContext('2d');
+    refCtx.drawImage(referenceImage, 0, 0, size, size);
+    const refData = refCtx.getImageData(0, 0, size, size);
+
+    // Create binary masks
+    const srcMask = this.createBinaryMask(srcData, size, size);
+    const refMask = this.createBinaryMask(refData, size, size);
+
+    // Phase 1: Mask overlap (IoU + Dice weighted)
+    const iou = this.calculateIoU(srcMask, refMask);
+    const dice = this.calculateDice(srcMask, refMask);
+    const maskScore = (iou * 0.4 + dice * 0.6) * 100;
+
+    // Phase 2: Hu Moments
+    const srcHu = this.calculateHuMoments(srcMask, size, size);
+    const refHu = this.calculateHuMoments(refMask, size, size);
+    const huDistance = this.huMomentDistance(srcHu, refHu);
+    const huScore = Math.max(0, 100 - huDistance * 20);
+
+    // Combine: trust mask when confident, blend Hu otherwise
+    let finalScore;
+    if (maskScore > 60) {
+      finalScore = maskScore * 0.8 + huScore * 0.2;
+    } else {
+      finalScore = maskScore * 0.4 + huScore * 0.6;
+    }
+
+    return finalScore;
+  },
+
+  async extractConditionalText(croppedData) {
+    // Initialize Tesseract if not already done
+    if (!this.tesseractWorker) {
+      if (typeof Tesseract === 'undefined') {
+        return { rawText: '', matched: null, confidence: 0 };
+      }
+
+      const status = document.getElementById('scannerStatus');
+      status.textContent = 'Loading OCR engine (first time only)...';
+
+      this.tesseractWorker = await Tesseract.createWorker('eng', 1, {
+        logger: (m) => {
+          if (m.status === 'recognizing text') {
+            status.textContent = `OCR: ${Math.round(m.progress * 100)}%`;
+          }
+        }
+      });
+    }
+
+    // Extract text region
+    const region = this.config.textRegion;
+    const x = Math.floor(croppedData.width * region.x);
+    const y = Math.floor(croppedData.height * region.y);
+    const w = Math.floor(croppedData.width * region.w);
+    const h = Math.floor(croppedData.height * region.h);
+
+    const textCanvas = document.createElement('canvas');
+    textCanvas.width = w;
+    textCanvas.height = h;
+    const textCtx = textCanvas.getContext('2d');
+
+    textCtx.drawImage(croppedData.canvas, x, y, w, h, 0, 0, w, h);
+
+    // Preprocess for OCR
+    this.preprocessForOCR(textCtx, w, h);
+
+    // Run OCR
+    const result = await this.tesseractWorker.recognize(textCanvas);
+    const rawText = result.data.text.trim();
+
+    // Match against known conditionals
+    const matched = this.matchConditionalText(rawText);
+
+    return {
+      rawText,
+      matched,
+      confidence: Math.round(result.data.confidence)
+    };
+  },
+
+  preprocessForOCR(ctx, width, height) {
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const pixels = imageData.data;
+
+    for (let i = 0; i < pixels.length; i += 4) {
+      // Convert to grayscale
+      const gray = pixels[i] * 0.299 + pixels[i + 1] * 0.587 + pixels[i + 2] * 0.114;
+
+      // Invert and threshold (assuming light text on dark background)
+      const value = gray > 100 ? 0 : 255;
+
+      pixels[i] = value;
+      pixels[i + 1] = value;
+      pixels[i + 2] = value;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+  },
+
+  matchConditionalText(extractedText) {
+    if (!extractedText || !configConditionalBonuses.bonuses) return null;
+
+    const normalized = extractedText.toLowerCase()
+      .replace(/[\n\r]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    let bestMatch = null;
+    let bestScore = 0;
+
+    for (const bonus of configConditionalBonuses.bonuses) {
+      const bonusText = bonus.name.toLowerCase();
+      const similarity = this.calculateTextSimilarity(normalized, bonusText);
+
+      if (similarity > bestScore && similarity > 40) {
+        bestScore = similarity;
+        bestMatch = { ...bonus, matchScore: Math.round(similarity) };
+      }
+    }
+
+    return bestMatch;
+  },
+
+  calculateTextSimilarity(text1, text2) {
+    // Combined: word overlap + Levenshtein distance for better fuzzy matching
+    const words1 = text1.split(/\s+/).filter(w => w.length > 2);
+    const words2 = text2.split(/\s+/).filter(w => w.length > 2);
+
+    if (words1.length === 0 || words2.length === 0) return 0;
+
+    // Word overlap score
+    let wordMatches = 0;
+    for (const w1 of words1) {
+      for (const w2 of words2) {
+        if (w1.includes(w2) || w2.includes(w1)) {
+          wordMatches++;
+          break;
+        }
+      }
+    }
+    const wordOverlapScore = (wordMatches / Math.max(words1.length, words2.length)) * 100;
+
+    // Levenshtein distance score
+    const levenScore = (1 - this.levenshteinDistance(text1, text2) / Math.max(text1.length, text2.length)) * 100;
+
+    // Weighted combination: 60% word overlap, 40% levenshtein
+    return wordOverlapScore * 0.6 + levenScore * 0.4;
+  },
+
+  levenshteinDistance(str1, str2) {
+    const m = str1.length;
+    const n = str2.length;
+    const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        dp[i][j] = Math.min(
+          dp[i - 1][j] + 1,      // deletion
+          dp[i][j - 1] + 1,      // insertion
+          dp[i - 1][j - 1] + cost // substitution
+        );
+      }
+    }
+
+    return dp[m][n];
+  },
+
+  showExtractionModal(results) {
+    const modal = document.getElementById('extractionModal');
+
+    // Set preview image
+    document.getElementById('extractedCardPreview').src = results.croppedImage;
+
+    // Set rank
+    document.getElementById('extractedRank').value = results.rank.rank;
+    this.setConfidence('rankConfidence', results.rank.confidence);
+
+    // Set element
+    document.getElementById('extractedElement').value = results.element.element;
+    this.setConfidence('elementConfidence', results.element.confidence);
+
+    // Set type
+    document.getElementById('extractedType').value = results.type.type;
+    this.setConfidence('typeConfidence', results.type.confidence);
+
+    // Set conditional text
+    document.getElementById('extractedConditionalText').textContent =
+      results.conditional.rawText || '(No text detected)';
+
+    // Populate conditional match dropdown
+    const matchSelect = document.getElementById('extractedConditionalMatch');
+    matchSelect.innerHTML = '<option value="">-- No match --</option>';
+
+    if (results.conditional.matched) {
+      const opt = document.createElement('option');
+      opt.value = JSON.stringify(results.conditional.matched);
+      opt.textContent = `${results.conditional.matched.name} (${results.conditional.matched.matchScore}% match)`;
+      opt.selected = true;
+      matchSelect.appendChild(opt);
+      this.setConfidence('conditionalConfidence', results.conditional.matched.matchScore);
+    } else {
+      document.getElementById('conditionalConfidence').textContent = '';
+    }
+
+    // Add top matching bonuses as options
+    if (configConditionalBonuses.bonuses) {
+      const topMatches = this.findTopMatches(results.conditional.rawText, 5);
+      for (const match of topMatches) {
+        if (!results.conditional.matched || match.id !== results.conditional.matched.id) {
+          const opt = document.createElement('option');
+          opt.value = JSON.stringify(match);
+          opt.textContent = `${match.name} (${match.matchScore}%)`;
+          matchSelect.appendChild(opt);
+        }
+      }
+    }
+
+    // Display bonus values and update on dropdown change
+    this.updateBonusValuesDisplay();
+    matchSelect.addEventListener('change', () => this.updateBonusValuesDisplay());
+
+    // Populate debug section with element/type detection details
+    this.populateDebugSection(results);
+
+    modal.style.display = 'flex';
+  },
+
+  updateBonusValuesDisplay() {
+    const matchSelect = document.getElementById('extractedConditionalMatch');
+    const bonusEl = document.getElementById('extractedBonusValues');
+
+    if (!matchSelect.value) {
+      bonusEl.textContent = '-';
+      return;
+    }
+
+    try {
+      const bonus = JSON.parse(matchSelect.value);
+      const parts = [];
+      if (bonus.flatBonus !== undefined && bonus.flatBonus !== 0) {
+        parts.push((bonus.flatBonus >= 0 ? '+' : '') + bonus.flatBonus);
+      }
+      if (bonus.multiplierBonus !== undefined && bonus.multiplierBonus !== 1) {
+        parts.push('x' + bonus.multiplierBonus);
+      }
+      bonusEl.textContent = parts.length > 0 ? parts.join(', ') : '-';
+    } catch (e) {
+      bonusEl.textContent = '-';
+    }
+  },
+
+  populateDebugSection(results) {
+    // Draw extracted element icon
+    const elemCanvas = document.getElementById('debugElementExtracted');
+    if (elemCanvas && results.element.iconData) {
+      const ctx = elemCanvas.getContext('2d');
+      ctx.clearRect(0, 0, 64, 64);
+      ctx.drawImage(results.element.iconData.canvas, 0, 0, 64, 64);
+    }
+
+    // Draw extracted type icon
+    const typeCanvas = document.getElementById('debugTypeExtracted');
+    if (typeCanvas && results.type.iconData) {
+      const ctx = typeCanvas.getContext('2d');
+      ctx.clearRect(0, 0, 64, 64);
+      ctx.drawImage(results.type.iconData.canvas, 0, 0, 64, 64);
+    }
+
+    // Populate element references with scores
+    const elemRefsContainer = document.getElementById('debugElementReferences');
+    if (elemRefsContainer && results.element.allScores) {
+      elemRefsContainer.innerHTML = '';
+      const sortedElements = Object.entries(results.element.allScores)
+        .sort((a, b) => b[1] - a[1]);
+
+      for (const [name, score] of sortedElements) {
+        const refImg = this.referenceImages.elements[name];
+        if (!refImg) continue;
+
+        const item = document.createElement('div');
+        item.className = 'debug-ref-item' + (name === results.element.element ? ' best-match' : '');
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 48;
+        canvas.height = 48;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(refImg, 0, 0, 48, 48);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'ref-name';
+        nameSpan.textContent = name;
+
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'ref-score' + (score >= 70 ? ' high' : score >= 50 ? ' medium' : ' low');
+        scoreSpan.textContent = score + '%';
+
+        item.appendChild(canvas);
+        item.appendChild(nameSpan);
+        item.appendChild(scoreSpan);
+        elemRefsContainer.appendChild(item);
+      }
+    }
+
+    // Populate type references with scores
+    const typeRefsContainer = document.getElementById('debugTypeReferences');
+    if (typeRefsContainer && results.type.allScores) {
+      typeRefsContainer.innerHTML = '';
+      const sortedTypes = Object.entries(results.type.allScores)
+        .sort((a, b) => b[1] - a[1]);
+
+      for (const [name, score] of sortedTypes) {
+        const refImg = this.referenceImages.types[name];
+        if (!refImg) continue;
+
+        const item = document.createElement('div');
+        item.className = 'debug-ref-item' + (name === results.type.type ? ' best-match' : '');
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 48;
+        canvas.height = 48;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(refImg, 0, 0, 48, 48);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'ref-name';
+        nameSpan.textContent = name;
+
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'ref-score' + (score >= 70 ? ' high' : score >= 50 ? ' medium' : ' low');
+        scoreSpan.textContent = score + '%';
+
+        item.appendChild(canvas);
+        item.appendChild(nameSpan);
+        item.appendChild(scoreSpan);
+        typeRefsContainer.appendChild(item);
+      }
+    }
+  },
+
+  setConfidence(elementId, confidence) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    el.textContent = `${confidence}%`;
+    el.className = 'confidence';
+
+    if (confidence < 50) {
+      el.classList.add('very-low');
+    } else if (confidence < 70) {
+      el.classList.add('low');
+    }
+  },
+
+  findTopMatches(text, limit) {
+    if (!text || !configConditionalBonuses.bonuses) return [];
+
+    const normalized = text.toLowerCase()
+      .replace(/[\n\r]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const scored = configConditionalBonuses.bonuses.map(bonus => ({
+      ...bonus,
+      matchScore: Math.round(this.calculateTextSimilarity(normalized, bonus.name.toLowerCase()))
+    }));
+
+    return scored
+      .filter(b => b.matchScore > 20)
+      .sort((a, b) => b.matchScore - a.matchScore)
+      .slice(0, limit);
+  },
+
+  drawDebugOverlay(croppedData) {
+    const ctx = croppedData.ctx;
+    const w = croppedData.width;
+    const h = croppedData.height;
+
+    // Draw element region (red)
+    const elemRegion = this.config.elementIconRegion;
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(
+      w * elemRegion.x, h * elemRegion.y,
+      w * elemRegion.w, h * elemRegion.h
+    );
+    ctx.fillStyle = 'red';
+    ctx.font = '12px sans-serif';
+    ctx.fillText('ELEMENT', w * elemRegion.x, h * elemRegion.y - 2);
+
+    // Draw type region (blue)
+    const typeRegion = this.config.typeIconRegion;
+    ctx.strokeStyle = 'blue';
+    ctx.strokeRect(
+      w * typeRegion.x, h * typeRegion.y,
+      w * typeRegion.w, h * typeRegion.h
+    );
+    ctx.fillStyle = 'blue';
+    ctx.fillText('TYPE', w * typeRegion.x, h * typeRegion.y - 2);
+
+    // Draw text region (green)
+    const textRegion = this.config.textRegion;
+    ctx.strokeStyle = 'lime';
+    ctx.strokeRect(
+      w * textRegion.x, h * textRegion.y,
+      w * textRegion.w, h * textRegion.h
+    );
+    ctx.fillStyle = 'lime';
+    ctx.fillText('TEXT/OCR', w * textRegion.x, h * textRegion.y - 2);
+
+    // Draw border bounds info
+    ctx.fillStyle = 'yellow';
+    ctx.font = '14px monospace';
+    ctx.fillText(`Bounds: L=${croppedData.bounds.left} T=${croppedData.bounds.top} R=${croppedData.bounds.right} B=${croppedData.bounds.bottom}`, 5, 16);
+    ctx.fillText(`Border: RGB(${croppedData.borderColor.r}, ${croppedData.borderColor.g}, ${croppedData.borderColor.b})`, 5, 32);
+  }
+};
+
+function confirmExtraction() {
+  const modal = document.getElementById('extractionModal');
+
+  // Get extracted values
+  const rank = document.getElementById('extractedRank').value;
+  const element = document.getElementById('extractedElement').value;
+  const type = document.getElementById('extractedType').value;
+  const conditionalSelect = document.getElementById('extractedConditionalMatch');
+
+  // Populate the roster form
+  document.getElementById('rosterName').value = '';
+  document.getElementById('rosterRank').value = rank;
+  document.getElementById('rosterElement').value = element;
+  document.getElementById('rosterType').value = type;
+
+  // Set conditional if matched
+  if (conditionalSelect.value) {
+    try {
+      const matchedBonus = JSON.parse(conditionalSelect.value);
+      selectRosterConditional(matchedBonus);
+    } catch (e) {
+      console.error('Failed to parse conditional:', e);
+    }
+  }
+
+  // Close modal
+  closeExtractionModal();
+
+  // Scroll to form
+  document.getElementById('rosterRank').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function closeExtractionModal() {
+  document.getElementById('extractionModal').style.display = 'none';
+}
+
+// ============================================
 // UTILITIES
 // ============================================
 
@@ -1756,3 +2837,4 @@ renderRoster();
 initializeDiceFromRanks();
 loadConfigFiles();
 calculate();
+ImageScanner.init();

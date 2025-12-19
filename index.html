@@ -434,6 +434,100 @@
       margin-top: 5px;
       font-style: italic;
     }
+
+    /* Saved Lineups Styles */
+    .lineup-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .lineup-name-input {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .save-lineup-btn {
+      background: #66ff66;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .save-lineup-btn:hover {
+      background: #88ff88;
+    }
+
+    .saved-lineups-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .saved-lineup-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: #1a1a2e;
+      border-radius: 5px;
+      border: 2px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .saved-lineup-item:hover {
+      border-color: #66ccff;
+    }
+
+    .lineup-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .lineup-name {
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .lineup-details {
+      font-size: 12px;
+      color: #888;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .lineup-detail-item {
+      background: #252542;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .lineup-conditionals-count {
+      color: #ffcc00;
+    }
+
+    .load-lineup-btn {
+      background: #66ccff;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .load-lineup-btn:hover {
+      background: #88ddff;
+    }
   </style>
 </head>
 <body>
@@ -539,6 +633,18 @@
           <option value="Machine">Machine</option>
         </select>
       </div>
+    </div>
+  </div>
+
+  <!-- Saved Lineups Section -->
+  <div class="section">
+    <h2>Saved Lineups</h2>
+    <div class="lineup-controls">
+      <input type="text" id="lineupName" class="lineup-name-input" placeholder="Enter lineup name...">
+      <button class="save-lineup-btn" onclick="saveLineup()">Save Current Lineup</button>
+    </div>
+    <div id="savedLineupsList" class="saved-lineups-list">
+      <!-- Populated by JavaScript -->
     </div>
   </div>
 
@@ -714,20 +820,24 @@
     // Load from localStorage or use defaults (with fallback for environments where localStorage doesn't work)
     let bonusItems = [];
     let conditionalBonuses = [];
+    let savedLineups = [];
 
     try {
       bonusItems = JSON.parse(localStorage.getItem('bonusItems')) || [];
       conditionalBonuses = JSON.parse(localStorage.getItem('conditionalBonuses')) || [];
+      savedLineups = JSON.parse(localStorage.getItem('savedLineups')) || [];
     } catch (e) {
       console.log('localStorage not available, using in-memory storage');
       bonusItems = [];
       conditionalBonuses = [];
+      savedLineups = [];
     }
 
     function saveData() {
       try {
         localStorage.setItem('bonusItems', JSON.stringify(bonusItems));
         localStorage.setItem('conditionalBonuses', JSON.stringify(conditionalBonuses));
+        localStorage.setItem('savedLineups', JSON.stringify(savedLineups));
       } catch (e) {
         // localStorage not available, data will persist only during session
       }
@@ -1042,6 +1152,118 @@
       saveData();
       renderConditionalBonuses();
       calculate();
+    }
+
+    // ============================================
+    // SAVED LINEUPS
+    // ============================================
+
+    function renderSavedLineups() {
+      const container = document.getElementById('savedLineupsList');
+
+      if (savedLineups.length === 0) {
+        container.innerHTML = '<div style="color: #666; padding: 10px;">No saved lineups yet. Enter a name and click "Save Current Lineup" to save your first lineup.</div>';
+        return;
+      }
+
+      container.innerHTML = savedLineups.map((lineup, index) => {
+        // Build monster summary
+        const monsterSummary = lineup.monsters.map((m, i) =>
+          `M${i + 1}: ${m.rank} ${m.type}${m.element !== 'None' ? ' (' + m.element + ')' : ''}`
+        ).join(' | ');
+
+        const condCount = lineup.conditionalBonuses.length;
+        const condText = condCount === 1 ? '1 conditional' : `${condCount} conditionals`;
+
+        return `
+          <div class="saved-lineup-item">
+            <div class="lineup-info">
+              <div class="lineup-name">${escapeHtml(lineup.name)}</div>
+              <div class="lineup-details">
+                <span class="lineup-detail-item">${monsterSummary}</span>
+                <span class="lineup-detail-item lineup-conditionals-count">${condText}</span>
+              </div>
+            </div>
+            <button class="load-lineup-btn" onclick="loadLineup(${index})">Load</button>
+            <button class="delete-btn" onclick="deleteLineup(${index})">Delete</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function saveLineup() {
+      const nameInput = document.getElementById('lineupName');
+      const name = nameInput.value.trim();
+
+      if (!name) {
+        alert('Please enter a name for this lineup');
+        return;
+      }
+
+      // Get current monster configuration
+      const monsters = [
+        {
+          type: document.getElementById('monster1Type').value,
+          element: document.getElementById('monster1Element').value,
+          rank: document.getElementById('monster1Rank').value,
+        },
+        {
+          type: document.getElementById('monster2Type').value,
+          element: document.getElementById('monster2Element').value,
+          rank: document.getElementById('monster2Rank').value,
+        },
+        {
+          type: document.getElementById('monster3Type').value,
+          element: document.getElementById('monster3Element').value,
+          rank: document.getElementById('monster3Rank').value,
+        },
+      ];
+
+      // Save the lineup
+      const lineup = {
+        name,
+        monsters,
+        conditionalBonuses: [...conditionalBonuses]
+      };
+
+      savedLineups.push(lineup);
+      saveData();
+      renderSavedLineups();
+
+      // Clear the name input
+      nameInput.value = '';
+    }
+
+    function loadLineup(index) {
+      const lineup = savedLineups[index];
+      if (!lineup) return;
+
+      // Load monster configuration
+      for (let i = 0; i < 3; i++) {
+        const m = lineup.monsters[i];
+        document.getElementById(`monster${i + 1}Rank`).value = m.rank;
+        document.getElementById(`monster${i + 1}Element`).value = m.element;
+        document.getElementById(`monster${i + 1}Type`).value = m.type;
+
+        // Update dice options based on new rank
+        updateDiceOptions(i + 1);
+      }
+
+      // Load conditional bonuses
+      conditionalBonuses = [...lineup.conditionalBonuses];
+      saveData();
+      renderConditionalBonuses();
+      calculate();
+    }
+
+    function deleteLineup(index) {
+      if (!confirm('Are you sure you want to delete this lineup?')) {
+        return;
+      }
+
+      savedLineups.splice(index, 1);
+      saveData();
+      renderSavedLineups();
     }
 
     // ============================================
@@ -1405,6 +1627,7 @@
     populateExampleDropdowns();
     renderBonusItems();
     renderConditionalBonuses();
+    renderSavedLineups();
     initializeDiceFromRanks();
     calculate();
   </script>

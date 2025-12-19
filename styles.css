@@ -1233,3 +1233,25 @@ select:focus, input:focus, textarea:focus {
   color: #ffcc00;
   font-weight: bold;
 }
+
+/* External Links */
+.external-link {
+  color: #66ccff;
+  text-decoration: none;
+}
+
+.external-link:hover {
+  text-decoration: underline;
+}
+
+/* Credits */
+.info-block.credits {
+  text-align: center;
+  border-top: 1px solid #333;
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+.coffee-btn {
+  margin-top: 15px;
+}

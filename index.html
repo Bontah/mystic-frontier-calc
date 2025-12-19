@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mystic Frontier Calculator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffcc00;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      color: #66ccff;
+      border-bottom: 1px solid #333;
+      padding-bottom: 8px;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .section {
+      background: #252542;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .dice-row, .monster-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .dice-group, .monster-group {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #aaa;
+    }
+
+    select, input[type="number"], input[type="text"], textarea {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background: #1a1a2e;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    textarea {
+      font-family: monospace;
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      outline: 2px solid #66ccff;
+    }
+
+    .bonus-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .bonus-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: #1a1a2e;
+      border-radius: 5px;
+    }
+
+    .bonus-item .bonus-name {
+      flex: 1;
+      font-weight: bold;
+    }
+
+    .bonus-item .bonus-stats {
+      color: #888;
+      font-size: 14px;
+    }
+
+    .bonus-stats .flat {
+      color: #66ff66;
+    }
+
+    .bonus-stats .flat.negative {
+      color: #ff6666;
+    }
+
+    .bonus-stats .mult {
+      color: #ffcc00;
+    }
+
+    .delete-btn {
+      background: #ff4444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .delete-btn:hover {
+      background: #ff6666;
+    }
+
+    .conditional-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .conditional-item {
+      padding: 10px;
+      background: #1a1a2e;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      opacity: 0.5;
+      transition: opacity 0.2s, border 0.2s;
+      border: 2px solid transparent;
+      gap: 10px;
+    }
+
+    .conditional-item.active {
+      opacity: 1;
+      border-color: #66ff66;
+    }
+
+    .conditional-item .cond-name {
+      font-weight: bold;
+    }
+
+    .conditional-item .cond-stats {
+      color: #888;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .difficulty-input {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .difficulty-input input {
+      width: 120px;
+    }
+
+    .results {
+      background: #252542;
+      padding: 25px;
+      border-radius: 10px;
+      text-align: left;
+    }
+
+    .result-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .result-item {
+      background: #1a1a2e;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .result-item .label {
+      color: #888;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .result-item .value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #66ccff;
+    }
+
+    .final-result {
+      font-size: 48px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    .final-result.pass {
+      color: #66ff66;
+    }
+
+    .final-result.fail {
+      color: #ff6666;
+    }
+
+    .result-status {
+      font-size: 24px;
+      padding: 15px 30px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    .result-status.pass {
+      background: rgba(102, 255, 102, 0.2);
+      color: #66ff66;
+    }
+
+    .result-status.fail {
+      background: rgba(255, 102, 102, 0.2);
+      color: #ff6666;
+    }
+
+    .difference {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #888;
+    }
+
+    /* Add Form Styles */
+    .add-form {
+      background: #1a1a2e;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .add-form h3 {
+      margin: 0 0 15px 0;
+      color: #66ccff;
+      font-size: 16px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .form-group.wide {
+      flex: 2;
+      min-width: 200px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+
+    .add-btn {
+      background: #66ccff;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .add-btn:hover {
+      background: #88ddff;
+    }
+
+    .help-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .help-text code {
+      background: #333;
+      padding: 2px 5px;
+      border-radius: 3px;
+      color: #ffcc00;
+    }
+
+    .error-text {
+      color: #ff6666;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    .example-dropdown {
+      background: #1a1a2e;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+      min-width: 150px;
+    }
+
+    .example-dropdown:hover {
+      border-color: #66ccff;
+    }
+
+    .example-dropdown:focus {
+      outline: 2px solid #66ccff;
+    }
+
+    .examples-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .examples-label {
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎲 Mystic Frontier Calculator</h1>
+
+  <!-- Monsters Section -->
+  <div class="section">
+    <h2>Monsters</h2>
+    <div class="monster-row">
+      <div class="monster-group">
+        <label>Monster 1 Element</label>
+        <select id="monster1Element" onchange="calculate()">
+          <option value="None">None</option>
+          <option value="Fire">Fire</option>
+          <option value="Poison">Poison</option>
+          <option value="Lightning">Lightning</option>
+          <option value="Ice">Ice</option>
+          <option value="Dark">Dark</option>
+          <option value="Holy">Holy</option>
+        </select>
+        <label style="margin-top: 10px;">Monster 1 Type</label>
+        <select id="monster1Type" onchange="calculate()">
+          <option value="Human">Human</option>
+          <option value="Beast">Beast</option>
+          <option value="Plant">Plant</option>
+          <option value="Aquatic">Aquatic</option>
+          <option value="Fairy">Fairy</option>
+          <option value="Reptile">Reptile</option>
+          <option value="Devil">Devil</option>
+          <option value="Undead">Undead</option>
+          <option value="Machine">Machine</option>
+        </select>
+      </div>
+      <div class="monster-group">
+        <label>Monster 2 Element</label>
+        <select id="monster2Element" onchange="calculate()">
+          <option value="None">None</option>
+          <option value="Fire">Fire</option>
+          <option value="Poison">Poison</option>
+          <option value="Lightning">Lightning</option>
+          <option value="Ice">Ice</option>
+          <option value="Dark">Dark</option>
+          <option value="Holy">Holy</option>
+        </select>
+        <label style="margin-top: 10px;">Monster 2 Type</label>
+        <select id="monster2Type" onchange="calculate()">
+          <option value="Human">Human</option>
+          <option value="Beast">Beast</option>
+          <option value="Plant">Plant</option>
+          <option value="Aquatic">Aquatic</option>
+          <option value="Fairy">Fairy</option>
+          <option value="Reptile">Reptile</option>
+          <option value="Devil">Devil</option>
+          <option value="Undead">Undead</option>
+          <option value="Machine">Machine</option>
+        </select>
+      </div>
+      <div class="monster-group">
+        <label>Monster 3 Element</label>
+        <select id="monster3Element" onchange="calculate()">
+          <option value="None">None</option>
+          <option value="Fire">Fire</option>
+          <option value="Poison">Poison</option>
+          <option value="Lightning">Lightning</option>
+          <option value="Ice">Ice</option>
+          <option value="Dark">Dark</option>
+          <option value="Holy">Holy</option>
+        </select>
+        <label style="margin-top: 10px;">Monster 3 Type</label>
+        <select id="monster3Type" onchange="calculate()">
+          <option value="Human">Human</option>
+          <option value="Beast">Beast</option>
+          <option value="Plant">Plant</option>
+          <option value="Aquatic">Aquatic</option>
+          <option value="Fairy">Fairy</option>
+          <option value="Reptile">Reptile</option>
+          <option value="Devil">Devil</option>
+          <option value="Undead">Undead</option>
+          <option value="Machine">Machine</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bonus Items Section -->
+  <div class="section">
+    <h2>Bonus Items</h2>
+    <div id="bonusItemsList" class="bonus-list">
+      <!-- Populated by JavaScript -->
+    </div>
+    
+    <div class="add-form">
+      <h3>+ Add Bonus Item</h3>
+      <div class="form-row">
+        <div class="form-group wide">
+          <label>Name</label>
+          <input type="text" id="newItemName" placeholder="e.g. Power Ring">
+        </div>
+        <div class="form-group">
+          <label>Flat Bonus</label>
+          <input type="number" id="newItemFlat" value="0" step="1">
+        </div>
+        <div class="form-group">
+          <label>Multiplier (e.g. 1.6)</label>
+          <input type="number" id="newItemMult" value="1" step="0.1">
+        </div>
+      </div>
+      <button class="add-btn" onclick="addBonusItem()">Add Item</button>
+    </div>
+  </div>
+
+  <!-- Conditional Bonuses Section -->
+  <div class="section">
+    <h2>Conditional Bonuses</h2>
+    <div id="conditionalList" class="conditional-list">
+      <!-- Populated by JavaScript -->
+    </div>
+    
+    <div class="add-form">
+      <h3>+ Add Conditional Bonus</h3>
+      <div class="examples-row">
+        <span class="examples-label">Load example:</span>
+        <select class="example-dropdown" id="diceExamples" onchange="loadExample('dice')">
+          <option value="">🎲 Dice...</option>
+        </select>
+        <select class="example-dropdown" id="monsterExamples" onchange="loadExample('monster')">
+          <option value="">👹 Monster...</option>
+        </select>
+        <select class="example-dropdown" id="comboExamples" onchange="loadExample('combo')">
+          <option value="">⚡ Combos...</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group wide">
+          <label>Name</label>
+          <input type="text" id="newCondName" placeholder="e.g. Odd Dice 2 Bonus">
+        </div>
+        <div class="form-group">
+          <label>Flat Bonus</label>
+          <input type="number" id="newCondFlat" value="0" step="1">
+        </div>
+        <div class="form-group">
+          <label>Multiplier (e.g. 1.6)</label>
+          <input type="number" id="newCondMult" value="1" step="0.1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex: 1; min-width: 100%;">
+          <label>Condition (JavaScript)</label>
+          <textarea id="newCondCondition" placeholder="e.g. dice[1] % 2 === 1"></textarea>
+          <div class="help-text">
+            Available variables: <code>dice[0]</code>, <code>dice[1]</code>, <code>dice[2]</code> (values 1-6), 
+            <code>monsters[0]</code>, <code>monsters[1]</code>, <code>monsters[2]</code> (each has <code>.type</code> and <code>.element</code>)
+          </div>
+          <div class="help-text">
+            Examples: <code>dice[0] >= 5</code> · <code>monsters[0].type === "Beast"</code> · <code>dice.every(d => d % 2 === 0)</code>
+          </div>
+          <div id="conditionError" class="error-text"></div>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addConditionalBonus()">Add Conditional</button>
+    </div>
+  </div>
+
+  <!-- Difficulty Section -->
+  <div class="section">
+    <h2>Difficulty</h2>
+    <div class="difficulty-input">
+      <label for="difficulty" style="margin: 0;">Target to beat:</label>
+      <input type="number" id="difficulty" value="50" min="0" onchange="calculate()">
+    </div>
+  </div>
+
+  <!-- Dice Section -->
+  <div class="section">
+    <h2>Dice</h2>
+    <div class="dice-row">
+      <div class="dice-group">
+        <label>Dice 1</label>
+        <select id="dice1" onchange="calculate()">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+      </div>
+      <div class="dice-group">
+        <label>Dice 2</label>
+        <select id="dice2" onchange="calculate()">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+      </div>
+      <div class="dice-group">
+        <label>Dice 3</label>
+        <select id="dice3" onchange="calculate()">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div class="results">
+    <h2 style="margin-top: 0;">Results</h2>
+    <div class="result-breakdown">
+      <div class="result-item">
+        <div class="label">Total Flat Bonus</div>
+        <div class="value" id="flatBonus">+0</div>
+      </div>
+      <div class="result-item">
+        <div class="label">Dice Sum</div>
+        <div class="value" id="diceSum">3</div>
+      </div>
+      <div class="result-item">
+        <div class="label">Total Multiplier</div>
+        <div class="value" id="totalMult">×1.0</div>
+      </div>
+      <div class="result-item">
+        <div class="label">Before Rounding</div>
+        <div class="value" id="beforeRound">3</div>
+      </div>
+    </div>
+    <div class="final-result" id="finalResult">3</div>
+    <div class="result-status" id="resultStatus">FAIL</div>
+    <div class="difference" id="difference">Failed by 47</div>
+    <div id="activeBonusesDisplay" style="margin-top: 15px; font-size: 12px; color: #888;"></div>
+  </div>
+
+  <script>
+    // ============================================
+    // DATA STORAGE
+    // ============================================
+
+    // Load from localStorage or use defaults (with fallback for environments where localStorage doesn't work)
+    let bonusItems = [];
+    let conditionalBonuses = [];
+
+    try {
+      bonusItems = JSON.parse(localStorage.getItem('bonusItems')) || [];
+      conditionalBonuses = JSON.parse(localStorage.getItem('conditionalBonuses')) || [];
+    } catch (e) {
+      console.log('localStorage not available, using in-memory storage');
+      bonusItems = [];
+      conditionalBonuses = [];
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem('bonusItems', JSON.stringify(bonusItems));
+        localStorage.setItem('conditionalBonuses', JSON.stringify(conditionalBonuses));
+      } catch (e) {
+        // localStorage not available, data will persist only during session
+      }
+    }
+
+    // ============================================
+    // EXAMPLE PRESETS
+    // ============================================
+
+    const examplePresets = {
+      dice: [
+        { name: 'Dice 1 Odd', condition: 'dice[0] % 2 === 1', flat: 1, mult: 1 },
+        { name: 'Dice 2 Odd', condition: 'dice[1] % 2 === 1', flat: 1, mult: 1 },
+        { name: 'Dice 3 Odd', condition: 'dice[2] % 2 === 1', flat: 1, mult: 1 },
+        { name: 'Dice 1 Even', condition: 'dice[0] % 2 === 0', flat: 1, mult: 1 },
+        { name: 'Dice 2 Even', condition: 'dice[1] % 2 === 0', flat: 1, mult: 1 },
+        { name: 'Dice 3 Even', condition: 'dice[2] % 2 === 0', flat: 1, mult: 1 },
+        { name: 'Dice 1 High (5+)', condition: 'dice[0] >= 5', flat: 2, mult: 1 },
+        { name: 'Dice 2 High (5+)', condition: 'dice[1] >= 5', flat: 2, mult: 1 },
+        { name: 'Dice 3 High (5+)', condition: 'dice[2] >= 5', flat: 2, mult: 1 },
+        { name: 'Dice 1 Low (1-2)', condition: 'dice[0] <= 2', flat: -1, mult: 1 },
+        { name: 'Dice 2 Low (1-2)', condition: 'dice[1] <= 2', flat: -1, mult: 1 },
+        { name: 'Dice 3 Low (1-2)', condition: 'dice[2] <= 2', flat: -1, mult: 1 },
+        { name: 'Dice 1 is 6', condition: 'dice[0] === 6', flat: 3, mult: 1.1 },
+        { name: 'Dice 2 is 6', condition: 'dice[1] === 6', flat: 3, mult: 1.1 },
+        { name: 'Dice 3 is 6', condition: 'dice[2] === 6', flat: 3, mult: 1.1 },
+        { name: 'All Dice Odd', condition: 'dice.every(d => d % 2 === 1)', flat: 5, mult: 1.2 },
+        { name: 'All Dice Even', condition: 'dice.every(d => d % 2 === 0)', flat: 5, mult: 1.2 },
+        { name: 'All Dice High (5+)', condition: 'dice.every(d => d >= 5)', flat: 8, mult: 1.5 },
+        { name: 'All Dice Same', condition: 'dice[0] === dice[1] && dice[1] === dice[2]', flat: 10, mult: 1.3 },
+        { name: 'Dice Sum 15+', condition: 'dice[0] + dice[1] + dice[2] >= 15', flat: 5, mult: 1.2 },
+        { name: 'Dice Sum 10 or Less', condition: 'dice[0] + dice[1] + dice[2] <= 10', flat: -3, mult: 1 },
+        { name: 'Straight (1-2-3 etc)', condition: '[...dice].sort((a,b)=>a-b).every((d,i,a)=>i===0||d===a[i-1]+1)', flat: 7, mult: 1.3 },
+      ],
+      monster: [
+        { name: 'Monster 1 is Beast', condition: 'monsters[0].type === "Beast"', flat: 2, mult: 1 },
+        { name: 'Monster 2 is Beast', condition: 'monsters[1].type === "Beast"', flat: 2, mult: 1 },
+        { name: 'Monster 3 is Beast', condition: 'monsters[2].type === "Beast"', flat: 2, mult: 1 },
+        { name: 'Has Any Beast', condition: 'monsters.some(m => m.type === "Beast")', flat: 2, mult: 1.1 },
+        { name: 'Has Any Devil', condition: 'monsters.some(m => m.type === "Devil")', flat: 3, mult: 1.1 },
+        { name: 'Has Any Undead', condition: 'monsters.some(m => m.type === "Undead")', flat: 2, mult: 1.1 },
+        { name: 'Has Any Machine', condition: 'monsters.some(m => m.type === "Machine")', flat: 2, mult: 1.1 },
+        { name: 'Has Any Fairy', condition: 'monsters.some(m => m.type === "Fairy")', flat: 2, mult: 1.1 },
+        { name: 'All Same Type', condition: 'monsters[0].type === monsters[1].type && monsters[1].type === monsters[2].type', flat: 10, mult: 1.2 },
+        { name: 'All Different Types', condition: 'monsters[0].type !== monsters[1].type && monsters[1].type !== monsters[2].type && monsters[0].type !== monsters[2].type', flat: 5, mult: 1.1 },
+        { name: 'Has Fire Element', condition: 'monsters.some(m => m.element === "Fire")', flat: 2, mult: 1.1 },
+        { name: 'Has Ice Element', condition: 'monsters.some(m => m.element === "Ice")', flat: 2, mult: 1.1 },
+        { name: 'Has Lightning Element', condition: 'monsters.some(m => m.element === "Lightning")', flat: 2, mult: 1.1 },
+        { name: 'Has Poison Element', condition: 'monsters.some(m => m.element === "Poison")', flat: 2, mult: 1.1 },
+        { name: 'Has Dark Element', condition: 'monsters.some(m => m.element === "Dark")', flat: 2, mult: 1.1 },
+        { name: 'Has Holy Element', condition: 'monsters.some(m => m.element === "Holy")', flat: 2, mult: 1.1 },
+        { name: 'All Same Element', condition: 'monsters[0].element === monsters[1].element && monsters[1].element === monsters[2].element && monsters[0].element !== "None"', flat: 8, mult: 1.3 },
+        { name: '2+ Fire Monsters', condition: 'monsters.filter(m => m.element === "Fire").length >= 2', flat: 5, mult: 1.2 },
+        { name: '2+ Ice Monsters', condition: 'monsters.filter(m => m.element === "Ice").length >= 2', flat: 5, mult: 1.2 },
+        { name: 'No Elements (All None)', condition: 'monsters.every(m => m.element === "None")', flat: 0, mult: 0.9 },
+      ],
+      combo: [
+        { name: 'Beast + High Dice 1', condition: 'monsters[0].type === "Beast" && dice[0] >= 5', flat: 4, mult: 1.2 },
+        { name: 'Devil + Odd Dice', condition: 'monsters.some(m => m.type === "Devil") && dice.some(d => d % 2 === 1)', flat: 3, mult: 1.15 },
+        { name: 'Fire + All Dice High', condition: 'monsters.some(m => m.element === "Fire") && dice.every(d => d >= 4)', flat: 6, mult: 1.3 },
+        { name: 'Undead + Low Dice Sum', condition: 'monsters.some(m => m.type === "Undead") && dice[0]+dice[1]+dice[2] <= 9', flat: 5, mult: 1.2 },
+        { name: 'Machine + Even Dice', condition: 'monsters.some(m => m.type === "Machine") && dice.every(d => d % 2 === 0)', flat: 8, mult: 1.3 },
+        { name: 'Holy + Triple 6', condition: 'monsters.some(m => m.element === "Holy") && dice.every(d => d === 6)', flat: 20, mult: 2.0 },
+        { name: 'Dark + Triple 1', condition: 'monsters.some(m => m.element === "Dark") && dice.every(d => d === 1)', flat: 15, mult: 1.8 },
+        { name: 'Fairy + All Odd Dice', condition: 'monsters.some(m => m.type === "Fairy") && dice.every(d => d % 2 === 1)', flat: 6, mult: 1.25 },
+        { name: 'Aquatic + Ice Element', condition: 'monsters.some(m => m.type === "Aquatic") && monsters.some(m => m.element === "Ice")', flat: 5, mult: 1.2 },
+        { name: 'Plant + Poison Element', condition: 'monsters.some(m => m.type === "Plant") && monsters.some(m => m.element === "Poison")', flat: 5, mult: 1.2 },
+        { name: 'Reptile + Fire Element', condition: 'monsters.some(m => m.type === "Reptile") && monsters.some(m => m.element === "Fire")', flat: 5, mult: 1.2 },
+        { name: 'Human + No Element', condition: 'monsters.some(m => m.type === "Human" && m.element === "None")', flat: 3, mult: 1.1 },
+      ]
+    };
+
+    function populateExampleDropdowns() {
+      const categories = ['dice', 'monster', 'combo'];
+      const labels = { dice: '🎲 Dice...', monster: '👹 Monster...', combo: '⚡ Combos...' };
+      
+      categories.forEach(cat => {
+        const select = document.getElementById(cat + 'Examples');
+        select.innerHTML = `<option value="">${labels[cat]}</option>`;
+        examplePresets[cat].forEach((ex, i) => {
+          const option = document.createElement('option');
+          option.value = i;
+          option.textContent = ex.name;
+          select.appendChild(option);
+        });
+      });
+    }
+
+    function loadExample(category) {
+      const select = document.getElementById(category + 'Examples');
+      const index = select.value;
+      if (index === '') return;
+      
+      const example = examplePresets[category][index];
+      document.getElementById('newCondName').value = example.name;
+      document.getElementById('newCondCondition').value = example.condition;
+      document.getElementById('newCondFlat').value = example.flat;
+      document.getElementById('newCondMult').value = example.mult;
+      document.getElementById('conditionError').textContent = '';
+      
+      // Reset dropdown
+      select.value = '';
+    }
+
+    function fillConditionExample(name, condition, flat, mult) {
+      document.getElementById('newCondName').value = name;
+      document.getElementById('newCondCondition').value = condition;
+      document.getElementById('newCondFlat').value = flat;
+      document.getElementById('newCondMult').value = mult;
+      document.getElementById('conditionError').textContent = '';
+    }
+
+    // ============================================
+    // BONUS ITEMS
+    // ============================================
+
+    function renderBonusItems() {
+      const container = document.getElementById('bonusItemsList');
+      
+      if (bonusItems.length === 0) {
+        container.innerHTML = '<div style="color: #666; padding: 10px;">No bonus items yet. Add one below.</div>';
+        return;
+      }
+      
+      container.innerHTML = bonusItems.map((item, index) => {
+        const flatClass = item.flatBonus < 0 ? 'flat negative' : 'flat';
+        const flatStr = item.flatBonus !== 0 
+          ? `<span class="${flatClass}">${item.flatBonus >= 0 ? '+' : ''}${item.flatBonus} flat</span>` 
+          : '';
+        const multStr = item.multiplierBonus !== 1 && item.multiplierBonus !== 0
+          ? `<span class="mult">×${item.multiplierBonus}</span>` 
+          : '';
+        const separator = flatStr && multStr ? ', ' : '';
+        
+        return `
+          <div class="bonus-item">
+            <span class="bonus-name">${escapeHtml(item.name)}</span>
+            <span class="bonus-stats">${flatStr}${separator}${multStr}</span>
+            <button class="delete-btn" onclick="deleteBonusItem(${index})">Delete</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addBonusItem() {
+      const name = document.getElementById('newItemName').value.trim();
+      const flatBonus = parseFloat(document.getElementById('newItemFlat').value) || 0;
+      const multiplierBonus = parseFloat(document.getElementById('newItemMult').value) || 0;
+
+      if (!name) {
+        alert('Please enter a name');
+        return;
+      }
+
+      bonusItems.push({ name, flatBonus, multiplierBonus });
+      saveData();
+      renderBonusItems();
+      calculate();
+
+      // Clear form
+      document.getElementById('newItemName').value = '';
+      document.getElementById('newItemFlat').value = '0';
+      document.getElementById('newItemMult').value = '1';
+    }
+
+    function deleteBonusItem(index) {
+      bonusItems.splice(index, 1);
+      saveData();
+      renderBonusItems();
+      calculate();
+    }
+
+    // ============================================
+    // CONDITIONAL BONUSES
+    // ============================================
+
+    function renderConditionalBonuses() {
+      const container = document.getElementById('conditionalList');
+      
+      if (conditionalBonuses.length === 0) {
+        container.innerHTML = '<div style="color: #666; padding: 10px;">No conditional bonuses yet. Add one below.</div>';
+        return;
+      }
+      
+      container.innerHTML = conditionalBonuses.map((cond, index) => {
+        const flatClass = cond.flatBonus < 0 ? 'flat negative' : 'flat';
+        const flatStr = cond.flatBonus !== 0 
+          ? `<span class="${flatClass}">${cond.flatBonus >= 0 ? '+' : ''}${cond.flatBonus} flat</span>` 
+          : '';
+        const multStr = cond.multiplierBonus !== 1 && cond.multiplierBonus !== 0
+          ? `<span class="mult">×${cond.multiplierBonus}</span>` 
+          : '';
+        const separator = flatStr && multStr ? ', ' : '';
+        
+        return `
+          <div class="conditional-item" id="cond${index}">
+            <div style="flex: 1; min-width: 0;">
+              <span class="cond-name">${escapeHtml(cond.name)}</span>
+              <div style="color: #666; font-size: 12px; font-family: monospace; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(cond.condition)}</div>
+            </div>
+            <span class="cond-stats">${flatStr}${separator}${multStr}</span>
+            <button class="delete-btn" onclick="deleteConditionalBonus(${index})">Delete</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addConditionalBonus() {
+      const name = document.getElementById('newCondName').value.trim();
+      const flatBonus = parseFloat(document.getElementById('newCondFlat').value) || 0;
+      const multiplierBonus = parseFloat(document.getElementById('newCondMult').value) || 0;
+      const condition = document.getElementById('newCondCondition').value.trim();
+      const errorEl = document.getElementById('conditionError');
+
+      if (!name) {
+        alert('Please enter a name');
+        return;
+      }
+
+      if (!condition) {
+        alert('Please enter a condition');
+        return;
+      }
+
+      // Test the condition
+      try {
+        const testDice = [1, 2, 3];
+        const testMonsters = [
+          { type: 'Human', element: 'None' },
+          { type: 'Human', element: 'None' },
+          { type: 'Human', element: 'None' }
+        ];
+        const testFn = new Function('dice', 'monsters', `return ${condition}`);
+        testFn(testDice, testMonsters);
+        errorEl.textContent = '';
+      } catch (e) {
+        errorEl.textContent = `Invalid condition: ${e.message}`;
+        return;
+      }
+
+      conditionalBonuses.push({ name, flatBonus, multiplierBonus, condition });
+      saveData();
+      renderConditionalBonuses();
+      calculate();
+
+      // Clear form
+      document.getElementById('newCondName').value = '';
+      document.getElementById('newCondFlat').value = '0';
+      document.getElementById('newCondMult').value = '1';
+      document.getElementById('newCondCondition').value = '';
+    }
+
+    function deleteConditionalBonus(index) {
+      conditionalBonuses.splice(index, 1);
+      saveData();
+      renderConditionalBonuses();
+      calculate();
+    }
+
+    // ============================================
+    // CALCULATION
+    // ============================================
+
+    function getState() {
+      const dice = [
+        parseInt(document.getElementById('dice1').value),
+        parseInt(document.getElementById('dice2').value),
+        parseInt(document.getElementById('dice3').value),
+      ];
+
+      const monsters = [
+        {
+          type: document.getElementById('monster1Type').value,
+          element: document.getElementById('monster1Element').value,
+        },
+        {
+          type: document.getElementById('monster2Type').value,
+          element: document.getElementById('monster2Element').value,
+        },
+        {
+          type: document.getElementById('monster3Type').value,
+          element: document.getElementById('monster3Element').value,
+        },
+      ];
+
+      const activeBonusItems = [...bonusItems];
+
+      const difficulty = parseInt(document.getElementById('difficulty').value) || 0;
+
+      return { dice, monsters, activeBonusItems, difficulty };
+    }
+
+    function calculate() {
+      const { dice, monsters, activeBonusItems, difficulty } = getState();
+
+      // Step 1: Sum dice
+      const diceSum = dice.reduce((a, b) => a + b, 0);
+
+      // Step 2: Calculate flat bonuses
+      let totalFlat = 0;
+      
+      // From toggled items
+      activeBonusItems.forEach(item => {
+        totalFlat += item.flatBonus;
+      });
+
+      // From conditional bonuses
+      conditionalBonuses.forEach((cond, index) => {
+        let isActive = false;
+        try {
+          const condFn = new Function('dice', 'monsters', `return ${cond.condition}`);
+          isActive = condFn(dice, monsters);
+        } catch (e) {
+          console.error(`Error in condition "${cond.name}":`, e);
+        }
+        
+        const el = document.getElementById(`cond${index}`);
+        if (el) {
+          el.classList.toggle('active', isActive);
+        }
+        
+        if (isActive) {
+          totalFlat += cond.flatBonus;
+        }
+      });
+
+      // Step 3: Calculate multipliers (just add them up directly)
+      // e.g., x1.6 + x1.2 + x1.6 = x4.4
+      let totalMultiplier = 0;
+      
+      activeBonusItems.forEach(item => {
+        if (item.multiplierBonus !== 0 && item.multiplierBonus !== 1) {
+          totalMultiplier += item.multiplierBonus;
+        }
+      });
+
+      conditionalBonuses.forEach((cond, index) => {
+        let isActive = false;
+        try {
+          const condFn = new Function('dice', 'monsters', `return ${cond.condition}`);
+          isActive = condFn(dice, monsters);
+        } catch (e) {
+          // Already logged above
+        }
+        
+        if (isActive && cond.multiplierBonus !== 0 && cond.multiplierBonus !== 1) {
+          totalMultiplier += cond.multiplierBonus;
+        }
+      });
+
+      // Step 4: Apply calculation
+      const afterFlat = diceSum + totalFlat;
+      let beforeRounding;
+      let finalMultiplier;
+      
+      if (totalMultiplier !== 0) {
+        finalMultiplier = totalMultiplier;
+        beforeRounding = afterFlat * finalMultiplier;
+      } else {
+        finalMultiplier = null;
+        beforeRounding = afterFlat;
+      }
+      
+      const finalResult = Math.floor(beforeRounding);
+
+      // Step 5: Compare to difficulty
+      const passed = finalResult >= difficulty;
+      const difference = finalResult - difficulty;
+
+      // Update display
+      document.getElementById('diceSum').textContent = diceSum;
+      document.getElementById('flatBonus').textContent = 
+        (totalFlat >= 0 ? '+' : '') + totalFlat;
+      
+      const multEl = document.getElementById('totalMult');
+      const beforeRoundEl = document.getElementById('beforeRound');
+      const multContainer = multEl.closest('.result-item');
+      const beforeRoundContainer = beforeRoundEl.closest('.result-item');
+      
+      if (finalMultiplier !== null) {
+        multContainer.style.display = '';
+        beforeRoundContainer.style.display = '';
+        multEl.textContent = '×' + finalMultiplier.toFixed(2);
+        beforeRoundEl.textContent = beforeRounding.toFixed(2);
+      } else {
+        multContainer.style.display = 'none';
+        beforeRoundContainer.style.display = 'none';
+      }
+      
+      const finalResultEl = document.getElementById('finalResult');
+      finalResultEl.textContent = finalResult;
+      finalResultEl.className = 'final-result ' + (passed ? 'pass' : 'fail');
+
+      const statusEl = document.getElementById('resultStatus');
+      statusEl.textContent = passed ? 'PASS' : 'FAIL';
+      statusEl.className = 'result-status ' + (passed ? 'pass' : 'fail');
+
+      const diffEl = document.getElementById('difference');
+      if (difference >= 0) {
+        diffEl.textContent = `Beat by ${difference}`;
+      } else {
+        diffEl.textContent = `Failed by ${Math.abs(difference)}`;
+      }
+
+      // Show active bonuses
+      const activeBonusNames = activeBonusItems.map(item => item.name);
+      const activeCondNames = [];
+      conditionalBonuses.forEach((cond, index) => {
+        const el = document.getElementById(`cond${index}`);
+        if (el && el.classList.contains('active')) {
+          activeCondNames.push(cond.name);
+        }
+      });
+      
+      const allActive = [...activeBonusNames, ...activeCondNames];
+      const activeBonusesEl = document.getElementById('activeBonusesDisplay');
+      if (allActive.length > 0) {
+        activeBonusesEl.textContent = `Active: ${allActive.join(', ')}`;
+      } else {
+        activeBonusesEl.textContent = '';
+      }
+    }
+
+    // ============================================
+    // UTILITIES
+    // ============================================
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ============================================
+    // INITIALIZE
+    // ============================================
+
+    populateExampleDropdowns();
+    renderBonusItems();
+    renderConditionalBonuses();
+    calculate();
+  </script>
+</body>
+</html>

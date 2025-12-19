@@ -668,13 +668,11 @@ select:focus, input:focus, textarea:focus {
   gap: 6px;
 }
 
-.roster-item.element-fire { border-left-color: #ff6b35; }
-.roster-item.element-ice { border-left-color: #4fc3f7; }
-.roster-item.element-lightning { border-left-color: #ffeb3b; }
-.roster-item.element-poison { border-left-color: #8bc34a; }
-.roster-item.element-dark { border-left-color: #9c27b0; }
-.roster-item.element-holy { border-left-color: #fff176; }
-.roster-item.element-none { border-left-color: #666; }
+.roster-item.rank-common { border-left-color: #9d9d9d; }
+.roster-item.rank-rare { border-left-color: #0070dd; }
+.roster-item.rank-epic { border-left-color: #a335ee; }
+.roster-item.rank-unique { border-left-color: #ff8000; }
+.roster-item.rank-legendary { border-left-color: #1eff00; }
 
 .roster-item-header {
   display: flex;

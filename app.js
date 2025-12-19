@@ -217,7 +217,6 @@ function renderRoster() {
 
   container.innerHTML = familiarRoster.map(fam => {
     const displayName = fam.name || `${fam.element} ${fam.type}`;
-    const elementClass = `element-${fam.element.toLowerCase()}`;
     const rankClass = `rank-${fam.rank.toLowerCase()}`;
 
     let conditionalHtml = '';
@@ -236,7 +235,7 @@ function renderRoster() {
     }
 
     return `
-      <div class="roster-item ${elementClass}">
+      <div class="roster-item ${rankClass}">
         <div class="roster-item-header">
           <span class="roster-item-name">${escapeHtml(displayName)}</span>
           <span class="roster-item-rank ${rankClass}">${fam.rank}</span>

@@ -27,6 +27,115 @@ function showPage(pageName) {
   }
 }
 
+let currentWave = null;
+
+function saveToCurrentWave() {
+  if (!currentWave) {
+    alert('Select a wave first by clicking Wave 1, 2, or 3');
+    return;
+  }
+
+  // Get current calculator values
+  const calcFamiliars = [];
+  for (let i = 1; i <= 3; i++) {
+    calcFamiliars.push({
+      rank: document.getElementById(`monster${i}Rank`).value,
+      element: document.getElementById(`monster${i}Element`).value,
+      type: document.getElementById(`monster${i}Type`).value
+    });
+  }
+
+  // Free current wave first
+  freeWave(currentWave);
+
+  // Find matching roster familiars (not already assigned to another wave)
+  const matched = [];
+  const availableFamiliars = [...familiarRoster.filter(f => !f.wave)];
+
+  for (const calc of calcFamiliars) {
+    const matchIndex = availableFamiliars.findIndex(f =>
+      f.rank === calc.rank && f.element === calc.element && f.type === calc.type
+    );
+    if (matchIndex !== -1) {
+      matched.push(availableFamiliars[matchIndex]);
+      availableFamiliars.splice(matchIndex, 1); // Remove so we don't match same familiar twice
+    }
+  }
+
+  if (matched.length === 0) {
+    alert('No matching familiars found in your roster');
+    return;
+  }
+
+  // Assign matched familiars to current wave
+  matched.forEach(fam => {
+    const rosterFam = familiarRoster.find(f => f.id === fam.id);
+    if (rosterFam) rosterFam.wave = currentWave;
+  });
+
+  saveData();
+  renderRoster();
+
+  // Update label
+  const label = document.getElementById('currentWaveLabel');
+  label.textContent = `(Wave ${currentWave} - ${matched.length}/3 assigned)`;
+
+  if (matched.length < 3) {
+    alert(`Only ${matched.length} of 3 familiars found in roster. Add the missing ones to your roster first.`);
+  }
+}
+
+function loadWave(waveNum) {
+  const waveFamiliars = familiarRoster.filter(f => f.wave === waveNum);
+
+  // Update active tab
+  document.querySelectorAll('.wave-tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelector(`.wave-tab.wave-${waveNum}`).classList.add('active');
+
+  // Update label
+  const label = document.getElementById('currentWaveLabel');
+  label.textContent = `(Wave ${waveNum})`;
+  label.className = `wave-label wave-${waveNum}`;
+
+  currentWave = waveNum;
+
+  if (waveFamiliars.length === 0) {
+    // No familiars assigned to this wave
+    label.textContent = `(Wave ${waveNum} - Empty)`;
+    return;
+  }
+
+  // Load familiars into calculator
+  waveFamiliars.forEach((fam, i) => {
+    if (i < 3) {
+      document.getElementById(`monster${i + 1}Rank`).value = fam.rank;
+      document.getElementById(`monster${i + 1}Element`).value = fam.element;
+      document.getElementById(`monster${i + 1}Type`).value = fam.type;
+    }
+  });
+
+  // Load conditionals from wave familiars
+  conditionalBonuses = [];
+  waveFamiliars.forEach(fam => {
+    if (fam.conditional) {
+      conditionalBonuses.push({
+        name: fam.conditional.name,
+        flatBonus: fam.conditional.flatBonus || 0,
+        multiplierBonus: fam.conditional.multiplierBonus || 1,
+        condition: fam.conditional.condition
+      });
+    }
+  });
+  saveData();
+  renderConditionalBonuses();
+
+  // Update dice options and recalculate
+  for (let i = 1; i <= 3; i++) {
+    updateDiceOptions(i);
+  }
+  calculate();
+}
+
 // ============================================
 // DATA STORAGE
 // ============================================
@@ -204,6 +313,29 @@ function deleteFromRoster(id) {
   renderRoster();
 }
 
+function assignToWave(ids, wave) {
+  ids.forEach(id => {
+    const fam = familiarRoster.find(f => f.id === id);
+    if (fam) fam.wave = wave;
+  });
+  saveData();
+  renderRoster();
+}
+
+function freeWave(wave) {
+  familiarRoster.forEach(fam => {
+    if (fam.wave === wave) fam.wave = null;
+  });
+  saveData();
+  renderRoster();
+}
+
+function freeAllWaves() {
+  familiarRoster.forEach(fam => fam.wave = null);
+  saveData();
+  renderRoster();
+}
+
 function exportRoster() {
   const data = JSON.stringify(familiarRoster, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
@@ -273,12 +405,16 @@ function renderRoster() {
       conditionalHtml = '<div class="roster-item-conditional none">No conditional</div>';
     }
 
+    const waveClass = fam.wave ? `wave-${fam.wave}` : '';
+    const waveBadge = fam.wave ? `<div class="wave-badge wave-${fam.wave}">Wave ${fam.wave}</div>` : '';
+
     return `
-      <div class="roster-item ${rankClass}">
+      <div class="roster-item ${rankClass} ${waveClass}">
         <div class="roster-item-header">
           <span class="roster-item-name">${escapeHtml(displayName)}</span>
           <span class="roster-item-rank ${rankClass}">${fam.rank}</span>
         </div>
+        ${waveBadge}
         <div class="roster-item-details">
           <span class="roster-item-element">${fam.element}</span> ·
           <span class="roster-item-type">${fam.type}</span>
@@ -505,17 +641,23 @@ function runOptimizer() {
   const filterType = document.getElementById('filterType')?.value || '';
   const requireMatch = document.getElementById('filterRequireMatch')?.checked || false;
 
-  if (familiarRoster.length < 3) {
+  // Filter out familiars that are assigned to a wave
+  const availableFamiliars = familiarRoster.filter(f => !f.wave);
+
+  if (availableFamiliars.length < 3) {
+    const assignedCount = familiarRoster.filter(f => f.wave).length;
     resultsContainer.innerHTML = `
       <div class="optimizer-error">
-        Add at least 3 familiars to your roster first!
+        Need at least 3 available familiars!
+        ${assignedCount > 0 ? `<br><small>${assignedCount} familiar(s) assigned to waves</small>` : ''}
+        ${familiarRoster.length < 3 ? `<br><small>Add more familiars to your roster</small>` : ''}
       </div>
     `;
     return;
   }
 
-  // Generate all combinations
-  let combinations = generateCombinations(familiarRoster, 3);
+  // Generate all combinations from available familiars
+  let combinations = generateCombinations(availableFamiliars, 3);
 
   // Apply filtering if required
   if (requireMatch && (filterElement || filterType)) {
@@ -628,7 +770,14 @@ function renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement,
           ${familiarsHtml}
         </div>
         ${breakdownHtml}
-        <button class="use-lineup-btn" onclick="useOptimizedLineup(${JSON.stringify(result.familiars).replace(/"/g, '&quot;')})">Use This Lineup</button>
+        <div class="lineup-actions">
+          <button class="use-lineup-btn" onclick="useOptimizedLineup(${JSON.stringify(result.familiars).replace(/"/g, '&quot;')})">Use in Calculator</button>
+          <div class="wave-assign-btns">
+            <button class="wave-assign-btn wave-1" onclick="assignToWave([${result.familiars.map(f => f.id).join(',')}], 1)">Wave 1</button>
+            <button class="wave-assign-btn wave-2" onclick="assignToWave([${result.familiars.map(f => f.id).join(',')}], 2)">Wave 2</button>
+            <button class="wave-assign-btn wave-3" onclick="assignToWave([${result.familiars.map(f => f.id).join(',')}], 3)">Wave 3</button>
+          </div>
+        </div>
       </div>
     `;
   };
@@ -969,7 +1118,7 @@ function renderSavedLineups() {
   const container = document.getElementById('savedLineupsList');
 
   if (savedLineups.length === 0) {
-    container.innerHTML = '<div style="color: #666; padding: 10px;">No saved lineups yet. Enter a name and click "Save Current Lineup" to save your first lineup.</div>';
+    container.innerHTML = '<div style="color: #666; padding: 10px;">No presets yet. Enter a name and click "Save Preset" to save your first wave preset.</div>';
     return;
   }
 

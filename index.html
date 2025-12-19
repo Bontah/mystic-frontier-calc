@@ -18,9 +18,17 @@
 
   <!-- Calculator Page -->
   <div id="page-calculator" class="page active">
+    <!-- Wave Selector -->
+    <div class="wave-selector">
+      <button class="wave-tab wave-1" onclick="loadWave(1)">Wave 1</button>
+      <button class="wave-tab wave-2" onclick="loadWave(2)">Wave 2</button>
+      <button class="wave-tab wave-3" onclick="loadWave(3)">Wave 3</button>
+      <button class="save-wave-btn" onclick="saveToCurrentWave()">Save to Wave</button>
+    </div>
+
     <!-- Familiars Section -->
     <div class="section">
-      <h2>Familiars</h2>
+      <h2>Familiars <span id="currentWaveLabel"></span></h2>
       <div class="monster-row">
         <div class="monster-group">
           <label>Fam. 1 Rank</label>
@@ -121,12 +129,12 @@
       </div>
     </div>
 
-    <!-- Saved Lineups Section -->
+    <!-- Wave Presets Section -->
     <div class="section">
-      <h2>Saved Lineups</h2>
+      <h2>Save Wave as Preset</h2>
       <div class="lineup-controls">
-        <input type="text" id="lineupName" class="lineup-name-input" placeholder="Enter lineup name...">
-        <button class="save-lineup-btn" onclick="saveLineup()">Save Current Lineup</button>
+        <input type="text" id="lineupName" class="lineup-name-input" placeholder="Enter preset name...">
+        <button class="save-lineup-btn" onclick="saveLineup()">Save Preset</button>
       </div>
       <div id="savedLineupsList" class="saved-lineups-list">
         <!-- Populated by JavaScript -->
@@ -349,6 +357,10 @@
       <div class="roster-stats">
         <span id="rosterCount">0 familiars in roster</span>
         <div class="roster-actions">
+          <button class="free-wave-btn wave-1" onclick="freeWave(1)">Free W1</button>
+          <button class="free-wave-btn wave-2" onclick="freeWave(2)">Free W2</button>
+          <button class="free-wave-btn wave-3" onclick="freeWave(3)">Free W3</button>
+          <button class="free-all-btn" onclick="freeAllWaves()">Free All</button>
           <button class="export-btn" onclick="exportRoster()">Export</button>
           <button class="import-btn" onclick="document.getElementById('importFile').click()">Import</button>
           <input type="file" id="importFile" accept=".json" onchange="importRoster(event)" style="display: none;">

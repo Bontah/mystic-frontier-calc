@@ -753,6 +753,140 @@ select:focus, input:focus, textarea:focus {
   color: #fff;
 }
 
+/* Wave Colors */
+.wave-1 { --wave-color: #ff6b6b; }
+.wave-2 { --wave-color: #4ecdc4; }
+.wave-3 { --wave-color: #ffe66d; }
+
+/* Wave Selector on Calculator Page */
+.wave-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.wave-tab {
+  flex: 1;
+  padding: 12px 20px;
+  background: #1a1a2e;
+  border: 2px solid var(--wave-color);
+  color: var(--wave-color);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.wave-tab:hover {
+  background: var(--wave-color);
+  color: #1a1a2e;
+}
+
+.wave-tab.active {
+  background: var(--wave-color);
+  color: #1a1a2e;
+}
+
+.wave-label {
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--wave-color);
+}
+
+.save-wave-btn {
+  padding: 12px 20px;
+  background: #66ff66;
+  border: none;
+  color: #1a1a2e;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.save-wave-btn:hover {
+  background: #88ff88;
+}
+
+/* Wave Badge on Roster Items */
+.roster-item.wave-1,
+.roster-item.wave-2,
+.roster-item.wave-3 {
+  opacity: 0.7;
+}
+
+.wave-badge {
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-align: center;
+  margin-bottom: 4px;
+  background: var(--wave-color);
+  color: #1a1a2e;
+}
+
+/* Free Wave Buttons */
+.free-wave-btn {
+  background: transparent;
+  border: 1px solid var(--wave-color);
+  color: var(--wave-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.free-wave-btn:hover {
+  background: var(--wave-color);
+  color: #1a1a2e;
+}
+
+.free-all-btn {
+  background: transparent;
+  border: 1px solid #888;
+  color: #888;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.free-all-btn:hover {
+  background: #888;
+  color: #1a1a2e;
+}
+
+/* Wave Assign Buttons in Optimizer */
+.lineup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wave-assign-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.wave-assign-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--wave-color);
+  color: var(--wave-color);
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.wave-assign-btn:hover {
+  background: var(--wave-color);
+  color: #1a1a2e;
+}
+
 .cancel-btn {
   background: #666;
   color: #fff;
@@ -938,7 +1072,6 @@ select:focus, input:focus, textarea:focus {
   cursor: pointer;
   font-weight: bold;
   font-size: 12px;
-  width: 100%;
 }
 
 .use-lineup-btn:hover {

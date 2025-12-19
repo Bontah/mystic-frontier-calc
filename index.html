@@ -348,6 +348,11 @@
       <div id="rosterList" class="roster-list"></div>
       <div class="roster-stats">
         <span id="rosterCount">0 familiars in roster</span>
+        <div class="roster-actions">
+          <button class="export-btn" onclick="exportRoster()">Export</button>
+          <button class="import-btn" onclick="document.getElementById('importFile').click()">Import</button>
+          <input type="file" id="importFile" accept=".json" onchange="importRoster(event)" style="display: none;">
+        </div>
       </div>
     </div>
 
@@ -458,16 +463,13 @@
         <p>Community-compiled list of GMS v265 Mystic Frontier rewards:</p>
         <p><a href="https://pastebin.com/kRbUSbt9" target="_blank" class="external-link">GMS v265 - Mystic Frontier Possible Rewards</a></p>
       </div>
-
-      <div class="info-block credits">
-        <h3>Credits</h3>
-        <p>Built by <strong>Bonta</strong>, Marksman player on EU - Luna</p>
-        <div class="coffee-btn">
-          <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="bonta" data-color="#1a1a2e" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#ffffff" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>
-        </div>
-      </div>
     </div>
   </div>
+
+  <footer class="site-footer">
+    <span>Built by <strong>Bonta</strong> · EU - Luna</span>
+    <a href="https://buymeacoffee.com/bonta" target="_blank" class="coffee-link">Buy me a coffee</a>
+  </footer>
 
   <script src="app.js"></script>
 </body>

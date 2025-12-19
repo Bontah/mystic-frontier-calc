@@ -770,9 +770,32 @@ select:focus, input:focus, textarea:focus {
 }
 
 .roster-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: 12px;
   color: #666;
-  text-align: right;
+}
+
+.roster-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.export-btn, .import-btn {
+  background: transparent;
+  border: 1px solid #666;
+  color: #888;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.export-btn:hover, .import-btn:hover {
+  background: #66ccff;
+  border-color: #66ccff;
+  color: #1a1a2e;
 }
 
 /* Optimizer Styles */
@@ -1251,14 +1274,28 @@ select:focus, input:focus, textarea:focus {
   text-decoration: underline;
 }
 
-/* Credits */
-.info-block.credits {
-  text-align: center;
+/* Site Footer */
+.site-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+  padding: 15px;
   border-top: 1px solid #333;
-  margin-top: 20px;
-  padding-top: 20px;
+  font-size: 12px;
+  color: #666;
 }
 
-.coffee-btn {
-  margin-top: 15px;
+.site-footer strong {
+  color: #888;
+}
+
+.coffee-link {
+  color: #ffcc00;
+  text-decoration: none;
+}
+
+.coffee-link:hover {
+  text-decoration: underline;
 }

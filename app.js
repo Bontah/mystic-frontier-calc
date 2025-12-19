@@ -120,7 +120,7 @@ function applyCondBonus(bonus) {
 }
 
 // ============================================
-// MONSTER RANK DICE SYSTEM
+// FAMILIAR RANK DICE SYSTEM
 // ============================================
 
 // Rank determines the max dice value (number of sides)
@@ -136,10 +136,10 @@ function getMaxDiceForRank(rank) {
   }
 }
 
-function updateDiceOptions(monsterIndex) {
-  const rank = document.getElementById(`monster${monsterIndex}Rank`).value;
+function updateDiceOptions(familiarIndex) {
+  const rank = document.getElementById(`monster${familiarIndex}Rank`).value;
   const maxDice = getMaxDiceForRank(rank);
-  const diceSelect = document.getElementById(`dice${monsterIndex}`);
+  const diceSelect = document.getElementById(`dice${familiarIndex}`);
   const currentValue = parseInt(diceSelect.value);
 
   // Rebuild options
@@ -159,8 +159,8 @@ function updateDiceOptions(monsterIndex) {
   }
 }
 
-function onRankChange(monsterIndex) {
-  updateDiceOptions(monsterIndex);
+function onRankChange(familiarIndex) {
+  updateDiceOptions(familiarIndex);
   calculate();
 }
 
@@ -285,13 +285,13 @@ function addConditionalBonus() {
   // Test the condition
   try {
     const testDice = [1, 2, 3];
-    const testMonsters = [
+    const testFamiliars = [
       { type: 'Human', element: 'None' },
       { type: 'Human', element: 'None' },
       { type: 'Human', element: 'None' }
     ];
-    const testFn = new Function('dice', 'monsters', `return ${condition}`);
-    testFn(testDice, testMonsters);
+    const testFn = new Function('dice', 'familiars', `return ${condition}`);
+    testFn(testDice, testFamiliars);
     errorEl.textContent = '';
   } catch (e) {
     errorEl.textContent = `Invalid condition: ${e.message}`;
@@ -330,9 +330,10 @@ function renderSavedLineups() {
   }
 
   container.innerHTML = savedLineups.map((lineup, index) => {
-    // Build monster summary
-    const monsterSummary = lineup.monsters.map((m, i) =>
-      `M${i + 1}: ${m.rank} ${m.type}${m.element !== 'None' ? ' (' + m.element + ')' : ''}`
+    // Build familiar summary (support both old 'monsters' and new 'familiars' key)
+    const familiars = lineup.familiars || lineup.monsters;
+    const familiarSummary = familiars.map((m, i) =>
+      `F${i + 1}: ${m.rank} ${m.type}${m.element !== 'None' ? ' (' + m.element + ')' : ''}`
     ).join(' | ');
 
     const condCount = lineup.conditionalBonuses.length;
@@ -343,7 +344,7 @@ function renderSavedLineups() {
         <div class="lineup-info">
           <div class="lineup-name">${escapeHtml(lineup.name)}</div>
           <div class="lineup-details">
-            <span class="lineup-detail-item">${monsterSummary}</span>
+            <span class="lineup-detail-item">${familiarSummary}</span>
             <span class="lineup-detail-item lineup-conditionals-count">${condText}</span>
           </div>
         </div>
@@ -363,8 +364,8 @@ function saveLineup() {
     return;
   }
 
-  // Get current monster configuration
-  const monsters = [
+  // Get current familiar configuration
+  const familiars = [
     {
       type: document.getElementById('monster1Type').value,
       element: document.getElementById('monster1Element').value,
@@ -385,7 +386,7 @@ function saveLineup() {
   // Save the lineup
   const lineup = {
     name,
-    monsters,
+    familiars,
     conditionalBonuses: [...conditionalBonuses]
   };
 
@@ -401,9 +402,10 @@ function loadLineup(index) {
   const lineup = savedLineups[index];
   if (!lineup) return;
 
-  // Load monster configuration
+  // Load familiar configuration (support both old 'monsters' and new 'familiars' key)
+  const familiars = lineup.familiars || lineup.monsters;
   for (let i = 0; i < 3; i++) {
-    const m = lineup.monsters[i];
+    const m = familiars[i];
     document.getElementById(`monster${i + 1}Rank`).value = m.rank;
     document.getElementById(`monster${i + 1}Element`).value = m.element;
     document.getElementById(`monster${i + 1}Type`).value = m.type;
@@ -433,7 +435,7 @@ function deleteLineup(index) {
 // REROLL LOGIC
 // ============================================
 
-function simulateResultDetailed(testDice, monsters, activeBonusItems) {
+function simulateResultDetailed(testDice, familiars, activeBonusItems) {
   // Calculate what the final result would be with given dice values
   // Returns detailed breakdown including which conditionals activate
   const diceSum = testDice.reduce((a, b) => a + b, 0);
@@ -452,8 +454,8 @@ function simulateResultDetailed(testDice, monsters, activeBonusItems) {
   conditionalBonuses.forEach(cond => {
     let isActive = false;
     try {
-      const condFn = new Function('dice', 'monsters', `return ${cond.condition}`);
-      isActive = condFn(testDice, monsters);
+      const condFn = new Function('dice', 'familiars', `return ${cond.condition}`);
+      isActive = condFn(testDice, familiars);
     } catch (e) {
       // Invalid condition
     }
@@ -504,22 +506,22 @@ function simulateResultDetailed(testDice, monsters, activeBonusItems) {
   };
 }
 
-function calculateRerollSuggestions(dice, monsters, activeBonusItems, difficulty, currentResult) {
+function calculateRerollSuggestions(dice, familiars, activeBonusItems, difficulty, currentResult) {
   const suggestions = [];
 
   for (let dieIndex = 0; dieIndex < 3; dieIndex++) {
     const currentValue = dice[dieIndex];
     const passingValues = [];
 
-    // Get max dice value based on monster rank
-    const maxDice = getMaxDiceForRank(monsters[dieIndex].rank);
+    // Get max dice value based on familiar rank
+    const maxDice = getMaxDiceForRank(familiars[dieIndex].rank);
 
     // Test all possible values for this die (1 to maxDice based on rank)
     for (let testValue = 1; testValue <= maxDice; testValue++) {
       const testDice = [...dice];
       testDice[dieIndex] = testValue;
 
-      const result = simulateResultDetailed(testDice, monsters, activeBonusItems);
+      const result = simulateResultDetailed(testDice, familiars, activeBonusItems);
 
       if (result.finalResult >= difficulty) {
         passingValues.push({
@@ -545,7 +547,7 @@ function calculateRerollSuggestions(dice, monsters, activeBonusItems, difficulty
       odds,
       currentPasses,
       maxDice,
-      rank: monsters[dieIndex].rank
+      rank: familiars[dieIndex].rank
     });
   }
 
@@ -613,7 +615,7 @@ function getState() {
     parseInt(document.getElementById('dice3').value),
   ];
 
-  const monsters = [
+  const familiars = [
     {
       type: document.getElementById('monster1Type').value,
       element: document.getElementById('monster1Element').value,
@@ -635,11 +637,11 @@ function getState() {
 
   const difficulty = parseInt(document.getElementById('difficulty').value) || 0;
 
-  return { dice, monsters, activeBonusItems, difficulty };
+  return { dice, familiars, activeBonusItems, difficulty };
 }
 
 function calculate() {
-  const { dice, monsters, activeBonusItems, difficulty } = getState();
+  const { dice, familiars, activeBonusItems, difficulty } = getState();
 
   // Step 1: Sum dice
   const diceSum = dice.reduce((a, b) => a + b, 0);
@@ -656,8 +658,8 @@ function calculate() {
   conditionalBonuses.forEach((cond, index) => {
     let isActive = false;
     try {
-      const condFn = new Function('dice', 'monsters', `return ${cond.condition}`);
-      isActive = condFn(dice, monsters);
+      const condFn = new Function('dice', 'familiars', `return ${cond.condition}`);
+      isActive = condFn(dice, familiars);
     } catch (e) {
       console.error(`Error in condition "${cond.name}":`, e);
     }
@@ -685,8 +687,8 @@ function calculate() {
   conditionalBonuses.forEach((cond, index) => {
     let isActive = false;
     try {
-      const condFn = new Function('dice', 'monsters', `return ${cond.condition}`);
-      isActive = condFn(dice, monsters);
+      const condFn = new Function('dice', 'familiars', `return ${cond.condition}`);
+      isActive = condFn(dice, familiars);
     } catch (e) {
       // Already logged above
     }
@@ -769,7 +771,7 @@ function calculate() {
   }
 
   // Calculate and display reroll suggestions
-  const rerollSuggestions = calculateRerollSuggestions(dice, monsters, activeBonusItems, difficulty, finalResult);
+  const rerollSuggestions = calculateRerollSuggestions(dice, familiars, activeBonusItems, difficulty, finalResult);
   renderRerollSuggestions(rerollSuggestions, passed, difficulty);
 }
 

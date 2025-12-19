@@ -9,12 +9,12 @@
 <body>
   <h1>🎲 Mystic Frontier Calculator</h1>
 
-  <!-- Monsters Section -->
+  <!-- Familiars Section -->
   <div class="section">
-    <h2>Monsters</h2>
+    <h2>Familiars</h2>
     <div class="monster-row">
       <div class="monster-group">
-        <label>Monster 1 Rank</label>
+        <label>Fam. 1 Rank</label>
         <select id="monster1Rank" onchange="onRankChange(1)">
           <option value="Common">Common (d3)</option>
           <option value="Rare">Rare (d4)</option>
@@ -22,7 +22,7 @@
           <option value="Unique">Unique (d6)</option>
           <option value="Legendary">Legendary (d6)</option>
         </select>
-        <label style="margin-top: 10px;">Monster 1 Element</label>
+        <label style="margin-top: 10px;">Fam. 1 Element</label>
         <select id="monster1Element" onchange="calculate()">
           <option value="None">None</option>
           <option value="Fire">Fire</option>
@@ -32,7 +32,7 @@
           <option value="Dark">Dark</option>
           <option value="Holy">Holy</option>
         </select>
-        <label style="margin-top: 10px;">Monster 1 Type</label>
+        <label style="margin-top: 10px;">Fam. 1 Type</label>
         <select id="monster1Type" onchange="calculate()">
           <option value="Human">Human</option>
           <option value="Beast">Beast</option>
@@ -46,7 +46,7 @@
         </select>
       </div>
       <div class="monster-group">
-        <label>Monster 2 Rank</label>
+        <label>Fam. 2 Rank</label>
         <select id="monster2Rank" onchange="onRankChange(2)">
           <option value="Common">Common (d3)</option>
           <option value="Rare">Rare (d4)</option>
@@ -54,7 +54,7 @@
           <option value="Unique">Unique (d6)</option>
           <option value="Legendary">Legendary (d6)</option>
         </select>
-        <label style="margin-top: 10px;">Monster 2 Element</label>
+        <label style="margin-top: 10px;">Fam. 2 Element</label>
         <select id="monster2Element" onchange="calculate()">
           <option value="None">None</option>
           <option value="Fire">Fire</option>
@@ -64,7 +64,7 @@
           <option value="Dark">Dark</option>
           <option value="Holy">Holy</option>
         </select>
-        <label style="margin-top: 10px;">Monster 2 Type</label>
+        <label style="margin-top: 10px;">Fam. 2 Type</label>
         <select id="monster2Type" onchange="calculate()">
           <option value="Human">Human</option>
           <option value="Beast">Beast</option>
@@ -78,7 +78,7 @@
         </select>
       </div>
       <div class="monster-group">
-        <label>Monster 3 Rank</label>
+        <label>Fam. 3 Rank</label>
         <select id="monster3Rank" onchange="onRankChange(3)">
           <option value="Common">Common (d3)</option>
           <option value="Rare">Rare (d4)</option>
@@ -86,7 +86,7 @@
           <option value="Unique">Unique (d6)</option>
           <option value="Legendary">Legendary (d6)</option>
         </select>
-        <label style="margin-top: 10px;">Monster 3 Element</label>
+        <label style="margin-top: 10px;">Fam. 3 Element</label>
         <select id="monster3Element" onchange="calculate()">
           <option value="None">None</option>
           <option value="Fire">Fire</option>
@@ -96,7 +96,7 @@
           <option value="Dark">Dark</option>
           <option value="Holy">Holy</option>
         </select>
-        <label style="margin-top: 10px;">Monster 3 Type</label>
+        <label style="margin-top: 10px;">Fam. 3 Type</label>
         <select id="monster3Type" onchange="calculate()">
           <option value="Human">Human</option>
           <option value="Beast">Beast</option>
@@ -192,10 +192,10 @@
           <textarea id="newCondCondition" placeholder="e.g. dice[1] % 2 === 1"></textarea>
           <div class="help-text">
             Available variables: <code>dice[0]</code>, <code>dice[1]</code>, <code>dice[2]</code> (values based on rank),
-            <code>monsters[0]</code>, <code>monsters[1]</code>, <code>monsters[2]</code> (each has <code>.type</code>, <code>.element</code>, and <code>.rank</code>)
+            <code>familiars[0]</code>, <code>familiars[1]</code>, <code>familiars[2]</code> (each has <code>.type</code>, <code>.element</code>, and <code>.rank</code>)
           </div>
           <div class="help-text">
-            Examples: <code>dice[0] >= 5</code> · <code>monsters[0].type === "Beast"</code> · <code>dice.every(d => d % 2 === 0)</code>
+            Examples: <code>dice[0] >= 5</code> · <code>familiars[0].type === "Beast"</code> · <code>dice.every(d => d % 2 === 0)</code>
           </div>
           <div id="conditionError" class="error-text"></div>
         </div>

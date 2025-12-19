@@ -72,11 +72,13 @@ let editingFamiliarId = null;
 function searchRosterConditional() {
   const query = document.getElementById('rosterConditionalSearch').value.toLowerCase().trim();
   const resultsContainer = document.getElementById('rosterConditionalResults');
+  const selectedRank = document.getElementById('rosterRank').value;
   if (!query) { resultsContainer.style.display = 'none'; return; }
 
   const allBonuses = configConditionalBonuses.bonuses || [];
   const matches = allBonuses.filter(b => {
-    return b.name.toLowerCase().includes(query) || b.condition.toLowerCase().includes(query) || b.rarity.toLowerCase().includes(query);
+    if (b.rarity !== selectedRank) return false;
+    return b.name.toLowerCase().includes(query) || b.condition.toLowerCase().includes(query);
   });
 
   if (matches.length === 0) {

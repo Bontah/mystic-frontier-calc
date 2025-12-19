@@ -92,14 +92,8 @@ function searchCondBonuses() {
   const resultsContainer = document.getElementById('condBonusSearchResults');
   if (!query) { resultsContainer.style.display = 'none'; return; }
 
-  // Flatten all categories into a single array with rarity and color
-  let allBonuses = [];
-  const categories = configConditionalBonuses.categories || {};
-  for (const [rarity, data] of Object.entries(categories)) {
-    for (const bonus of (data.bonuses || [])) {
-      allBonuses.push({ ...bonus, rarity: rarity, color: data.color });
-    }
-  }
+  // Use pre-flattened bonuses array from loadConfigFiles
+  const allBonuses = configConditionalBonuses.bonuses || [];
   const matches = allBonuses.filter(b => {
     return b.name.toLowerCase().includes(query) || b.condition.toLowerCase().includes(query) || b.rarity.toLowerCase().includes(query);
   });

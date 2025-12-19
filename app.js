@@ -252,7 +252,7 @@ function addToRoster() {
       type,
       conditional: selectedRosterConditional ? { ...selectedRosterConditional } : null
     };
-    familiarRoster.push(familiar);
+    familiarRoster.unshift(familiar);
   }
 
   // Clear name input

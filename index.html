@@ -343,6 +343,97 @@
       font-size: 12px;
       color: #666;
     }
+
+    .reroll-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #333;
+    }
+
+    .reroll-title {
+      color: #ffcc00;
+      font-size: 16px;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .reroll-suggestions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    .reroll-item {
+      background: #1a1a2e;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+    }
+
+    .reroll-item.can-reroll {
+      border-color: #66ccff;
+    }
+
+    .reroll-item.impossible {
+      border-color: #ff6666;
+      opacity: 0.6;
+    }
+
+    .reroll-item.not-needed {
+      border-color: #66ff66;
+      opacity: 0.6;
+    }
+
+    .reroll-die-name {
+      font-weight: bold;
+      color: #aaa;
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .reroll-current {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 5px;
+    }
+
+    .reroll-target {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .reroll-target.possible {
+      color: #66ccff;
+    }
+
+    .reroll-target.impossible {
+      color: #ff6666;
+    }
+
+    .reroll-target.not-needed {
+      color: #66ff66;
+    }
+
+    .reroll-odds {
+      font-size: 12px;
+      color: #888;
+      margin-top: 5px;
+    }
+
+    .reroll-breakdown {
+      font-size: 12px;
+      color: #66ccff;
+      margin-top: 8px;
+      font-family: monospace;
+    }
+
+    .reroll-conditionals {
+      font-size: 11px;
+      color: #66ff66;
+      margin-top: 5px;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -581,6 +672,14 @@
     <div class="result-status" id="resultStatus">FAIL</div>
     <div class="difference" id="difference">Failed by 47</div>
     <div id="activeBonusesDisplay" style="margin-top: 15px; font-size: 12px; color: #888;"></div>
+
+    <!-- Reroll Suggestions -->
+    <div id="rerollSection" class="reroll-section" style="display: none;">
+      <div class="reroll-title">🎯 Reroll Suggestions</div>
+      <div id="rerollSuggestions" class="reroll-suggestions">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
   </div>
 
   <script>
@@ -865,6 +964,173 @@
     }
 
     // ============================================
+    // REROLL LOGIC
+    // ============================================
+
+    function simulateResultDetailed(testDice, monsters, activeBonusItems) {
+      // Calculate what the final result would be with given dice values
+      // Returns detailed breakdown including which conditionals activate
+      const diceSum = testDice.reduce((a, b) => a + b, 0);
+
+      // Calculate flat bonuses from items
+      let itemFlat = 0;
+      activeBonusItems.forEach(item => {
+        itemFlat += item.flatBonus;
+      });
+
+      // Check conditional bonuses and track which ones activate
+      let conditionalFlat = 0;
+      let conditionalMult = 0;
+      const activeConditionals = [];
+
+      conditionalBonuses.forEach(cond => {
+        let isActive = false;
+        try {
+          const condFn = new Function('dice', 'monsters', `return ${cond.condition}`);
+          isActive = condFn(testDice, monsters);
+        } catch (e) {
+          // Invalid condition
+        }
+        if (isActive) {
+          activeConditionals.push(cond.name);
+          conditionalFlat += cond.flatBonus;
+          if (cond.multiplierBonus !== 0 && cond.multiplierBonus !== 1) {
+            conditionalMult += cond.multiplierBonus;
+          }
+        }
+      });
+
+      // Calculate multipliers from items
+      let itemMult = 0;
+      activeBonusItems.forEach(item => {
+        if (item.multiplierBonus !== 0 && item.multiplierBonus !== 1) {
+          itemMult += item.multiplierBonus;
+        }
+      });
+
+      const totalFlat = itemFlat + conditionalFlat;
+      const totalMultiplier = itemMult + conditionalMult;
+
+      // Calculate final result
+      const afterFlat = diceSum + totalFlat;
+      let beforeRounding;
+      let finalMultiplier = null;
+      if (totalMultiplier !== 0) {
+        finalMultiplier = totalMultiplier;
+        beforeRounding = afterFlat * finalMultiplier;
+      } else {
+        beforeRounding = afterFlat;
+      }
+      const finalResult = Math.floor(beforeRounding);
+
+      return {
+        diceSum,
+        totalFlat,
+        totalMultiplier: finalMultiplier,
+        finalResult,
+        activeConditionals,
+        breakdown: {
+          itemFlat,
+          conditionalFlat,
+          itemMult,
+          conditionalMult
+        }
+      };
+    }
+
+    function calculateRerollSuggestions(dice, monsters, activeBonusItems, difficulty, currentResult) {
+      const suggestions = [];
+
+      for (let dieIndex = 0; dieIndex < 3; dieIndex++) {
+        const currentValue = dice[dieIndex];
+        const passingValues = [];
+
+        // Test all possible values for this die (1-6)
+        for (let testValue = 1; testValue <= 6; testValue++) {
+          const testDice = [...dice];
+          testDice[dieIndex] = testValue;
+
+          const result = simulateResultDetailed(testDice, monsters, activeBonusItems);
+
+          if (result.finalResult >= difficulty) {
+            passingValues.push({
+              value: testValue,
+              ...result
+            });
+          }
+        }
+
+        // Calculate odds based on how many values pass
+        const odds = passingValues.length > 0
+          ? Math.round((passingValues.length / 6) * 100)
+          : null;
+
+        // Check if current value is among passing values
+        const currentPasses = passingValues.some(p => p.value === currentValue);
+
+        suggestions.push({
+          dieIndex,
+          dieName: `Dice ${dieIndex + 1}`,
+          currentValue,
+          passingValues,
+          odds,
+          currentPasses
+        });
+      }
+
+      return suggestions;
+    }
+
+    function renderRerollSuggestions(suggestions, passed, difficulty) {
+      const section = document.getElementById('rerollSection');
+      const container = document.getElementById('rerollSuggestions');
+
+      // Hide section if already passing
+      if (passed) {
+        section.style.display = 'none';
+        return;
+      }
+
+      section.style.display = 'block';
+
+      container.innerHTML = suggestions.map(s => {
+        let itemClass = 'reroll-item';
+        let targetClass = 'reroll-target';
+        let targetText = '';
+        let conditionalsHtml = '';
+
+        if (s.passingValues.length === 0) {
+          // Impossible to pass by rerolling this die alone
+          itemClass += ' impossible';
+          targetClass += ' impossible';
+          targetText = 'Impossible alone';
+        } else {
+          // Can reroll to pass - show which values work
+          itemClass += ' can-reroll';
+          targetClass += ' possible';
+
+          const passingNums = s.passingValues.map(p => p.value);
+          targetText = `Need: ${passingNums.join(', ')}`;
+
+          // Show which conditionals would activate
+          const r = s.passingValues[0];
+          if (r.activeConditionals.length > 0) {
+            conditionalsHtml = `<div class="reroll-conditionals">Activates: ${r.activeConditionals.join(', ')}</div>`;
+          }
+        }
+
+        return `
+          <div class="${itemClass}">
+            <div class="reroll-die-name">${s.dieName}</div>
+            <div class="reroll-current">Current: ${s.currentValue}</div>
+            <div class="${targetClass}">${targetText}</div>
+            ${conditionalsHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ============================================
     // CALCULATION
     // ============================================
 
@@ -1026,6 +1292,10 @@
       } else {
         activeBonusesEl.textContent = '';
       }
+
+      // Calculate and display reroll suggestions
+      const rerollSuggestions = calculateRerollSuggestions(dice, monsters, activeBonusItems, difficulty, finalResult);
+      renderRerollSuggestions(rerollSuggestions, passed, difficulty);
     }
 
     // ============================================

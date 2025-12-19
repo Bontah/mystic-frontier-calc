@@ -21,7 +21,7 @@ function showPage(pageName) {
 
   // Activate corresponding nav button
   const buttons = document.querySelectorAll('.nav-btn');
-  const pageIndex = { calculator: 0, roster: 1, info: 2 };
+  const pageIndex = { calculator: 0, roster: 1, info: 2, howtouse: 3 };
   if (buttons[pageIndex[pageName]]) {
     buttons[pageIndex[pageName]].classList.add('active');
   }
@@ -788,22 +788,14 @@ async function findBestOverallAsync(combinations, bonuses, onProgress) {
 
   for (const combo of combinations) {
     const maxDice = getMaxDiceForFamiliars(combo);
-    const avgDice = maxDice.map(max => Math.ceil((1 + max) / 2));
-    const result = evaluateLineup(combo, bonuses, avgDice);
+    // Use mathematical expected value: E[dice] = (1 + max) / 2
+    // Since conditionals only depend on familiar properties (not dice values),
+    // E[score] = (E[diceSum] + flat) * mult, which is computed directly
+    const expectedDice = maxDice.map(max => (1 + max) / 2);
+    const result = evaluateLineup(combo, bonuses, expectedDice);
 
-    // Calculate expected value across all roll combinations
-    let totalScore = 0;
-    let count = 0;
-    for (let d1 = 1; d1 <= maxDice[0]; d1++) {
-      for (let d2 = 1; d2 <= maxDice[1]; d2++) {
-        for (let d3 = 1; d3 <= maxDice[2]; d3++) {
-          const r = evaluateLineup(combo, bonuses, [d1, d2, d3]);
-          totalScore += r.score;
-          count++;
-        }
-      }
-    }
-    const expectedScore = totalScore / count;
+    // Score with expected dice gives us the expected value directly
+    const expectedScore = result.score;
 
     if (expectedScore > bestScore) {
       bestScore = expectedScore;
@@ -811,7 +803,7 @@ async function findBestOverallAsync(combinations, bonuses, onProgress) {
         familiars: combo,
         score: Math.round(expectedScore),
         scoreLabel: 'Expected',
-        testDice: avgDice,
+        testDice: maxDice.map(max => Math.ceil((1 + max) / 2)),
         ...result
       };
     }
@@ -926,8 +918,10 @@ async function runOptimizer() {
     }
   }
 
-  // Show progress indicator
+  // Show progress indicator with cancel button
   const totalSteps = combinations.length * 3; // 3 strategies to evaluate
+  let cancelled = false;
+
   resultsContainer.innerHTML = `
     <div class="optimizer-progress">
       <div class="progress-text">Analyzing ${combinations.length.toLocaleString()} lineup combinations...</div>
@@ -935,14 +929,23 @@ async function runOptimizer() {
         <div class="progress-bar" id="optimizerProgressBar" style="width: 0%"></div>
       </div>
       <div class="progress-percent" id="optimizerProgressPercent">0%</div>
+      <button class="cancel-btn" id="optimizerCancelBtn">Cancel</button>
     </div>
   `;
 
+  document.getElementById('optimizerCancelBtn').onclick = () => {
+    cancelled = true;
+  };
+
   // Helper to update progress and yield to UI
+  // Yield every 1% or 500 steps, whichever is larger (reduces overhead)
   let currentStep = 0;
+  const yieldInterval = Math.max(500, Math.floor(totalSteps / 100));
+
   const updateProgress = async () => {
+    if (cancelled) throw new Error('cancelled');
     currentStep++;
-    if (currentStep % 50 === 0 || currentStep === totalSteps) {
+    if (currentStep % yieldInterval === 0 || currentStep === totalSteps) {
       const percent = Math.round((currentStep / totalSteps) * 100);
       document.getElementById('optimizerProgressBar').style.width = percent + '%';
       document.getElementById('optimizerProgressPercent').textContent = percent + '%';
@@ -950,12 +953,24 @@ async function runOptimizer() {
     }
   };
 
-  // Find best lineups for each strategy with progress updates
-  const bestOverall = await findBestOverallAsync(combinations, [], updateProgress);
-  const bestLow = await findBestForLowRollsAsync(combinations, [], updateProgress);
-  const bestHigh = await findBestForHighRollsAsync(combinations, [], updateProgress);
+  try {
+    // Find best lineups for each strategy with progress updates
+    const bestOverall = await findBestOverallAsync(combinations, [], updateProgress);
+    const bestLow = await findBestForLowRollsAsync(combinations, [], updateProgress);
+    const bestHigh = await findBestForHighRollsAsync(combinations, [], updateProgress);
 
-  renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement, filterType });
+    renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement, filterType });
+  } catch (e) {
+    if (e.message === 'cancelled') {
+      resultsContainer.innerHTML = `
+        <div class="optimizer-error">
+          Optimization cancelled.
+        </div>
+      `;
+    } else {
+      throw e;
+    }
+  }
 }
 
 function renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement, filterType }) {

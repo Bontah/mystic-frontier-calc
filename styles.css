@@ -1078,6 +1078,23 @@ select:focus, input:focus, textarea:focus {
   font-size: 16px;
 }
 
+.optimizer-progress .cancel-btn {
+  margin-top: 15px;
+  padding: 8px 20px;
+  background: transparent;
+  border: 2px solid #ff6666;
+  color: #ff6666;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.optimizer-progress .cancel-btn:hover {
+  background: #ff6666;
+  color: #1a1a2e;
+}
+
 .lineup-card {
   background: #1a1a2e;
   border-radius: 10px;
@@ -1307,6 +1324,74 @@ select:focus, input:focus, textarea:focus {
 .info-block p {
   margin: 0;
   color: #ccc;
+}
+
+/* How to Use Page */
+.howtouse-section {
+  background: #1a1a2e;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+
+.howtouse-section:last-child {
+  margin-bottom: 0;
+}
+
+.howtouse-section h3 {
+  color: #66ccff;
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.howtouse-section p {
+  color: #ccc;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.howtouse-section ul,
+.howtouse-section ol {
+  color: #b8b8b8;
+  margin: 0 0 12px 0;
+  padding-left: 24px;
+}
+
+.howtouse-section li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.howtouse-section strong {
+  color: #ffcc00;
+}
+
+.howtouse-images {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.howtouse-image {
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+  text-align: center;
+}
+
+.howtouse-image img {
+  width: 100%;
+  border-radius: 8px;
+  border: 2px solid #444;
+  margin-bottom: 8px;
+}
+
+.howtouse-image span {
+  display: block;
+  color: #888;
+  font-size: 14px;
 }
 
 /* Optimizer Filters */

@@ -14,6 +14,7 @@
     <button class="nav-btn active" onclick="showPage('calculator')">Calculator</button>
     <button class="nav-btn" onclick="showPage('roster')">My Roster</button>
     <button class="nav-btn" onclick="showPage('info')">Additional Information</button>
+    <button class="nav-btn" onclick="showPage('howtouse')">How to Use</button>
   </nav>
 
   <!-- Calculator Page -->
@@ -501,6 +502,87 @@
         <h3>Possible Rewards</h3>
         <p>Community-compiled list of GMS v265 Mystic Frontier rewards:</p>
         <p><a href="https://pastebin.com/kRbUSbt9" target="_blank" class="external-link">GMS v265 - Mystic Frontier Possible Rewards</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- How to Use Page -->
+  <div id="page-howtouse" class="page">
+    <div class="section">
+      <h2>How to Use</h2>
+
+      <div class="howtouse-section">
+        <h3>Welcome</h3>
+        <p>Mystic Frontier Calculator helps you calculate expedition scores, manage your familiar roster, and find the best lineup combinations for your expeditions.</p>
+      </div>
+
+      <div class="howtouse-section">
+        <h3>Calculator</h3>
+        <p>The Calculator tab lets you simulate expedition outcomes:</p>
+        <ul>
+          <li>Select 3 familiars from your roster (or enter manually)</li>
+          <li>Each familiar contributes their dice roll based on rank</li>
+          <li>Adjust the dice values to see different outcomes</li>
+          <li>Add bonus items for extra flat bonuses or multipliers</li>
+          <li>The total score is calculated as: (Dice Sum + Flat Bonuses) x Multipliers</li>
+        </ul>
+      </div>
+
+      <div class="howtouse-section">
+        <h3>My Roster</h3>
+        <p>Build and manage your familiar collection:</p>
+        <ul>
+          <li>Add familiars manually by filling out the form</li>
+          <li>Or use the <strong>Image Scanner</strong> to automatically extract familiar data from screenshots</li>
+          <li>Assign familiars to expedition waves for quick access</li>
+          <li>Use the <strong>Lineup Optimizer</strong> to find the best combinations</li>
+        </ul>
+      </div>
+
+      <div class="howtouse-section">
+        <h3>Image Scanner</h3>
+        <p>Quickly add familiars by scanning screenshots of your familiar cards:</p>
+        <ol>
+          <li>In-game, open your familiar's details screen</li>
+          <li>Take a screenshot that shows the familiar card clearly</li>
+          <li>Upload the screenshot to the Image Scanner</li>
+          <li>The scanner will extract: Name, Rank, Element, Type, and Conditional bonus</li>
+          <li>Review and adjust the extracted data if needed</li>
+          <li>Click "Confirm & Fill Form" to add to your roster</li>
+        </ol>
+        <p><strong>How to capture the card in-game:</strong></p>
+        <div class="howtouse-images">
+          <div class="howtouse-image">
+            <img src="examples/howtouse_1.png" alt="Step 1: In-game capture">
+            <span>Step 1</span>
+          </div>
+          <div class="howtouse-image">
+            <img src="examples/howtouse_2.png" alt="Step 2: In-game capture">
+            <span>Step 2</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="howtouse-section">
+        <h3>Lineup Optimizer</h3>
+        <p>Find the best familiar combinations from your roster:</p>
+        <ul>
+          <li>The optimizer analyzes all possible 3-familiar combinations</li>
+          <li>Shows best lineups for: Expected value, Low rolls (1-1-1), and High rolls</li>
+          <li>Filter by element or type if your expedition requires specific ones</li>
+          <li>Click "Use This Lineup" to load the familiars into the calculator</li>
+        </ul>
+      </div>
+
+      <div class="howtouse-section">
+        <h3>Additional Information</h3>
+        <p>The Additional Information tab contains reference tables for:</p>
+        <ul>
+          <li>Familiar ranks and their dice types</li>
+          <li>How the score calculation works</li>
+          <li>Conditional bonus information</li>
+          <li>Links to community resources</li>
+        </ul>
       </div>
     </div>
   </div>

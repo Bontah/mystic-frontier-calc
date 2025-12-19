@@ -39,6 +39,7 @@ function saveToCurrentWave() {
   const calcFamiliars = [];
   for (let i = 1; i <= 3; i++) {
     calcFamiliars.push({
+      name: document.getElementById(`monster${i}Name`).value,
       rank: document.getElementById(`monster${i}Rank`).value,
       element: document.getElementById(`monster${i}Element`).value,
       type: document.getElementById(`monster${i}Type`).value
@@ -108,6 +109,7 @@ function loadWave(waveNum) {
   // Load familiars into calculator
   waveFamiliars.forEach((fam, i) => {
     if (i < 3) {
+      document.getElementById(`monster${i + 1}Name`).value = fam.name || '';
       document.getElementById(`monster${i + 1}Rank`).value = fam.rank;
       document.getElementById(`monster${i + 1}Element`).value = fam.element;
       document.getElementById(`monster${i + 1}Type`).value = fam.type;
@@ -1079,6 +1081,7 @@ function renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement,
 function useOptimizedLineup(familiars) {
   // Populate the main Familiars section with this lineup
   familiars.forEach((fam, i) => {
+    document.getElementById(`monster${i + 1}Name`).value = fam.name || '';
     document.getElementById(`monster${i + 1}Rank`).value = fam.rank;
     document.getElementById(`monster${i + 1}Element`).value = fam.element;
     document.getElementById(`monster${i + 1}Type`).value = fam.type;
@@ -1456,16 +1459,19 @@ function saveLineup() {
   // Get current familiar configuration
   const familiars = [
     {
+      name: document.getElementById('monster1Name').value,
       type: document.getElementById('monster1Type').value,
       element: document.getElementById('monster1Element').value,
       rank: document.getElementById('monster1Rank').value,
     },
     {
+      name: document.getElementById('monster2Name').value,
       type: document.getElementById('monster2Type').value,
       element: document.getElementById('monster2Element').value,
       rank: document.getElementById('monster2Rank').value,
     },
     {
+      name: document.getElementById('monster3Name').value,
       type: document.getElementById('monster3Type').value,
       element: document.getElementById('monster3Element').value,
       rank: document.getElementById('monster3Rank').value,
@@ -1495,6 +1501,7 @@ function loadLineup(index) {
   const familiars = lineup.familiars || lineup.monsters;
   for (let i = 0; i < 3; i++) {
     const m = familiars[i];
+    document.getElementById(`monster${i + 1}Name`).value = m.name || '';
     document.getElementById(`monster${i + 1}Rank`).value = m.rank;
     document.getElementById(`monster${i + 1}Element`).value = m.element;
     document.getElementById(`monster${i + 1}Type`).value = m.type;

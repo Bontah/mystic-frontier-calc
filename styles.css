@@ -15,7 +15,50 @@ body {
 h1 {
   text-align: center;
   color: #ffcc00;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+}
+
+/* Navigation Bar */
+.top-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: #252542;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.nav-btn {
+  flex: 1;
+  background: transparent;
+  border: 2px solid #444;
+  color: #888;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover {
+  border-color: #66ccff;
+  color: #66ccff;
+}
+
+.nav-btn.active {
+  background: #66ccff;
+  border-color: #66ccff;
+  color: #1a1a2e;
+}
+
+/* Page containers */
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
 }
 
 h2 {
@@ -738,25 +781,6 @@ select:focus, input:focus, textarea:focus {
   margin-bottom: 15px;
 }
 
-.optimizer-mode-toggle {
-  display: flex;
-  gap: 15px;
-}
-
-.optimizer-mode-toggle label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  font-weight: normal;
-  color: #aaa;
-}
-
-.optimizer-mode-toggle input[type="radio"] {
-  width: auto;
-  accent-color: #66ccff;
-}
-
 .optimize-btn {
   background: #ffcc00;
   color: #1a1a2e;
@@ -891,62 +915,6 @@ select:focus, input:focus, textarea:focus {
   background: #88ff88;
 }
 
-/* Bonus Recommendations Section */
-.optimizer-recommendations {
-  background: #1a1a2e;
-  border-radius: 10px;
-  padding: 15px;
-  border-left: 4px solid #66ccff;
-}
-
-.optimizer-recommendations-title {
-  font-weight: bold;
-  color: #66ccff;
-  margin-bottom: 10px;
-}
-
-.recommendation-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px;
-  background: #252542;
-  border-radius: 5px;
-  margin-bottom: 6px;
-}
-
-.recommendation-item:last-child {
-  margin-bottom: 0;
-}
-
-.recommendation-info {
-  flex: 1;
-}
-
-.recommendation-name {
-  font-size: 13px;
-  color: #fff;
-}
-
-.recommendation-stats {
-  font-size: 11px;
-  color: #888;
-}
-
-.recommendation-add-btn {
-  background: #66ccff;
-  color: #1a1a2e;
-  border: none;
-  border-radius: 4px;
-  padding: 5px 10px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 11px;
-}
-
-.recommendation-add-btn:hover {
-  background: #88ddff;
-}
 
 /* Roster Conditional Search */
 .roster-conditional-search {
@@ -1018,4 +986,250 @@ select:focus, input:focus, textarea:focus {
 
 .roster-item-conditional .conditional-stats {
   color: #888;
+}
+
+/* Info Page Styles */
+.info-block {
+  background: #1a1a2e;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.info-block:last-child {
+  margin-bottom: 0;
+}
+
+.info-block h3 {
+  color: #ffcc00;
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.info-block ul,
+.info-block ol {
+  margin: 0;
+  padding-left: 20px;
+  color: #ccc;
+}
+
+.info-block li {
+  margin-bottom: 5px;
+}
+
+.info-block p {
+  margin: 0;
+  color: #ccc;
+}
+
+/* Optimizer Filters */
+.optimizer-filters {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: #1a1a2e;
+  border-radius: 8px;
+}
+
+.optimizer-filters .filter-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.optimizer-filters .filter-group label {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 5px;
+}
+
+.optimizer-filters .filter-mode {
+  width: 100%;
+  margin-top: 5px;
+}
+
+.optimizer-filters .filter-mode label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #aaa;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.optimizer-filters .filter-mode input[type="checkbox"] {
+  width: auto;
+  accent-color: #66ccff;
+}
+
+/* Optimizer Help */
+.optimizer-help {
+  margin-bottom: 15px;
+}
+
+.help-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #66ccff;
+  font-size: 14px;
+  padding: 10px;
+  background: #1a1a2e;
+  border-radius: 8px;
+}
+
+.help-toggle:hover {
+  background: #252542;
+}
+
+.help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: #66ccff;
+  color: #1a1a2e;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.optimizer-help-content {
+  background: #1a1a2e;
+  padding: 15px;
+  border-radius: 0 0 8px 8px;
+  margin-top: -8px;
+}
+
+.help-item {
+  margin-bottom: 12px;
+}
+
+.help-item:last-child {
+  margin-bottom: 0;
+}
+
+.help-item strong {
+  color: #ffcc00;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.help-item p {
+  color: #aaa;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Lineup Familiar Bonus Display */
+.lineup-familiar-bonus {
+  margin-top: 8px;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.lineup-familiar-bonus.active {
+  background: rgba(102, 255, 102, 0.15);
+  border: 1px solid rgba(102, 255, 102, 0.3);
+}
+
+.lineup-familiar-bonus.inactive {
+  background: rgba(255, 204, 0, 0.1);
+  color: #888;
+  font-style: italic;
+}
+
+.lineup-familiar-bonus.none {
+  color: #666;
+  font-style: italic;
+}
+
+.lineup-familiar-bonus .bonus-name {
+  color: #66ff66;
+  font-weight: bold;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lineup-familiar-bonus .bonus-values {
+  color: #ffcc00;
+}
+
+/* Match Badges */
+.match-badges {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+  justify-content: center;
+}
+
+.match-badge {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+.match-badge.element-match {
+  background: rgba(102, 255, 102, 0.2);
+  color: #66ff66;
+}
+
+.match-badge.type-match {
+  background: rgba(255, 204, 0, 0.2);
+  color: #ffcc00;
+}
+
+.lineup-familiar.expedition-match {
+  border: 2px solid #66ff66;
+}
+
+/* Lineup Breakdown */
+.lineup-breakdown {
+  background: #1a1a2e;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.breakdown-header {
+  font-size: 12px;
+  color: #66ccff;
+  font-weight: bold;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #333;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.breakdown-source {
+  color: #aaa;
+}
+
+.breakdown-values {
+  color: #66ff66;
+  font-weight: bold;
+}
+
+.breakdown-totals {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #333;
+  font-size: 13px;
+  color: #ffcc00;
+  font-weight: bold;
 }

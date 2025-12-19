@@ -1,4 +1,33 @@
 // ============================================
+// PAGE NAVIGATION
+// ============================================
+
+function showPage(pageName) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(page => {
+    page.classList.remove('active');
+  });
+
+  // Remove active from all nav buttons
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  // Show selected page
+  const page = document.getElementById(`page-${pageName}`);
+  if (page) {
+    page.classList.add('active');
+  }
+
+  // Activate corresponding nav button
+  const buttons = document.querySelectorAll('.nav-btn');
+  const pageIndex = { calculator: 0, roster: 1, info: 2 };
+  if (buttons[pageIndex[pageName]]) {
+    buttons[pageIndex[pageName]].classList.add('active');
+  }
+}
+
+// ============================================
 // DATA STORAGE
 // ============================================
 
@@ -246,9 +275,21 @@ function evaluateLineup(familiars, bonuses, dice) {
   let totalFlat = 0;
   let totalMult = 0;
   const activeBonusNames = [];
+  const familiarBreakdown = [];
 
   // Include conditionals from the familiars themselves
-  familiars.forEach(fam => {
+  familiars.forEach((fam, index) => {
+    const breakdown = {
+      familiarIndex: index,
+      element: fam.element,
+      type: fam.type,
+      rank: fam.rank,
+      conditionalTriggered: false,
+      conditionalName: null,
+      flatContribution: 0,
+      multiplierContribution: 0
+    };
+
     if (fam.conditional) {
       let isActive = false;
       try {
@@ -258,6 +299,11 @@ function evaluateLineup(familiars, bonuses, dice) {
         // Invalid condition
       }
       if (isActive) {
+        breakdown.conditionalTriggered = true;
+        breakdown.conditionalName = fam.conditional.name;
+        breakdown.flatContribution = fam.conditional.flatBonus || 0;
+        breakdown.multiplierContribution = fam.conditional.multiplierBonus || 0;
+
         activeBonusNames.push(fam.conditional.name);
         totalFlat += fam.conditional.flatBonus || 0;
         if (fam.conditional.multiplierBonus && fam.conditional.multiplierBonus !== 0 && fam.conditional.multiplierBonus !== 1) {
@@ -265,6 +311,8 @@ function evaluateLineup(familiars, bonuses, dice) {
         }
       }
     }
+
+    familiarBreakdown.push(breakdown);
   });
 
   // Check each conditional bonus
@@ -294,7 +342,8 @@ function evaluateLineup(familiars, bonuses, dice) {
     diceSum,
     totalFlat,
     totalMult,
-    activeBonusNames
+    activeBonusNames,
+    familiarBreakdown
   };
 }
 
@@ -394,62 +443,18 @@ function getAllLibraryBonuses() {
   return configConditionalBonuses.bonuses || [];
 }
 
-function findRecommendedBonuses(familiars, bonuses, limit = 10) {
-  // Find bonuses that would activate with this lineup
-  const maxDice = getMaxDiceForFamiliars(familiars);
-  const recommendations = [];
-
-  // Test with various dice combinations
-  const testCases = [
-    [1, 1, 1],
-    maxDice,
-    maxDice.map(d => Math.ceil(d / 2)),
-    [6, 6, 6] // Triple 6s for maximum bonuses
-  ];
-
-  const seenIds = new Set();
-  const activeBonusIds = new Set(conditionalBonuses.map(b => b.id || b.name));
-
-  bonuses.forEach(bonus => {
-    if (seenIds.has(bonus.id) || activeBonusIds.has(bonus.id) || activeBonusIds.has(bonus.name)) return;
-
-    let wouldActivate = false;
-    for (const dice of testCases) {
-      try {
-        const condFn = new Function('dice', 'familiars', `return ${bonus.condition}`);
-        if (condFn(dice, familiars)) {
-          wouldActivate = true;
-          break;
-        }
-      } catch (e) {
-        // Invalid condition
-      }
-    }
-
-    if (wouldActivate) {
-      // Calculate value score: flat + (mult-1)*10
-      const flatValue = bonus.flatBonus || 0;
-      const multValue = (bonus.multiplierBonus && bonus.multiplierBonus !== 1)
-        ? (bonus.multiplierBonus - 1) * 10
-        : 0;
-      const value = flatValue + multValue;
-
-      recommendations.push({
-        ...bonus,
-        value
-      });
-      seenIds.add(bonus.id);
-    }
-  });
-
-  // Sort by value and return top N
-  return recommendations
-    .sort((a, b) => b.value - a.value)
-    .slice(0, limit);
+function toggleOptimizerHelp() {
+  const content = document.getElementById('optimizerHelpContent');
+  content.style.display = content.style.display === 'none' ? 'block' : 'none';
 }
 
 function runOptimizer() {
   const resultsContainer = document.getElementById('optimizerResults');
+
+  // Get filter values
+  const filterElement = document.getElementById('filterElement')?.value || '';
+  const filterType = document.getElementById('filterType')?.value || '';
+  const requireMatch = document.getElementById('filterRequireMatch')?.checked || false;
 
   if (familiarRoster.length < 3) {
     resultsContainer.innerHTML = `
@@ -460,53 +465,107 @@ function runOptimizer() {
     return;
   }
 
-  const mode = document.querySelector('input[name="optimizerMode"]:checked').value;
-  const bonuses = mode === 'active' ? conditionalBonuses : getAllLibraryBonuses();
+  // Generate all combinations
+  let combinations = generateCombinations(familiarRoster, 3);
 
-  if (bonuses.length === 0) {
-    resultsContainer.innerHTML = `
-      <div class="optimizer-error">
-        ${mode === 'active' ? 'Add some conditional bonuses first, or switch to "Scan Full Library" mode.' : 'Could not load bonus library.'}
-      </div>
-    `;
-    return;
+  // Apply filtering if required
+  if (requireMatch && (filterElement || filterType)) {
+    combinations = combinations.filter(combo => {
+      const hasMatchingElement = !filterElement || combo.some(fam => fam.element === filterElement);
+      const hasMatchingType = !filterType || combo.some(fam => fam.type === filterType);
+      return hasMatchingElement && hasMatchingType;
+    });
+
+    if (combinations.length === 0) {
+      resultsContainer.innerHTML = `
+        <div class="optimizer-error">
+          No lineup combinations match your filter criteria.<br>
+          Try adjusting the filters or add more familiars to your roster.
+        </div>
+      `;
+      return;
+    }
   }
 
-  // Generate all combinations
-  const combinations = generateCombinations(familiarRoster, 3);
+  // Find best lineups for each strategy (only using familiars' own conditionals)
+  const bestOverall = findBestOverall(combinations, []);
+  const bestLow = findBestForLowRolls(combinations, []);
+  const bestHigh = findBestForHighRolls(combinations, []);
 
-  // Find best lineups for each strategy
-  const bestOverall = findBestOverall(combinations, bonuses);
-  const bestLow = findBestForLowRolls(combinations, bonuses);
-  const bestHigh = findBestForHighRolls(combinations, bonuses);
-
-  // Find recommended bonuses for the best overall lineup
-  const allBonuses = getAllLibraryBonuses();
-  const recommendations = bestOverall ? findRecommendedBonuses(bestOverall.familiars, allBonuses) : [];
-
-  renderOptimizerResults({ bestOverall, bestLow, bestHigh, recommendations });
+  renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement, filterType });
 }
 
-function renderOptimizerResults({ bestOverall, bestLow, bestHigh, recommendations }) {
+function renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement, filterType }) {
   const container = document.getElementById('optimizerResults');
 
   const renderLineupCard = (result, type, title, icon) => {
     if (!result) return '';
 
-    const familiarsHtml = result.familiars.map(fam => {
+    const familiarsHtml = result.familiars.map((fam, index) => {
       const elementClass = `element-${fam.element.toLowerCase()}`;
+      const matchesElement = filterElement && fam.element === filterElement;
+      const matchesType = filterType && fam.type === filterType;
+      const matchClass = (matchesElement || matchesType) ? 'expedition-match' : '';
+
+      // Get breakdown for this familiar
+      const breakdown = result.familiarBreakdown ? result.familiarBreakdown[index] : null;
+      let bonusHtml = '';
+      if (breakdown && breakdown.conditionalTriggered) {
+        const flatStr = breakdown.flatContribution !== 0 ? `+${breakdown.flatContribution}` : '';
+        const multStr = breakdown.multiplierContribution && breakdown.multiplierContribution !== 0 && breakdown.multiplierContribution !== 1 ? `x${breakdown.multiplierContribution}` : '';
+        bonusHtml = `
+          <div class="lineup-familiar-bonus active">
+            <div class="bonus-name">${escapeHtml(breakdown.conditionalName)}</div>
+            <div class="bonus-values">${flatStr}${flatStr && multStr ? ', ' : ''}${multStr}</div>
+          </div>
+        `;
+      } else if (fam.conditional) {
+        bonusHtml = `<div class="lineup-familiar-bonus inactive">Conditional not triggered</div>`;
+      } else {
+        bonusHtml = `<div class="lineup-familiar-bonus none">No conditional</div>`;
+      }
+
+      const matchBadges = `
+        ${matchesElement ? '<span class="match-badge element-match">Element</span>' : ''}
+        ${matchesType ? '<span class="match-badge type-match">Type</span>' : ''}
+      `;
+
       return `
-        <div class="lineup-familiar ${elementClass}">
+        <div class="lineup-familiar ${elementClass} ${matchClass}">
+          ${(matchesElement || matchesType) ? `<div class="match-badges">${matchBadges}</div>` : ''}
           <div class="lineup-familiar-element">${fam.element}</div>
           <div class="lineup-familiar-type">${fam.type}</div>
           <div class="lineup-familiar-rank">${fam.rank}</div>
+          ${bonusHtml}
         </div>
       `;
     }).join('');
 
-    const triggersHtml = result.activeBonusNames.length > 0
-      ? `<div class="lineup-triggers"><strong>Triggers:</strong> ${result.activeBonusNames.slice(0, 5).join(', ')}${result.activeBonusNames.length > 5 ? ` (+${result.activeBonusNames.length - 5} more)` : ''}</div>`
-      : '<div class="lineup-triggers">No bonuses triggered with test dice</div>';
+    // Build breakdown summary
+    let breakdownHtml = '';
+    if (result.familiarBreakdown) {
+      const activeBreakdowns = result.familiarBreakdown.filter(b => b.conditionalTriggered);
+      if (activeBreakdowns.length > 0) {
+        breakdownHtml = `
+          <div class="lineup-breakdown">
+            <div class="breakdown-header">Bonus Breakdown</div>
+            ${activeBreakdowns.map(b => {
+              const flatStr = b.flatContribution !== 0 ? `+${b.flatContribution} flat` : '';
+              const multStr = b.multiplierContribution && b.multiplierContribution !== 0 && b.multiplierContribution !== 1 ? `x${b.multiplierContribution}` : '';
+              return `
+                <div class="breakdown-row">
+                  <span class="breakdown-source">${b.element} ${b.type}:</span>
+                  <span class="breakdown-values">${flatStr}${flatStr && multStr ? ', ' : ''}${multStr}</span>
+                </div>
+              `;
+            }).join('')}
+            <div class="breakdown-totals">
+              <span>Total: +${result.totalFlat} flat${result.totalMult ? `, x${result.totalMult}` : ''}</span>
+            </div>
+          </div>
+        `;
+      }
+    }
 
     return `
       <div class="lineup-card ${type}">
@@ -517,36 +576,16 @@ function renderOptimizerResults({ bestOverall, bestLow, bestHigh, recommendation
         <div class="lineup-familiars">
           ${familiarsHtml}
         </div>
-        ${triggersHtml}
+        ${breakdownHtml}
         <button class="use-lineup-btn" onclick="useOptimizedLineup(${JSON.stringify(result.familiars).replace(/"/g, '&quot;')})">Use This Lineup</button>
       </div>
     `;
   };
 
-  const recommendationsHtml = recommendations.length > 0 ? `
-    <div class="optimizer-recommendations">
-      <div class="optimizer-recommendations-title">Recommended Bonuses to Add</div>
-      ${recommendations.map(bonus => {
-        const flatStr = bonus.flatBonus !== 0 ? `<span class="flat${bonus.flatBonus < 0 ? ' negative' : ''}">${bonus.flatBonus >= 0 ? '+' : ''}${bonus.flatBonus}</span>` : '';
-        const multStr = bonus.multiplierBonus && bonus.multiplierBonus !== 1 ? `<span class="mult">×${bonus.multiplierBonus}</span>` : '';
-        return `
-          <div class="recommendation-item">
-            <div class="recommendation-info">
-              <div class="recommendation-name">${escapeHtml(bonus.name)}</div>
-              <div class="recommendation-stats">${flatStr}${flatStr && multStr ? ', ' : ''}${multStr} <span style="color:${bonus.color};">[${bonus.rarity}]</span></div>
-            </div>
-            <button class="recommendation-add-btn" onclick="applyCondBonus(${JSON.stringify(bonus).replace(/"/g, '&quot;')})">Add</button>
-          </div>
-        `;
-      }).join('')}
-    </div>
-  ` : '';
-
   container.innerHTML = `
     ${renderLineupCard(bestOverall, 'best-overall', 'BEST OVERALL', '🏆')}
     ${renderLineupCard(bestLow, 'best-low', 'BEST FOR LOW ROLLS', '🛡️')}
     ${renderLineupCard(bestHigh, 'best-high', 'BEST FOR HIGH ROLLS', '🎯')}
-    ${recommendationsHtml}
   `;
 }
 
@@ -813,7 +852,6 @@ function renderConditionalBonuses() {
       <div class="conditional-item" id="cond${index}">
         <div style="flex: 1; min-width: 0;">
           <span class="cond-name">${escapeHtml(cond.name)}</span>
-          <div style="color: #666; font-size: 12px; font-family: monospace; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(cond.condition)}</div>
         </div>
         <span class="cond-stats">${flatStr}${separator}${multStr}</span>
         <button class="delete-btn" onclick="deleteConditionalBonus(${index})">Delete</button>

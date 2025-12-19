@@ -124,45 +124,12 @@
     </div>
   </div>
 
-  <!-- Bonus Items Section -->
-  <div class="section">
-    <h2>Bonus Items</h2>
-    <div class="config-section-title">Item Library</div>
-    <div class="config-search">
-      <input type="text" id="bonusItemSearch" placeholder="Search items (e.g., tier1, multiplier, dice)..." oninput="searchBonusItems()">
-    </div>
-    <div id="bonusItemSearchResults" class="config-results" style="display: none;"></div>
-    <div class="config-section-title">Active Items</div>
-    <div id="bonusItemsList" class="bonus-list">
-      <!-- Populated by JavaScript -->
-    </div>
-
-    <div class="add-form">
-      <h3>+ Add Bonus Item</h3>
-      <div class="form-row">
-        <div class="form-group wide">
-          <label>Name</label>
-          <input type="text" id="newItemName" placeholder="e.g. Power Ring">
-        </div>
-        <div class="form-group">
-          <label>Flat Bonus</label>
-          <input type="number" id="newItemFlat" value="0" step="1">
-        </div>
-        <div class="form-group">
-          <label>Multiplier (e.g. 1.6)</label>
-          <input type="number" id="newItemMult" value="1" step="0.1">
-        </div>
-      </div>
-      <button class="add-btn" onclick="addBonusItem()">Add Item</button>
-    </div>
-  </div>
-
   <!-- Conditional Bonuses Section -->
   <div class="section">
     <h2>Conditional Bonuses</h2>
     <div class="config-section-title">Bonus Library</div>
     <div class="config-search">
-      <input type="text" id="condBonusSearch" placeholder="Search bonuses (e.g., dice, beast, fire, legendary)..." oninput="searchCondBonuses()">
+      <input type="text" id="condBonusSearch" placeholder="Search bonuses..." oninput="searchCondBonuses()">
     </div>
     <div id="condBonusSearchResults" class="config-results" style="display: none;"></div>
     <div class="config-section-title">Active Conditionals</div>
@@ -201,6 +168,39 @@
         </div>
       </div>
       <button class="add-btn" onclick="addConditionalBonus()">Add Conditional</button>
+    </div>
+  </div>
+
+  <!-- Bonus Items Section -->
+  <div class="section">
+    <h2>Bonus Items</h2>
+    <div class="config-section-title">Item Library</div>
+    <div class="config-search">
+      <input type="text" id="bonusItemSearch" placeholder="Search items..." oninput="searchBonusItems()">
+    </div>
+    <div id="bonusItemSearchResults" class="config-results" style="display: none;"></div>
+    <div class="config-section-title">Active Items</div>
+    <div id="bonusItemsList" class="bonus-list">
+      <!-- Populated by JavaScript -->
+    </div>
+
+    <div class="add-form" style="display: none">
+      <h3>+ Add Bonus Item</h3>
+      <div class="form-row">
+        <div class="form-group wide">
+          <label>Name</label>
+          <input type="text" id="newItemName" placeholder="e.g. Power Ring">
+        </div>
+        <div class="form-group">
+          <label>Flat Bonus</label>
+          <input type="number" id="newItemFlat" value="0" step="1">
+        </div>
+        <div class="form-group">
+          <label>Multiplier (e.g. 1.6)</label>
+          <input type="number" id="newItemMult" value="1" step="0.1">
+        </div>
+      </div>
+      <button class="add-btn" onclick="addBonusItem()">Add Item</button>
     </div>
   </div>
 

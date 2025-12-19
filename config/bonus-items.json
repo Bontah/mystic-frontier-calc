@@ -4,183 +4,178 @@
   "items": [
     {
       "id": "210001",
-      "name": "-5% expedition time upon completion",
+      "name": "Mysterious Stopwatch",
+      "description": "-5% expedition time upon completion",
       "flatBonus": 0,
-      "multiplierBonus": 0,
-      "expeditionTimeReduction": 0.05,
-      "tags": ["frontier", "tier1", "time"]
+      "multiplierBonus": 0
     },
     {
       "id": "211001",
-      "name": "Dice Total: +3",
+      "name": "Blessed Dice",
+      "description": "Dice Total: +3",
       "flatBonus": 3,
-      "multiplierBonus": 0,
-      "tags": ["frontier", "tier1", "dice"]
+      "multiplierBonus": 0
     },
     {
       "id": "211002",
-      "name": "Final Multiplier: +1.2x",
+      "name": "Swift-Rolling Dice",
+      "description": "Final Multiplier: +1.2x",
       "flatBonus": 0,
-      "multiplierBonus": 1.2,
-      "tags": ["frontier", "tier1", "multiplier"]
+      "multiplierBonus": 1.2
     },
     {
       "id": "211003",
-      "name": "Dice Total: -1, Final Multiplier: +1.6x",
+      "name": "Sharp-Edged Dice",
+      "description": "Dice Total: -1, Final Multiplier: +1.6x",
       "flatBonus": -1,
-      "multiplierBonus": 1.6,
-      "tags": ["frontier", "tier1", "hybrid", "risky"]
+      "multiplierBonus": 1.6
     },
     {
       "id": "211004",
-      "name": "Dice Total: +1, Final Multiplier: +1.4x",
+      "name": "Holy Rollers",
+      "description": "Dice Total: +1, Final Multiplier: +1.4x",
       "flatBonus": 1,
-      "multiplierBonus": 1.4,
-      "tags": ["frontier", "tier1", "hybrid"]
+      "multiplierBonus": 1.4
     },
     {
       "id": "220001",
-      "name": "-10% expedition time upon completion",
+      "name": "Mysterious Blue Stopwatch",
+      "description": "-10% expedition time upon completion",
       "flatBonus": 0,
-      "multiplierBonus": 0,
-      "expeditionTimeReduction": 0.10,
-      "tags": ["frontier", "tier2", "time"]
+      "multiplierBonus": 0
     },
     {
       "id": "221001",
-      "name": "Dice Total: +6",
+      "name": "Blessed Blue Dice",
+      "description": "Dice Total: +6",
       "flatBonus": 6,
-      "multiplierBonus": 0,
-      "tags": ["frontier", "tier2", "dice"]
+      "multiplierBonus": 0
     },
     {
       "id": "221002",
-      "name": "Final Multiplier: +1.4x",
+      "name": "Swift-Rolling Blue Dice",
+      "description": "Final Multiplier: +1.4x",
       "flatBonus": 0,
-      "multiplierBonus": 1.4,
-      "tags": ["frontier", "tier2", "multiplier"]
+      "multiplierBonus": 1.4
     },
     {
       "id": "221003",
-      "name": "Dice Total: -1, Final Multiplier: +1.8x",
+      "name": "Sharp-Edged Blue Dice",
+      "description": "Dice Total: -1, Final Multiplier: +1.8x",
       "flatBonus": -1,
-      "multiplierBonus": 1.8,
-      "tags": ["frontier", "tier2", "hybrid", "risky"]
+      "multiplierBonus": 1.8
     },
     {
       "id": "221004",
-      "name": "Dice Total: +1, Final Multiplier: +1.6x",
+      "name": "Blue Holy Rollers",
+      "description": "Dice Total: +1, Final Multiplier: +1.6x",
       "flatBonus": 1,
-      "multiplierBonus": 1.6,
-      "tags": ["frontier", "tier2", "hybrid"]
+      "multiplierBonus": 1.6
     },
     {
       "id": "230001",
-      "name": "-15% expedition time upon completion",
+      "name": "Mysterious Purple Stopwatch",
+      "description": "-15% expedition time upon completion",
       "flatBonus": 0,
-      "multiplierBonus": 0,
-      "expeditionTimeReduction": 0.15,
-      "tags": ["frontier", "tier3", "time"]
+      "multiplierBonus": 0
     },
     {
       "id": "231001",
-      "name": "Dice Total: +9",
+      "name": "Blessed Purple Dice",
+      "description": "Dice Total: +9",
       "flatBonus": 9,
-      "multiplierBonus": 0,
-      "tags": ["frontier", "tier3", "dice"]
+      "multiplierBonus": 0
     },
     {
       "id": "231002",
-      "name": "Final Multiplier: +1.6x",
+      "name": "Swift-Rolling Purple Dice",
+      "description": "Final Multiplier: +1.6x",
       "flatBonus": 0,
-      "multiplierBonus": 1.6,
-      "tags": ["frontier", "tier3", "multiplier"]
+      "multiplierBonus": 1.6
     },
     {
       "id": "231003",
-      "name": "Dice Total: -1, Final Multiplier: +2x",
+      "name": "Sharp-Edged Purple Dice",
+      "description": "Dice Total: -1, Final Multiplier: +2x",
       "flatBonus": -1,
-      "multiplierBonus": 2.0,
-      "tags": ["frontier", "tier3", "hybrid", "risky"]
+      "multiplierBonus": 2.0
     },
     {
       "id": "231004",
-      "name": "Dice Total: +1, Final Multiplier: +1.8x",
+      "name": "Sharp-Edged Blue Dice",
+      "description": "Dice Total: +1, Final Multiplier: +1.8x",
       "flatBonus": 1,
-      "multiplierBonus": 1.8,
-      "tags": ["frontier", "tier3", "hybrid"]
+      "multiplierBonus": 1.8
     },
     {
       "id": "240001",
-      "name": "-20% expedition time upon completion",
+      "name": "Mysterious Orange Stopwatch",
+      "description": "-20% expedition time upon completion",
       "flatBonus": 0,
-      "multiplierBonus": 0,
-      "expeditionTimeReduction": 0.20,
-      "tags": ["frontier", "tier4", "time"]
+      "multiplierBonus": 0
     },
     {
       "id": "241001",
-      "name": "Dice Total: +12",
+      "name": "Blessed Orange Dice",
+      "description": "Dice Total: +12",
       "flatBonus": 12,
-      "multiplierBonus": 0,
-      "tags": ["frontier", "tier4", "dice"]
+      "multiplierBonus": 0
     },
     {
       "id": "241002",
-      "name": "Final Multiplier: +1.8x",
+      "name": "Swift-Rolling Orange Dice",
+      "description": "Final Multiplier: +1.8x",
       "flatBonus": 0,
-      "multiplierBonus": 1.8,
-      "tags": ["frontier", "tier4", "multiplier"]
+      "multiplierBonus": 1.8
     },
     {
       "id": "241003",
-      "name": "Dice Total: -1, Final Multiplier: +2.2x",
+      "name": "Sharp-Edged Orange Dice",
+      "description": "Dice Total: -1, Final Multiplier: +2.2x",
       "flatBonus": -1,
-      "multiplierBonus": 2.2,
-      "tags": ["frontier", "tier4", "hybrid", "risky"]
+      "multiplierBonus": 2.2
     },
     {
       "id": "241004",
-      "name": "Dice Total: +1, Final Multiplier: +2x",
+      "name": "Orange Holy Rollers",
+      "description": "Dice Total: +1, Final Multiplier: +2x",
       "flatBonus": 1,
-      "multiplierBonus": 2.0,
-      "tags": ["frontier", "tier4", "hybrid"]
+      "multiplierBonus": 2.0
     },
     {
       "id": "250001",
-      "name": "-25% expedition time upon completion",
+      "name": "Mysterious Green Stopwatch",
+      "description": "-25% expedition time upon completion",
       "flatBonus": 0,
-      "multiplierBonus": 0,
-      "expeditionTimeReduction": 0.25,
-      "tags": ["frontier", "tier5", "time"]
+      "multiplierBonus": 0
     },
     {
       "id": "251001",
-      "name": "Dice Total: +15",
+      "name": "Blessed Green Dice",
+      "description": "Dice Total: +15",
       "flatBonus": 15,
-      "multiplierBonus": 0,
-      "tags": ["frontier", "tier5", "dice"]
+      "multiplierBonus": 0
     },
     {
       "id": "251002",
-      "name": "Final Multiplier: +2x",
+      "name": "Swift-Rolling Green Dice",
+      "description": "Final Multiplier: +2x",
       "flatBonus": 0,
-      "multiplierBonus": 2.0,
-      "tags": ["frontier", "tier5", "multiplier"]
+      "multiplierBonus": 2.0
     },
     {
       "id": "251003",
-      "name": "Dice Total: -1, Final Multiplier: +2.4x",
+      "name": "Sharp-Edged Green Dice",
+      "description": "Dice Total: -1, Final Multiplier: +2.4x",
       "flatBonus": -1,
-      "multiplierBonus": 2.4,
-      "tags": ["frontier", "tier5", "hybrid", "risky"]
+      "multiplierBonus": 2.4
     },
     {
       "id": "251004",
-      "name": "Dice Total: +1, Final Multiplier: +2.2x",
+      "name": "Green Holy Rollers",
+      "description": "Dice Total: +1, Final Multiplier: +2.2x",
       "flatBonus": 1,
-      "multiplierBonus": 2.2,
-      "tags": ["frontier", "tier5", "hybrid"]
+      "multiplierBonus": 2.2
     }
   ]
 }

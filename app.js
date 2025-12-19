@@ -63,8 +63,8 @@ function searchBonusItems() {
   const items = configBonusItems.items || [];
   const matches = items.filter(item => {
     const nameMatch = item.name.toLowerCase().includes(query);
-    const tagMatch = item.tags && item.tags.some(tag => tag.toLowerCase().includes(query));
-    return nameMatch || tagMatch;
+    const descMatch = item.description && item.description.toLowerCase().includes(query);
+    return nameMatch || descMatch;
   });
 
   if (matches.length === 0) {
@@ -73,8 +73,8 @@ function searchBonusItems() {
     resultsContainer.innerHTML = matches.map(item => {
       const flatStr = item.flatBonus !== 0 ? '<span class="flat' + (item.flatBonus < 0 ? ' negative' : '') + '">' + (item.flatBonus >= 0 ? '+' : '') + item.flatBonus + '</span>' : '';
       const multStr = item.multiplierBonus && item.multiplierBonus !== 0 ? '<span class="mult">x' + item.multiplierBonus + '</span>' : '';
-      const tagsStr = item.tags ? item.tags.join(', ') : '';
-      return '<div class="config-item" onclick="applyBonusItem(' + JSON.stringify(item).replace(/"/g, "&quot;") + ')"><div class="config-item-info"><div class="config-item-name">' + escapeHtml(item.name) + '</div><div class="config-item-stats">' + flatStr + (flatStr && multStr ? ', ' : '') + multStr + '</div><div class="config-item-tags">' + tagsStr + '</div></div><button class="apply-btn" onclick="event.stopPropagation()">Apply</button></div>';
+      const descStr = item.description || '';
+      return '<div class="config-item" onclick="applyBonusItem(' + JSON.stringify(item).replace(/"/g, "&quot;") + ')"><div class="config-item-info"><div class="config-item-name">' + escapeHtml(item.name) + '</div><div class="config-item-stats">' + flatStr + (flatStr && multStr ? ', ' : '') + multStr + '</div><div class="config-item-tags">' + escapeHtml(descStr) + '</div></div><button class="apply-btn" onclick="event.stopPropagation()">Apply</button></div>';
     }).join('');
   }
   resultsContainer.style.display = 'block';

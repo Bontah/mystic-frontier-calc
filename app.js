@@ -508,6 +508,14 @@ function importRoster(event) {
   event.target.value = '';
 }
 
+let rosterExpanded = false;
+const ROSTER_COLLAPSED_COUNT = 6;
+
+function toggleRosterExpand() {
+  rosterExpanded = !rosterExpanded;
+  renderRoster();
+}
+
 function renderRoster() {
   const container = document.getElementById('rosterList');
   const countEl = document.getElementById('rosterCount');
@@ -519,7 +527,11 @@ function renderRoster() {
     return;
   }
 
-  container.innerHTML = familiarRoster.map(fam => {
+  const showAll = rosterExpanded || familiarRoster.length <= ROSTER_COLLAPSED_COUNT;
+  const displayFamiliars = showAll ? familiarRoster : familiarRoster.slice(0, ROSTER_COLLAPSED_COUNT);
+  const hiddenCount = familiarRoster.length - ROSTER_COLLAPSED_COUNT;
+
+  const familiarCards = displayFamiliars.map(fam => {
     const displayName = fam.name || `${fam.element} ${fam.type}`;
     const rankClass = `rank-${fam.rank.toLowerCase()}`;
 
@@ -560,6 +572,18 @@ function renderRoster() {
       </div>
     `;
   }).join('');
+
+  // Add show more/less button if needed
+  let toggleBtn = '';
+  if (familiarRoster.length > ROSTER_COLLAPSED_COUNT) {
+    if (rosterExpanded) {
+      toggleBtn = `<button class="roster-toggle-btn" onclick="toggleRosterExpand()">Show Less</button>`;
+    } else {
+      toggleBtn = `<button class="roster-toggle-btn" onclick="toggleRosterExpand()">Show All (${hiddenCount} more)</button>`;
+    }
+  }
+
+  container.innerHTML = familiarCards + (toggleBtn ? `<div class="roster-toggle-wrapper">${toggleBtn}</div>` : '');
 }
 
 // ============================================

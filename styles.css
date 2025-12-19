@@ -957,6 +957,27 @@ select:focus, input:focus, textarea:focus {
   background: #888;
 }
 
+.roster-toggle-wrapper {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 10px;
+}
+
+.roster-toggle-btn {
+  background: transparent;
+  border: 1px solid #66ccff;
+  color: #66ccff;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.roster-toggle-btn:hover {
+  background: #66ccff;
+  color: #1a1a2e;
+}
+
 .roster-stats {
   display: flex;
   justify-content: space-between;

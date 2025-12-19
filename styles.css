@@ -646,6 +646,11 @@ select:focus, input:focus, textarea:focus {
   min-width: 120px;
 }
 
+.roster-inputs input[type="text"] {
+  flex: 2;
+  min-width: 150px;
+}
+
 .roster-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -869,16 +874,20 @@ select:focus, input:focus, textarea:focus {
 .lineup-familiar.element-holy { border-top-color: #fff176; }
 .lineup-familiar.element-none { border-top-color: #666; }
 
-.lineup-familiar-element {
+.lineup-familiar-name {
   font-weight: bold;
-  font-size: 14px;
-  color: #66ccff;
+  font-size: 13px;
+  color: #fff;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.lineup-familiar-type {
-  font-size: 12px;
-  color: #ffcc00;
-  margin: 4px 0;
+.lineup-familiar-details {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 2px;
 }
 
 .lineup-familiar-rank {

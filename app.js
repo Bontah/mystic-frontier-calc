@@ -112,6 +112,7 @@ function clearRosterConditional() {
 }
 
 function addToRoster() {
+  const name = document.getElementById('rosterName').value.trim();
   const rank = document.getElementById('rosterRank').value;
   const element = document.getElementById('rosterElement').value;
   const type = document.getElementById('rosterType').value;
@@ -122,6 +123,7 @@ function addToRoster() {
     if (index !== -1) {
       familiarRoster[index] = {
         id: editingFamiliarId,
+        name,
         rank,
         element,
         type,
@@ -135,6 +137,7 @@ function addToRoster() {
     // Add new familiar
     const familiar = {
       id: Date.now(),
+      name,
       rank,
       element,
       type,
@@ -142,6 +145,9 @@ function addToRoster() {
     };
     familiarRoster.push(familiar);
   }
+
+  // Clear name input
+  document.getElementById('rosterName').value = '';
 
   saveData();
   renderRoster();
@@ -155,6 +161,7 @@ function editFamiliar(id) {
   if (!familiar) return;
 
   // Populate form with familiar data
+  document.getElementById('rosterName').value = familiar.name || '';
   document.getElementById('rosterRank').value = familiar.rank;
   document.getElementById('rosterElement').value = familiar.element;
   document.getElementById('rosterType').value = familiar.type;
@@ -177,6 +184,7 @@ function editFamiliar(id) {
 
 function cancelEdit() {
   editingFamiliarId = null;
+  document.getElementById('rosterName').value = '';
   document.getElementById('rosterAddBtn').textContent = 'Add to Roster';
   document.getElementById('rosterCancelBtn').style.display = 'none';
   clearRosterConditional();
@@ -208,7 +216,7 @@ function renderRoster() {
   }
 
   container.innerHTML = familiarRoster.map(fam => {
-    const displayName = `${fam.element} ${fam.type}`;
+    const displayName = fam.name || `${fam.element} ${fam.type}`;
     const elementClass = `element-${fam.element.toLowerCase()}`;
     const rankClass = `rank-${fam.rank.toLowerCase()}`;
 
@@ -283,6 +291,7 @@ function evaluateLineup(familiars, bonuses, dice) {
   familiars.forEach((fam, index) => {
     const breakdown = {
       familiarIndex: index,
+      name: fam.name,
       element: fam.element,
       type: fam.type,
       rank: fam.rank,
@@ -532,11 +541,12 @@ function renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement,
         ${matchesType ? '<span class="match-badge type-match">Type</span>' : ''}
       `;
 
+      const displayName = fam.name || `${fam.element} ${fam.type}`;
       return `
         <div class="lineup-familiar ${elementClass} ${matchClass}">
           ${(matchesElement || matchesType) ? `<div class="match-badges">${matchBadges}</div>` : ''}
-          <div class="lineup-familiar-element">${fam.element}</div>
-          <div class="lineup-familiar-type">${fam.type}</div>
+          <div class="lineup-familiar-name">${escapeHtml(displayName)}</div>
+          <div class="lineup-familiar-details">${fam.element} · ${fam.type}</div>
           <div class="lineup-familiar-rank">${fam.rank}</div>
           ${bonusHtml}
         </div>
@@ -554,9 +564,10 @@ function renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement,
             ${activeBreakdowns.map(b => {
               const flatStr = b.flatContribution !== 0 ? `+${b.flatContribution} flat` : '';
               const multStr = b.multiplierContribution && b.multiplierContribution !== 0 && b.multiplierContribution !== 1 ? `x${b.multiplierContribution}` : '';
+              const sourceName = b.name || `${b.element} ${b.type}`;
               return `
                 <div class="breakdown-row">
-                  <span class="breakdown-source">${b.element} ${b.type}:</span>
+                  <span class="breakdown-source">${escapeHtml(sourceName)}:</span>
                   <span class="breakdown-values">${flatStr}${flatStr && multStr ? ', ' : ''}${multStr}</span>
                 </div>
               `;
@@ -599,18 +610,16 @@ function useOptimizedLineup(familiars) {
     document.getElementById(`monster${i + 1}Type`).value = fam.type;
   });
 
-  // Add familiars' conditionals to active conditionals (avoid duplicates)
+  // Clear existing conditionals and add each familiar's conditional
+  conditionalBonuses = [];
   familiars.forEach(fam => {
     if (fam.conditional) {
-      const exists = conditionalBonuses.some(c => c.name === fam.conditional.name && c.condition === fam.conditional.condition);
-      if (!exists) {
-        conditionalBonuses.push({
-          name: fam.conditional.name,
-          flatBonus: fam.conditional.flatBonus || 0,
-          multiplierBonus: fam.conditional.multiplierBonus || 1,
-          condition: fam.conditional.condition
-        });
-      }
+      conditionalBonuses.push({
+        name: fam.conditional.name,
+        flatBonus: fam.conditional.flatBonus || 0,
+        multiplierBonus: fam.conditional.multiplierBonus || 1,
+        condition: fam.conditional.condition
+      });
     }
   });
   saveData();

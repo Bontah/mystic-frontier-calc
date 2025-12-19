@@ -7,15 +7,19 @@ let bonusItems = [];
 let conditionalBonuses = [];
 let savedLineups = [];
 
+let familiarRoster = [];
+
 try {
   bonusItems = JSON.parse(localStorage.getItem('bonusItems')) || [];
   conditionalBonuses = JSON.parse(localStorage.getItem('conditionalBonuses')) || [];
   savedLineups = JSON.parse(localStorage.getItem('savedLineups')) || [];
+  familiarRoster = JSON.parse(localStorage.getItem('familiarRoster')) || [];
 } catch (e) {
   console.log('localStorage not available, using in-memory storage');
   bonusItems = [];
   conditionalBonuses = [];
   savedLineups = [];
+  familiarRoster = [];
 }
 
 function saveData() {
@@ -23,9 +27,562 @@ function saveData() {
     localStorage.setItem('bonusItems', JSON.stringify(bonusItems));
     localStorage.setItem('conditionalBonuses', JSON.stringify(conditionalBonuses));
     localStorage.setItem('savedLineups', JSON.stringify(savedLineups));
+    localStorage.setItem('familiarRoster', JSON.stringify(familiarRoster));
   } catch (e) {
     // localStorage not available, data will persist only during session
   }
+}
+
+// ============================================
+// FAMILIAR ROSTER
+// ============================================
+
+let selectedRosterConditional = null;
+let editingFamiliarId = null;
+
+function searchRosterConditional() {
+  const query = document.getElementById('rosterConditionalSearch').value.toLowerCase().trim();
+  const resultsContainer = document.getElementById('rosterConditionalResults');
+  if (!query) { resultsContainer.style.display = 'none'; return; }
+
+  const allBonuses = configConditionalBonuses.bonuses || [];
+  const matches = allBonuses.filter(b => {
+    return b.name.toLowerCase().includes(query) || b.condition.toLowerCase().includes(query) || b.rarity.toLowerCase().includes(query);
+  });
+
+  if (matches.length === 0) {
+    resultsContainer.innerHTML = '<div style="padding: 10px; color: #666;">No bonuses found</div>';
+  } else {
+    const limitedMatches = matches.slice(0, 20);
+    resultsContainer.innerHTML = limitedMatches.map(bonus => {
+      const flatStr = bonus.flatBonus !== 0 ? '<span class="flat' + (bonus.flatBonus < 0 ? ' negative' : '') + '">' + (bonus.flatBonus >= 0 ? '+' : '') + bonus.flatBonus + '</span>' : '';
+      const multStr = bonus.multiplierBonus && bonus.multiplierBonus !== 1 ? '<span class="mult">x' + bonus.multiplierBonus + '</span>' : '';
+      return '<div class="config-item" style="border-left: 3px solid ' + bonus.color + ';" onclick="selectRosterConditional(' + JSON.stringify(bonus).replace(/"/g, "&quot;") + ')"><div class="config-item-info"><div class="config-item-name">' + escapeHtml(bonus.name) + ' <span style="font-size:11px;color:' + bonus.color + ';">[' + bonus.rarity + ']</span></div><div class="config-item-stats">' + flatStr + (flatStr && multStr ? ', ' : '') + multStr + '</div></div></div>';
+    }).join('');
+  }
+  resultsContainer.style.display = 'block';
+}
+
+function selectRosterConditional(bonus) {
+  selectedRosterConditional = bonus;
+  document.getElementById('rosterConditionalSearch').value = '';
+  document.getElementById('rosterConditionalResults').style.display = 'none';
+
+  const displayEl = document.getElementById('selectedConditionalDisplay');
+  const flatStr = bonus.flatBonus !== 0 ? (bonus.flatBonus >= 0 ? '+' : '') + bonus.flatBonus : '';
+  const multStr = bonus.multiplierBonus && bonus.multiplierBonus !== 1 ? 'x' + bonus.multiplierBonus : '';
+  displayEl.innerHTML = `<span class="selected-conditional-name">${escapeHtml(bonus.name)}</span> <span style="color:${bonus.color};">[${bonus.rarity}]</span> ${flatStr}${flatStr && multStr ? ', ' : ''}${multStr} <button class="clear-conditional-btn" onclick="clearRosterConditional()">×</button>`;
+  displayEl.style.display = 'block';
+}
+
+function clearRosterConditional() {
+  selectedRosterConditional = null;
+  document.getElementById('selectedConditionalDisplay').style.display = 'none';
+}
+
+function addToRoster() {
+  const rank = document.getElementById('rosterRank').value;
+  const element = document.getElementById('rosterElement').value;
+  const type = document.getElementById('rosterType').value;
+
+  if (editingFamiliarId !== null) {
+    // Update existing familiar
+    const index = familiarRoster.findIndex(f => f.id === editingFamiliarId);
+    if (index !== -1) {
+      familiarRoster[index] = {
+        id: editingFamiliarId,
+        rank,
+        element,
+        type,
+        conditional: selectedRosterConditional ? { ...selectedRosterConditional } : null
+      };
+    }
+    editingFamiliarId = null;
+    document.getElementById('rosterAddBtn').textContent = 'Add to Roster';
+    document.getElementById('rosterCancelBtn').style.display = 'none';
+  } else {
+    // Add new familiar
+    const familiar = {
+      id: Date.now(),
+      rank,
+      element,
+      type,
+      conditional: selectedRosterConditional ? { ...selectedRosterConditional } : null
+    };
+    familiarRoster.push(familiar);
+  }
+
+  saveData();
+  renderRoster();
+
+  // Clear conditional selection
+  clearRosterConditional();
+}
+
+function editFamiliar(id) {
+  const familiar = familiarRoster.find(f => f.id === id);
+  if (!familiar) return;
+
+  // Populate form with familiar data
+  document.getElementById('rosterRank').value = familiar.rank;
+  document.getElementById('rosterElement').value = familiar.element;
+  document.getElementById('rosterType').value = familiar.type;
+
+  // Set conditional if exists
+  if (familiar.conditional) {
+    selectRosterConditional(familiar.conditional);
+  } else {
+    clearRosterConditional();
+  }
+
+  // Set editing mode
+  editingFamiliarId = id;
+  document.getElementById('rosterAddBtn').textContent = 'Update Familiar';
+  document.getElementById('rosterCancelBtn').style.display = 'inline-block';
+
+  // Scroll to form
+  document.getElementById('rosterRank').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function cancelEdit() {
+  editingFamiliarId = null;
+  document.getElementById('rosterAddBtn').textContent = 'Add to Roster';
+  document.getElementById('rosterCancelBtn').style.display = 'none';
+  clearRosterConditional();
+}
+
+function deleteFromRoster(id) {
+  if (!confirm('Remove this familiar from your roster?')) return;
+
+  familiarRoster = familiarRoster.filter(f => f.id !== id);
+
+  // If we were editing this familiar, cancel the edit
+  if (editingFamiliarId === id) {
+    cancelEdit();
+  }
+
+  saveData();
+  renderRoster();
+}
+
+function renderRoster() {
+  const container = document.getElementById('rosterList');
+  const countEl = document.getElementById('rosterCount');
+
+  countEl.textContent = `${familiarRoster.length} familiar${familiarRoster.length !== 1 ? 's' : ''} in roster`;
+
+  if (familiarRoster.length === 0) {
+    container.innerHTML = '<div style="color: #666; padding: 10px; grid-column: 1/-1;">No familiars in roster yet. Add your familiars above.</div>';
+    return;
+  }
+
+  container.innerHTML = familiarRoster.map(fam => {
+    const displayName = `${fam.element} ${fam.type}`;
+    const elementClass = `element-${fam.element.toLowerCase()}`;
+    const rankClass = `rank-${fam.rank.toLowerCase()}`;
+
+    let conditionalHtml = '';
+    if (fam.conditional) {
+      const flatStr = fam.conditional.flatBonus !== 0 ? (fam.conditional.flatBonus >= 0 ? '+' : '') + fam.conditional.flatBonus : '';
+      const multStr = fam.conditional.multiplierBonus && fam.conditional.multiplierBonus !== 1 ? 'x' + fam.conditional.multiplierBonus : '';
+      const color = fam.conditional.color || '#888';
+      conditionalHtml = `
+        <div class="roster-item-conditional" style="border-left: 2px solid ${color};">
+          <span class="conditional-name">${escapeHtml(fam.conditional.name)}</span>
+          <span class="conditional-stats">${flatStr}${flatStr && multStr ? ', ' : ''}${multStr}</span>
+        </div>
+      `;
+    } else {
+      conditionalHtml = '<div class="roster-item-conditional none">No conditional</div>';
+    }
+
+    return `
+      <div class="roster-item ${elementClass}">
+        <div class="roster-item-header">
+          <span class="roster-item-name">${escapeHtml(displayName)}</span>
+          <span class="roster-item-rank ${rankClass}">${fam.rank}</span>
+        </div>
+        <div class="roster-item-details">
+          <span class="roster-item-element">${fam.element}</span> ·
+          <span class="roster-item-type">${fam.type}</span>
+        </div>
+        ${conditionalHtml}
+        <div class="roster-item-actions">
+          <button class="roster-item-edit" onclick="editFamiliar(${fam.id})">Edit</button>
+          <button class="roster-item-delete" onclick="deleteFromRoster(${fam.id})">Remove</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================
+// LINEUP OPTIMIZER
+// ============================================
+
+function generateCombinations(arr, size) {
+  const result = [];
+
+  function combine(start, combo) {
+    if (combo.length === size) {
+      result.push([...combo]);
+      return;
+    }
+    for (let i = start; i < arr.length; i++) {
+      combo.push(arr[i]);
+      combine(i + 1, combo);
+      combo.pop();
+    }
+  }
+
+  combine(0, []);
+  return result;
+}
+
+function evaluateLineup(familiars, bonuses, dice) {
+  // Calculate the score for a lineup with given dice values
+  const diceSum = dice.reduce((a, b) => a + b, 0);
+
+  let totalFlat = 0;
+  let totalMult = 0;
+  const activeBonusNames = [];
+
+  // Include conditionals from the familiars themselves
+  familiars.forEach(fam => {
+    if (fam.conditional) {
+      let isActive = false;
+      try {
+        const condFn = new Function('dice', 'familiars', `return ${fam.conditional.condition}`);
+        isActive = condFn(dice, familiars);
+      } catch (e) {
+        // Invalid condition
+      }
+      if (isActive) {
+        activeBonusNames.push(fam.conditional.name);
+        totalFlat += fam.conditional.flatBonus || 0;
+        if (fam.conditional.multiplierBonus && fam.conditional.multiplierBonus !== 0 && fam.conditional.multiplierBonus !== 1) {
+          totalMult += fam.conditional.multiplierBonus;
+        }
+      }
+    }
+  });
+
+  // Check each conditional bonus
+  bonuses.forEach(cond => {
+    let isActive = false;
+    try {
+      const condFn = new Function('dice', 'familiars', `return ${cond.condition}`);
+      isActive = condFn(dice, familiars);
+    } catch (e) {
+      // Invalid condition
+    }
+
+    if (isActive) {
+      activeBonusNames.push(cond.name);
+      totalFlat += cond.flatBonus || 0;
+      if (cond.multiplierBonus && cond.multiplierBonus !== 0 && cond.multiplierBonus !== 1) {
+        totalMult += cond.multiplierBonus;
+      }
+    }
+  });
+
+  const afterFlat = diceSum + totalFlat;
+  const finalResult = totalMult !== 0 ? Math.floor(afterFlat * totalMult) : afterFlat;
+
+  return {
+    score: finalResult,
+    diceSum,
+    totalFlat,
+    totalMult,
+    activeBonusNames
+  };
+}
+
+function getMaxDiceForFamiliars(familiars) {
+  return familiars.map(f => getMaxDiceForRank(f.rank));
+}
+
+function findBestOverall(combinations, bonuses) {
+  // Evaluate with average dice values
+  let best = null;
+  let bestScore = -Infinity;
+
+  combinations.forEach(combo => {
+    const maxDice = getMaxDiceForFamiliars(combo);
+    // Use average dice values
+    const avgDice = maxDice.map(max => Math.ceil((1 + max) / 2));
+    const result = evaluateLineup(combo, bonuses, avgDice);
+
+    // Also calculate expected value across all roll combinations
+    let totalScore = 0;
+    let count = 0;
+    for (let d1 = 1; d1 <= maxDice[0]; d1++) {
+      for (let d2 = 1; d2 <= maxDice[1]; d2++) {
+        for (let d3 = 1; d3 <= maxDice[2]; d3++) {
+          const r = evaluateLineup(combo, bonuses, [d1, d2, d3]);
+          totalScore += r.score;
+          count++;
+        }
+      }
+    }
+    const expectedScore = totalScore / count;
+
+    if (expectedScore > bestScore) {
+      bestScore = expectedScore;
+      best = {
+        familiars: combo,
+        score: Math.round(expectedScore),
+        scoreLabel: 'Expected',
+        testDice: avgDice,
+        ...result
+      };
+    }
+  });
+
+  return best;
+}
+
+function findBestForLowRolls(combinations, bonuses) {
+  // Evaluate with dice = [1,1,1]
+  let best = null;
+  let bestScore = -Infinity;
+
+  combinations.forEach(combo => {
+    const dice = [1, 1, 1];
+    const result = evaluateLineup(combo, bonuses, dice);
+
+    if (result.score > bestScore) {
+      bestScore = result.score;
+      best = {
+        familiars: combo,
+        score: result.score,
+        scoreLabel: 'With 1-1-1',
+        testDice: dice,
+        ...result
+      };
+    }
+  });
+
+  return best;
+}
+
+function findBestForHighRolls(combinations, bonuses) {
+  // Evaluate with max dice based on ranks
+  let best = null;
+  let bestScore = -Infinity;
+
+  combinations.forEach(combo => {
+    const dice = getMaxDiceForFamiliars(combo);
+    const result = evaluateLineup(combo, bonuses, dice);
+
+    if (result.score > bestScore) {
+      bestScore = result.score;
+      best = {
+        familiars: combo,
+        score: result.score,
+        scoreLabel: `With ${dice.join('-')}`,
+        testDice: dice,
+        ...result
+      };
+    }
+  });
+
+  return best;
+}
+
+function getAllLibraryBonuses() {
+  return configConditionalBonuses.bonuses || [];
+}
+
+function findRecommendedBonuses(familiars, bonuses, limit = 10) {
+  // Find bonuses that would activate with this lineup
+  const maxDice = getMaxDiceForFamiliars(familiars);
+  const recommendations = [];
+
+  // Test with various dice combinations
+  const testCases = [
+    [1, 1, 1],
+    maxDice,
+    maxDice.map(d => Math.ceil(d / 2)),
+    [6, 6, 6] // Triple 6s for maximum bonuses
+  ];
+
+  const seenIds = new Set();
+  const activeBonusIds = new Set(conditionalBonuses.map(b => b.id || b.name));
+
+  bonuses.forEach(bonus => {
+    if (seenIds.has(bonus.id) || activeBonusIds.has(bonus.id) || activeBonusIds.has(bonus.name)) return;
+
+    let wouldActivate = false;
+    for (const dice of testCases) {
+      try {
+        const condFn = new Function('dice', 'familiars', `return ${bonus.condition}`);
+        if (condFn(dice, familiars)) {
+          wouldActivate = true;
+          break;
+        }
+      } catch (e) {
+        // Invalid condition
+      }
+    }
+
+    if (wouldActivate) {
+      // Calculate value score: flat + (mult-1)*10
+      const flatValue = bonus.flatBonus || 0;
+      const multValue = (bonus.multiplierBonus && bonus.multiplierBonus !== 1)
+        ? (bonus.multiplierBonus - 1) * 10
+        : 0;
+      const value = flatValue + multValue;
+
+      recommendations.push({
+        ...bonus,
+        value
+      });
+      seenIds.add(bonus.id);
+    }
+  });
+
+  // Sort by value and return top N
+  return recommendations
+    .sort((a, b) => b.value - a.value)
+    .slice(0, limit);
+}
+
+function runOptimizer() {
+  const resultsContainer = document.getElementById('optimizerResults');
+
+  if (familiarRoster.length < 3) {
+    resultsContainer.innerHTML = `
+      <div class="optimizer-error">
+        Add at least 3 familiars to your roster first!
+      </div>
+    `;
+    return;
+  }
+
+  const mode = document.querySelector('input[name="optimizerMode"]:checked').value;
+  const bonuses = mode === 'active' ? conditionalBonuses : getAllLibraryBonuses();
+
+  if (bonuses.length === 0) {
+    resultsContainer.innerHTML = `
+      <div class="optimizer-error">
+        ${mode === 'active' ? 'Add some conditional bonuses first, or switch to "Scan Full Library" mode.' : 'Could not load bonus library.'}
+      </div>
+    `;
+    return;
+  }
+
+  // Generate all combinations
+  const combinations = generateCombinations(familiarRoster, 3);
+
+  // Find best lineups for each strategy
+  const bestOverall = findBestOverall(combinations, bonuses);
+  const bestLow = findBestForLowRolls(combinations, bonuses);
+  const bestHigh = findBestForHighRolls(combinations, bonuses);
+
+  // Find recommended bonuses for the best overall lineup
+  const allBonuses = getAllLibraryBonuses();
+  const recommendations = bestOverall ? findRecommendedBonuses(bestOverall.familiars, allBonuses) : [];
+
+  renderOptimizerResults({ bestOverall, bestLow, bestHigh, recommendations });
+}
+
+function renderOptimizerResults({ bestOverall, bestLow, bestHigh, recommendations }) {
+  const container = document.getElementById('optimizerResults');
+
+  const renderLineupCard = (result, type, title, icon) => {
+    if (!result) return '';
+
+    const familiarsHtml = result.familiars.map(fam => {
+      const elementClass = `element-${fam.element.toLowerCase()}`;
+      return `
+        <div class="lineup-familiar ${elementClass}">
+          <div class="lineup-familiar-element">${fam.element}</div>
+          <div class="lineup-familiar-type">${fam.type}</div>
+          <div class="lineup-familiar-rank">${fam.rank}</div>
+        </div>
+      `;
+    }).join('');
+
+    const triggersHtml = result.activeBonusNames.length > 0
+      ? `<div class="lineup-triggers"><strong>Triggers:</strong> ${result.activeBonusNames.slice(0, 5).join(', ')}${result.activeBonusNames.length > 5 ? ` (+${result.activeBonusNames.length - 5} more)` : ''}</div>`
+      : '<div class="lineup-triggers">No bonuses triggered with test dice</div>';
+
+    return `
+      <div class="lineup-card ${type}">
+        <div class="lineup-card-header">
+          <div class="lineup-card-title">${icon} ${title}</div>
+          <div class="lineup-card-score">${result.scoreLabel}: <strong>${result.score}</strong></div>
+        </div>
+        <div class="lineup-familiars">
+          ${familiarsHtml}
+        </div>
+        ${triggersHtml}
+        <button class="use-lineup-btn" onclick="useOptimizedLineup(${JSON.stringify(result.familiars).replace(/"/g, '&quot;')})">Use This Lineup</button>
+      </div>
+    `;
+  };
+
+  const recommendationsHtml = recommendations.length > 0 ? `
+    <div class="optimizer-recommendations">
+      <div class="optimizer-recommendations-title">Recommended Bonuses to Add</div>
+      ${recommendations.map(bonus => {
+        const flatStr = bonus.flatBonus !== 0 ? `<span class="flat${bonus.flatBonus < 0 ? ' negative' : ''}">${bonus.flatBonus >= 0 ? '+' : ''}${bonus.flatBonus}</span>` : '';
+        const multStr = bonus.multiplierBonus && bonus.multiplierBonus !== 1 ? `<span class="mult">×${bonus.multiplierBonus}</span>` : '';
+        return `
+          <div class="recommendation-item">
+            <div class="recommendation-info">
+              <div class="recommendation-name">${escapeHtml(bonus.name)}</div>
+              <div class="recommendation-stats">${flatStr}${flatStr && multStr ? ', ' : ''}${multStr} <span style="color:${bonus.color};">[${bonus.rarity}]</span></div>
+            </div>
+            <button class="recommendation-add-btn" onclick="applyCondBonus(${JSON.stringify(bonus).replace(/"/g, '&quot;')})">Add</button>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  ` : '';
+
+  container.innerHTML = `
+    ${renderLineupCard(bestOverall, 'best-overall', 'BEST OVERALL', '🏆')}
+    ${renderLineupCard(bestLow, 'best-low', 'BEST FOR LOW ROLLS', '🛡️')}
+    ${renderLineupCard(bestHigh, 'best-high', 'BEST FOR HIGH ROLLS', '🎯')}
+    ${recommendationsHtml}
+  `;
+}
+
+function useOptimizedLineup(familiars) {
+  // Populate the main Familiars section with this lineup
+  familiars.forEach((fam, i) => {
+    document.getElementById(`monster${i + 1}Rank`).value = fam.rank;
+    document.getElementById(`monster${i + 1}Element`).value = fam.element;
+    document.getElementById(`monster${i + 1}Type`).value = fam.type;
+  });
+
+  // Add familiars' conditionals to active conditionals (avoid duplicates)
+  familiars.forEach(fam => {
+    if (fam.conditional) {
+      const exists = conditionalBonuses.some(c => c.name === fam.conditional.name && c.condition === fam.conditional.condition);
+      if (!exists) {
+        conditionalBonuses.push({
+          name: fam.conditional.name,
+          flatBonus: fam.conditional.flatBonus || 0,
+          multiplierBonus: fam.conditional.multiplierBonus || 1,
+          condition: fam.conditional.condition
+        });
+      }
+    }
+  });
+  saveData();
+  renderConditionalBonuses();
+
+  // Update dice options and recalculate
+  for (let i = 1; i <= 3; i++) {
+    updateDiceOptions(i);
+  }
+  calculate();
+
+  // Scroll to results
+  document.getElementById('finalResult').scrollIntoView({ behavior: 'smooth' });
 }
 
 // ============================================
@@ -792,6 +1349,7 @@ function escapeHtml(text) {
 renderBonusItems();
 renderConditionalBonuses();
 renderSavedLineups();
+renderRoster();
 initializeDiceFromRanks();
 loadConfigFiles();
 calculate();

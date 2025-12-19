@@ -578,3 +578,444 @@ select:focus, input:focus, textarea:focus {
   padding-bottom: 5px;
   border-bottom: 1px solid #333;
 }
+
+/* Section Description */
+.section-description {
+  color: #888;
+  font-size: 14px;
+  margin: 0 0 15px 0;
+}
+
+/* Familiar Roster Styles */
+.roster-add-form {
+  margin-bottom: 15px;
+}
+
+.roster-inputs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.roster-inputs select {
+  flex: 1;
+  min-width: 120px;
+}
+
+.roster-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.roster-item {
+  background: #1a1a2e;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #666;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.roster-item.element-fire { border-left-color: #ff6b35; }
+.roster-item.element-ice { border-left-color: #4fc3f7; }
+.roster-item.element-lightning { border-left-color: #ffeb3b; }
+.roster-item.element-poison { border-left-color: #8bc34a; }
+.roster-item.element-dark { border-left-color: #9c27b0; }
+.roster-item.element-holy { border-left-color: #fff176; }
+.roster-item.element-none { border-left-color: #666; }
+
+.roster-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.roster-item-name {
+  font-weight: bold;
+  color: #fff;
+  font-size: 14px;
+}
+
+.roster-item-rank {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+.roster-item-rank.rank-common { background: #9d9d9d; color: #1a1a2e; }
+.roster-item-rank.rank-rare { background: #0070dd; color: #fff; }
+.roster-item-rank.rank-epic { background: #a335ee; color: #fff; }
+.roster-item-rank.rank-unique { background: #ff8000; color: #fff; }
+.roster-item-rank.rank-legendary { background: #1eff00; color: #1a1a2e; }
+
+.roster-item-details {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.roster-item-element {
+  color: #66ccff;
+}
+
+.roster-item-type {
+  color: #ffcc00;
+}
+
+.roster-item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #333;
+}
+
+.roster-item-edit {
+  flex: 1;
+  background: transparent;
+  border: 1px solid #666;
+  color: #888;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+
+.roster-item-edit:hover {
+  background: #66ccff;
+  border-color: #66ccff;
+  color: #1a1a2e;
+}
+
+.roster-item-delete {
+  flex: 1;
+  background: transparent;
+  border: 1px solid #ff4444;
+  color: #ff6666;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+
+.roster-item-delete:hover {
+  background: #ff4444;
+  color: #fff;
+}
+
+.cancel-btn {
+  background: #666;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.cancel-btn:hover {
+  background: #888;
+}
+
+.roster-stats {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+}
+
+/* Optimizer Styles */
+.optimizer-controls {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.optimizer-mode-toggle {
+  display: flex;
+  gap: 15px;
+}
+
+.optimizer-mode-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: normal;
+  color: #aaa;
+}
+
+.optimizer-mode-toggle input[type="radio"] {
+  width: auto;
+  accent-color: #66ccff;
+}
+
+.optimize-btn {
+  background: #ffcc00;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.optimize-btn:hover {
+  background: #ffdd44;
+}
+
+.optimizer-results {
+  display: grid;
+  gap: 15px;
+}
+
+.optimizer-error {
+  background: rgba(255, 102, 102, 0.2);
+  color: #ff6666;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.lineup-card {
+  background: #1a1a2e;
+  border-radius: 10px;
+  padding: 15px;
+  border-left: 4px solid #ffcc00;
+}
+
+.lineup-card.best-overall { border-left-color: #ffcc00; }
+.lineup-card.best-low { border-left-color: #66ccff; }
+.lineup-card.best-high { border-left-color: #ff6666; }
+
+.lineup-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.lineup-card-title {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.lineup-card.best-overall .lineup-card-title { color: #ffcc00; }
+.lineup-card.best-low .lineup-card-title { color: #66ccff; }
+.lineup-card.best-high .lineup-card-title { color: #ff6666; }
+
+.lineup-card-score {
+  font-size: 14px;
+  color: #888;
+}
+
+.lineup-card-score strong {
+  color: #66ff66;
+  font-size: 18px;
+}
+
+.lineup-familiars {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.lineup-familiar {
+  flex: 1;
+  background: #252542;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  border-top: 3px solid #666;
+}
+
+.lineup-familiar.element-fire { border-top-color: #ff6b35; }
+.lineup-familiar.element-ice { border-top-color: #4fc3f7; }
+.lineup-familiar.element-lightning { border-top-color: #ffeb3b; }
+.lineup-familiar.element-poison { border-top-color: #8bc34a; }
+.lineup-familiar.element-dark { border-top-color: #9c27b0; }
+.lineup-familiar.element-holy { border-top-color: #fff176; }
+.lineup-familiar.element-none { border-top-color: #666; }
+
+.lineup-familiar-element {
+  font-weight: bold;
+  font-size: 14px;
+  color: #66ccff;
+}
+
+.lineup-familiar-type {
+  font-size: 12px;
+  color: #ffcc00;
+  margin: 4px 0;
+}
+
+.lineup-familiar-rank {
+  font-size: 10px;
+  color: #888;
+}
+
+.lineup-triggers {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 12px;
+  padding: 8px;
+  background: #252542;
+  border-radius: 5px;
+}
+
+.lineup-triggers strong {
+  color: #66ff66;
+}
+
+.use-lineup-btn {
+  background: #66ff66;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+  width: 100%;
+}
+
+.use-lineup-btn:hover {
+  background: #88ff88;
+}
+
+/* Bonus Recommendations Section */
+.optimizer-recommendations {
+  background: #1a1a2e;
+  border-radius: 10px;
+  padding: 15px;
+  border-left: 4px solid #66ccff;
+}
+
+.optimizer-recommendations-title {
+  font-weight: bold;
+  color: #66ccff;
+  margin-bottom: 10px;
+}
+
+.recommendation-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background: #252542;
+  border-radius: 5px;
+  margin-bottom: 6px;
+}
+
+.recommendation-item:last-child {
+  margin-bottom: 0;
+}
+
+.recommendation-info {
+  flex: 1;
+}
+
+.recommendation-name {
+  font-size: 13px;
+  color: #fff;
+}
+
+.recommendation-stats {
+  font-size: 11px;
+  color: #888;
+}
+
+.recommendation-add-btn {
+  background: #66ccff;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.recommendation-add-btn:hover {
+  background: #88ddff;
+}
+
+/* Roster Conditional Search */
+.roster-conditional-search {
+  margin-top: 10px;
+  position: relative;
+}
+
+.roster-conditional-search input {
+  width: 100%;
+}
+
+.roster-conditional-search .config-results {
+  position: absolute;
+  width: 100%;
+  z-index: 10;
+  margin-bottom: 0;
+}
+
+.selected-conditional {
+  background: #1a1a2e;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.selected-conditional-name {
+  font-weight: bold;
+  color: #fff;
+}
+
+.clear-conditional-btn {
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: auto;
+}
+
+.clear-conditional-btn:hover {
+  background: #ff6666;
+}
+
+/* Roster Item Conditional */
+.roster-item-conditional {
+  font-size: 11px;
+  padding: 6px 8px;
+  background: #252542;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.roster-item-conditional.none {
+  color: #666;
+  font-style: italic;
+}
+
+.roster-item-conditional .conditional-name {
+  color: #fff;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.roster-item-conditional .conditional-stats {
+  color: #888;
+}

@@ -320,6 +320,10 @@ function assignToWave(ids, wave) {
   });
   saveData();
   renderRoster();
+
+  // Navigate to calculator and load the wave
+  showPage('calculator');
+  loadWave(wave);
 }
 
 function freeWave(wave) {
@@ -818,8 +822,8 @@ function useOptimizedLineup(familiars) {
   }
   calculate();
 
-  // Scroll to results
-  document.getElementById('finalResult').scrollIntoView({ behavior: 'smooth' });
+  // Navigate to calculator page
+  showPage('calculator');
 }
 
 // ============================================

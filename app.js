@@ -145,19 +145,67 @@ let bonusItems = [];
 let conditionalBonuses = [];
 let savedLineups = [];
 
-let familiarRoster = [];
+let characters = [];
+let currentCharacterId = null;
+
+// Helper to get current character's roster
+function getFamiliarRoster() {
+  const char = characters.find(c => c.id === currentCharacterId);
+  return char ? char.roster : [];
+}
+
+// Helper to set current character's roster
+function setFamiliarRoster(roster) {
+  const char = characters.find(c => c.id === currentCharacterId);
+  if (char) char.roster = roster;
+}
+
+// For backwards compatibility - getter/setter for familiarRoster
+Object.defineProperty(window, 'familiarRoster', {
+  get: function() { return getFamiliarRoster(); },
+  set: function(val) { setFamiliarRoster(val); }
+});
 
 try {
   bonusItems = JSON.parse(localStorage.getItem('bonusItems')) || [];
   conditionalBonuses = JSON.parse(localStorage.getItem('conditionalBonuses')) || [];
   savedLineups = JSON.parse(localStorage.getItem('savedLineups')) || [];
-  familiarRoster = JSON.parse(localStorage.getItem('familiarRoster')) || [];
+  characters = JSON.parse(localStorage.getItem('characters')) || [];
+  currentCharacterId = JSON.parse(localStorage.getItem('currentCharacterId')) || null;
+
+  // Migration: if old familiarRoster exists, migrate to first character
+  const oldRoster = JSON.parse(localStorage.getItem('familiarRoster'));
+  if (oldRoster && oldRoster.length > 0 && characters.length === 0) {
+    characters.push({
+      id: Date.now(),
+      name: 'Main',
+      roster: oldRoster
+    });
+    currentCharacterId = characters[0].id;
+    localStorage.removeItem('familiarRoster');
+  }
+
+  // Create default character if none exist
+  if (characters.length === 0) {
+    characters.push({
+      id: Date.now(),
+      name: 'Main',
+      roster: []
+    });
+    currentCharacterId = characters[0].id;
+  }
+
+  // Ensure a character is selected
+  if (!currentCharacterId && characters.length > 0) {
+    currentCharacterId = characters[0].id;
+  }
 } catch (e) {
   console.log('localStorage not available, using in-memory storage');
   bonusItems = [];
   conditionalBonuses = [];
   savedLineups = [];
-  familiarRoster = [];
+  characters = [{ id: Date.now(), name: 'Main', roster: [] }];
+  currentCharacterId = characters[0].id;
 }
 
 function saveData() {
@@ -165,10 +213,88 @@ function saveData() {
     localStorage.setItem('bonusItems', JSON.stringify(bonusItems));
     localStorage.setItem('conditionalBonuses', JSON.stringify(conditionalBonuses));
     localStorage.setItem('savedLineups', JSON.stringify(savedLineups));
-    localStorage.setItem('familiarRoster', JSON.stringify(familiarRoster));
+    localStorage.setItem('characters', JSON.stringify(characters));
+    localStorage.setItem('currentCharacterId', JSON.stringify(currentCharacterId));
   } catch (e) {
     // localStorage not available, data will persist only during session
   }
+}
+
+// ============================================
+// CHARACTER MANAGEMENT
+// ============================================
+
+function renderCharacterSelector() {
+  const container = document.getElementById('characterSelector');
+  if (!container) return;
+
+  const currentChar = characters.find(c => c.id === currentCharacterId);
+
+  container.innerHTML = `
+    <select id="characterSelect" onchange="switchCharacter(this.value)">
+      ${characters.map(c => `<option value="${c.id}" ${c.id === currentCharacterId ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
+    </select>
+    <button class="char-btn" onclick="addCharacter()">+</button>
+    <button class="char-btn" onclick="renameCharacter()">Rename</button>
+    ${characters.length > 1 ? `<button class="char-btn delete" onclick="deleteCharacter()">Delete</button>` : ''}
+  `;
+}
+
+function switchCharacter(id) {
+  currentCharacterId = parseInt(id);
+  saveData();
+  renderRoster();
+  renderCharacterSelector();
+
+  // Clear wave selection
+  currentWave = null;
+  document.querySelectorAll('.wave-tab').forEach(tab => tab.classList.remove('active'));
+  const label = document.getElementById('currentWaveLabel');
+  if (label) label.textContent = '';
+}
+
+function addCharacter() {
+  const name = prompt('Enter character name:');
+  if (!name || !name.trim()) return;
+
+  const newChar = {
+    id: Date.now(),
+    name: name.trim(),
+    roster: []
+  };
+  characters.push(newChar);
+  currentCharacterId = newChar.id;
+  saveData();
+  renderRoster();
+  renderCharacterSelector();
+}
+
+function renameCharacter() {
+  const currentChar = characters.find(c => c.id === currentCharacterId);
+  if (!currentChar) return;
+
+  const name = prompt('Enter new name:', currentChar.name);
+  if (!name || !name.trim()) return;
+
+  currentChar.name = name.trim();
+  saveData();
+  renderCharacterSelector();
+}
+
+function deleteCharacter() {
+  if (characters.length <= 1) {
+    alert('Cannot delete the last character');
+    return;
+  }
+
+  const currentChar = characters.find(c => c.id === currentCharacterId);
+  if (!confirm(`Delete character "${currentChar.name}" and all their familiars?`)) return;
+
+  characters = characters.filter(c => c.id !== currentCharacterId);
+  currentCharacterId = characters[0].id;
+  saveData();
+  renderRoster();
+  renderCharacterSelector();
 }
 
 // ============================================
@@ -182,11 +308,12 @@ function searchRosterConditional() {
   const query = document.getElementById('rosterConditionalSearch').value.toLowerCase().trim();
   const resultsContainer = document.getElementById('rosterConditionalResults');
   const selectedRank = document.getElementById('rosterRank').value;
+  const prePatch = document.getElementById('prePatchFam').checked;
   if (!query) { resultsContainer.style.display = 'none'; return; }
 
   const allBonuses = configConditionalBonuses.bonuses || [];
   const matches = allBonuses.filter(b => {
-    if (b.rarity !== selectedRank) return false;
+    if (!prePatch && b.rarity !== selectedRank) return false;
     return b.name.toLowerCase().includes(query) || b.condition.toLowerCase().includes(query);
   });
 
@@ -341,12 +468,14 @@ function freeAllWaves() {
 }
 
 function exportRoster() {
+  const currentChar = characters.find(c => c.id === currentCharacterId);
+  const charName = currentChar ? currentChar.name : 'unknown';
   const data = JSON.stringify(familiarRoster, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'mystic-frontier-roster.json';
+  a.download = `mystic-frontier-${charName.toLowerCase().replace(/\s+/g, '-')}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -888,12 +1017,21 @@ function applyBonusItem(item) {
 function searchCondBonuses() {
   const query = document.getElementById('condBonusSearch').value.toLowerCase().trim();
   const resultsContainer = document.getElementById('condBonusSearchResults');
+  const prePatch = document.getElementById('prePatchCalc').checked;
   if (!query) { resultsContainer.style.display = 'none'; return; }
+
+  // Get current familiar ranks from calculator
+  const calcRanks = [
+    document.getElementById('monster1Rank').value,
+    document.getElementById('monster2Rank').value,
+    document.getElementById('monster3Rank').value
+  ];
 
   // Use pre-flattened bonuses array from loadConfigFiles
   const allBonuses = configConditionalBonuses.bonuses || [];
   const matches = allBonuses.filter(b => {
-    return b.name.toLowerCase().includes(query) || b.condition.toLowerCase().includes(query) || b.rarity.toLowerCase().includes(query);
+    if (!prePatch && !calcRanks.includes(b.rarity)) return false;
+    return b.name.toLowerCase().includes(query) || b.condition.toLowerCase().includes(query);
   });
 
   if (matches.length === 0) {
@@ -1586,6 +1724,7 @@ function escapeHtml(text) {
 // INITIALIZE
 // ============================================
 
+renderCharacterSelector();
 renderBonusItems();
 renderConditionalBonuses();
 renderSavedLineups();

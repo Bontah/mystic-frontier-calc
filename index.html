@@ -147,6 +147,7 @@
       <div class="config-section-title">Bonus Library</div>
       <div class="config-search">
         <input type="text" id="condBonusSearch" placeholder="Search bonuses..." oninput="searchCondBonuses()">
+        <label class="prepatch-label"><input type="checkbox" id="prePatchCalc" onchange="searchCondBonuses()"> Pre-patch fam</label>
       </div>
       <div id="condBonusSearchResults" class="config-results" style="display: none;"></div>
       <div class="config-section-title">Active Conditionals</div>
@@ -308,6 +309,12 @@
 
   <!-- My Roster Page -->
   <div id="page-roster" class="page">
+    <!-- Character Selector -->
+    <div class="character-selector-wrapper">
+      <label>Character:</label>
+      <div id="characterSelector" class="character-selector"></div>
+    </div>
+
     <!-- Familiar Roster Section -->
     <div class="section">
       <h2>My Familiar Roster</h2>
@@ -348,6 +355,7 @@
         </div>
         <div class="roster-conditional-search">
           <input type="text" id="rosterConditionalSearch" placeholder="Search conditional bonus..." oninput="searchRosterConditional()">
+          <label class="prepatch-label"><input type="checkbox" id="prePatchFam" onchange="searchRosterConditional()"> Pre-patch fam</label>
           <div id="rosterConditionalResults" class="config-results" style="display: none;"></div>
           <div id="selectedConditionalDisplay" class="selected-conditional" style="display: none;"></div>
         </div>

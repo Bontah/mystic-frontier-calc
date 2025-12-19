@@ -629,6 +629,60 @@ select:focus, input:focus, textarea:focus {
   margin: 0 0 15px 0;
 }
 
+/* Character Selector */
+.character-selector-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: #1a1a2e;
+  border-radius: 8px;
+}
+
+.character-selector-wrapper > label {
+  font-weight: bold;
+  color: #ffcc00;
+}
+
+.character-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.character-selector select {
+  flex: 1;
+  max-width: 200px;
+}
+
+.char-btn {
+  background: transparent;
+  border: 1px solid #666;
+  color: #888;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.char-btn:hover {
+  background: #66ccff;
+  border-color: #66ccff;
+  color: #1a1a2e;
+}
+
+.char-btn.delete {
+  border-color: #ff4444;
+  color: #ff6666;
+}
+
+.char-btn.delete:hover {
+  background: #ff4444;
+  color: #fff;
+}
+
 /* Familiar Roster Styles */
 .roster-add-form {
   margin-bottom: 15px;
@@ -1085,8 +1139,23 @@ select:focus, input:focus, textarea:focus {
   position: relative;
 }
 
-.roster-conditional-search input {
+.roster-conditional-search input[type="text"] {
   width: 100%;
+}
+
+.prepatch-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #888;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+.prepatch-label input {
+  width: auto;
+  accent-color: #ffcc00;
 }
 
 .roster-conditional-search .config-results {

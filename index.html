@@ -179,26 +179,8 @@
             <option value="Unique">Unique (d6)</option>
             <option value="Legendary">Legendary (d6)</option>
           </select>
-          <select id="rosterElement">
-            <option value="None">None</option>
-            <option value="Fire">Fire</option>
-            <option value="Poison">Poison</option>
-            <option value="Lightning">Lightning</option>
-            <option value="Ice">Ice</option>
-            <option value="Dark">Dark</option>
-            <option value="Holy">Holy</option>
-          </select>
-          <select id="rosterType">
-            <option value="Human">Human</option>
-            <option value="Beast">Beast</option>
-            <option value="Plant">Plant</option>
-            <option value="Aquatic">Aquatic</option>
-            <option value="Fairy">Fairy</option>
-            <option value="Reptile">Reptile</option>
-            <option value="Devil">Devil</option>
-            <option value="Undead">Undead</option>
-            <option value="Machine">Machine</option>
-          </select>
+          <div id="rosterElementContainer"></div>
+          <div id="rosterTypeContainer"></div>
           <button id="rosterAddBtn" class="add-btn" data-action="add-to-roster">Add to Roster</button>
           <button id="rosterCancelBtn" class="cancel-btn" data-action="cancel-edit" style="display: none;">Cancel</button>
         </div>
@@ -542,29 +524,11 @@
         </div>
         <div class="form-group">
           <label>Element</label>
-          <select id="familiarEditElement">
-            <option value="None">None</option>
-            <option value="Fire">Fire</option>
-            <option value="Poison">Poison</option>
-            <option value="Lightning">Lightning</option>
-            <option value="Ice">Ice</option>
-            <option value="Dark">Dark</option>
-            <option value="Holy">Holy</option>
-          </select>
+          <div id="familiarEditElementContainer"></div>
         </div>
         <div class="form-group">
           <label>Type</label>
-          <select id="familiarEditType">
-            <option value="Human">Human</option>
-            <option value="Beast">Beast</option>
-            <option value="Plant">Plant</option>
-            <option value="Aquatic">Aquatic</option>
-            <option value="Fairy">Fairy</option>
-            <option value="Reptile">Reptile</option>
-            <option value="Devil">Devil</option>
-            <option value="Undead">Undead</option>
-            <option value="Machine">Machine</option>
-          </select>
+          <div id="familiarEditTypeContainer"></div>
         </div>
       </div>
       <!-- Conditional Bonus Search - Two Step -->

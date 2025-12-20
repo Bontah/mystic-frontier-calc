@@ -25,3 +25,9 @@ export {
   renderWaveFilters,
   updateRosterList,
 } from './roster-item.js';
+
+export {
+  createIconDropdown,
+  ELEMENT_OPTIONS,
+  TYPE_OPTIONS,
+} from './icon-dropdown.js';

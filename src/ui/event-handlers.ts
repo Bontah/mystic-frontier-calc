@@ -18,13 +18,20 @@ import {
   switchCharacter,
 } from './actions.js';
 import { updateRosterList } from './components/roster-item.js';
+import { createIconDropdown, ELEMENT_OPTIONS, TYPE_OPTIONS } from './components/icon-dropdown.js';
 import { saveState } from '../state/persistence.js';
 import { createConditionalSelector } from './conditional-selector/index.js';
-import type { Wave, Rank, ConditionalBonus, CalcFamiliar } from '../types/index.js';
+import type { Wave, Rank, CalcFamiliar } from '../types/index.js';
 
 // Module-level conditional selector instances
 let modalConditionalSelector: ReturnType<typeof createConditionalSelector> | null = null;
 let rosterConditionalSelector: ReturnType<typeof createConditionalSelector> | null = null;
+
+// Module-level icon dropdown instances
+let modalElementDropdown: ReturnType<typeof createIconDropdown> | null = null;
+let modalTypeDropdown: ReturnType<typeof createIconDropdown> | null = null;
+let rosterElementDropdown: ReturnType<typeof createIconDropdown> | null = null;
+let rosterTypeDropdown: ReturnType<typeof createIconDropdown> | null = null;
 
 /**
  * Setup all event handlers
@@ -36,10 +43,42 @@ export function setupEventHandlers(): void {
   setupDiceEvents();
   setupWaveEvents();
   setupKeyboardShortcuts();
+  setupIconDropdowns();
   setupModalConditionalSelector();
   setupRosterConditionalSelector();
   setupFamiliarModalSave();
   setupRosterFormEvents();
+}
+
+/**
+ * Setup icon dropdowns for element and type selection
+ */
+function setupIconDropdowns(): void {
+  // Modal dropdowns
+  modalElementDropdown = createIconDropdown({
+    containerId: 'familiarEditElementContainer',
+    options: ELEMENT_OPTIONS,
+    defaultValue: 'None',
+  });
+
+  modalTypeDropdown = createIconDropdown({
+    containerId: 'familiarEditTypeContainer',
+    options: TYPE_OPTIONS,
+    defaultValue: 'Human',
+  });
+
+  // Roster form dropdowns
+  rosterElementDropdown = createIconDropdown({
+    containerId: 'rosterElementContainer',
+    options: ELEMENT_OPTIONS,
+    defaultValue: 'None',
+  });
+
+  rosterTypeDropdown = createIconDropdown({
+    containerId: 'rosterTypeContainer',
+    options: TYPE_OPTIONS,
+    defaultValue: 'Human',
+  });
 }
 
 /**
@@ -200,13 +239,13 @@ function openFamiliarModal(slot: number): void {
   // Populate form
   const nameInput = document.getElementById('familiarEditName') as HTMLInputElement;
   const rankSelect = document.getElementById('familiarEditRank') as HTMLSelectElement;
-  const elementSelect = document.getElementById('familiarEditElement') as HTMLSelectElement;
-  const typeSelect = document.getElementById('familiarEditType') as HTMLSelectElement;
 
   if (nameInput) nameInput.value = fam?.name || '';
   if (rankSelect) rankSelect.value = fam?.rank || '';
-  if (elementSelect) elementSelect.value = fam?.element || 'None';
-  if (typeSelect) typeSelect.value = fam?.type || 'Human';
+
+  // Set icon dropdowns
+  modalElementDropdown?.setValue(fam?.element || 'None');
+  modalTypeDropdown?.setValue(fam?.type || 'Human');
 
   // Set conditional if exists
   if (fam?.conditional && modalConditionalSelector) {
@@ -232,15 +271,16 @@ function openRosterEditModal(id: number): void {
   // Populate inline form with familiar data
   const nameInput = document.getElementById('rosterName') as HTMLInputElement;
   const rankSelect = document.getElementById('rosterRank') as HTMLSelectElement;
-  const elementSelect = document.getElementById('rosterElement') as HTMLSelectElement;
-  const typeSelect = document.getElementById('rosterType') as HTMLSelectElement;
   const cancelBtn = document.getElementById('rosterCancelBtn') as HTMLElement;
   const addBtn = document.getElementById('rosterAddBtn') as HTMLElement;
 
   if (nameInput) nameInput.value = familiar.name;
   if (rankSelect) rankSelect.value = familiar.rank;
-  if (elementSelect) elementSelect.value = familiar.element;
-  if (typeSelect) typeSelect.value = familiar.type;
+
+  // Set icon dropdowns
+  rosterElementDropdown?.setValue(familiar.element);
+  rosterTypeDropdown?.setValue(familiar.type);
+
   if (cancelBtn) cancelBtn.style.display = 'inline-block';
   if (addBtn) addBtn.textContent = 'Save Changes';
 
@@ -482,8 +522,6 @@ function saveFamiliarFromModal(): void {
   const slotInput = document.getElementById('familiarEditSlot') as HTMLInputElement;
   const nameInput = document.getElementById('familiarEditName') as HTMLInputElement;
   const rankSelect = document.getElementById('familiarEditRank') as HTMLSelectElement;
-  const elementSelect = document.getElementById('familiarEditElement') as HTMLSelectElement;
-  const typeSelect = document.getElementById('familiarEditType') as HTMLSelectElement;
 
   if (!slotInput || !rankSelect) return;
 
@@ -498,8 +536,8 @@ function saveFamiliarFromModal(): void {
   const familiar: CalcFamiliar = {
     name: nameInput?.value || `Familiar ${slot + 1}`,
     rank,
-    element: (elementSelect?.value || 'None') as CalcFamiliar['element'],
-    type: (typeSelect?.value || 'Human') as CalcFamiliar['type'],
+    element: (modalElementDropdown?.getValue() || 'None') as CalcFamiliar['element'],
+    type: (modalTypeDropdown?.getValue() || 'Human') as CalcFamiliar['type'],
     conditional: modalConditionalSelector?.getSelected() ?? null,
   };
 
@@ -536,14 +574,15 @@ function setupRosterFormEvents(): void {
 function addFamiliarFromRosterForm(): void {
   const nameInput = document.getElementById('rosterName') as HTMLInputElement;
   const rankSelect = document.getElementById('rosterRank') as HTMLSelectElement;
-  const elementSelect = document.getElementById('rosterElement') as HTMLSelectElement;
-  const typeSelect = document.getElementById('rosterType') as HTMLSelectElement;
 
   const name = nameInput?.value?.trim();
   if (!name) {
     alert('Please enter a familiar name');
     return;
   }
+
+  const element = (rosterElementDropdown?.getValue() || 'None') as CalcFamiliar['element'];
+  const type = (rosterTypeDropdown?.getValue() || 'Human') as CalcFamiliar['type'];
 
   const state = store.getState();
   const editingId = state.editingFamiliarId;
@@ -562,8 +601,8 @@ function addFamiliarFromRosterForm(): void {
         ...roster[famIdx],
         name,
         rank: rankSelect.value as Rank,
-        element: elementSelect.value as CalcFamiliar['element'],
-        type: typeSelect.value as CalcFamiliar['type'],
+        element,
+        type,
         conditional: rosterConditionalSelector?.getSelected() ?? null,
       };
       characters[charIdx].roster = roster;
@@ -576,8 +615,8 @@ function addFamiliarFromRosterForm(): void {
     addFamiliarToRoster({
       name,
       rank: rankSelect.value as Rank,
-      element: elementSelect.value as CalcFamiliar['element'],
-      type: typeSelect.value as CalcFamiliar['type'],
+      element,
+      type,
       conditional: rosterConditionalSelector?.getSelected() ?? null,
     });
   }
@@ -600,17 +639,17 @@ function cancelRosterEdit(): void {
 function clearRosterForm(): void {
   const nameInput = document.getElementById('rosterName') as HTMLInputElement;
   const rankSelect = document.getElementById('rosterRank') as HTMLSelectElement;
-  const elementSelect = document.getElementById('rosterElement') as HTMLSelectElement;
-  const typeSelect = document.getElementById('rosterType') as HTMLSelectElement;
   const cancelBtn = document.getElementById('rosterCancelBtn') as HTMLElement;
   const addBtn = document.getElementById('rosterAddBtn') as HTMLElement;
 
   if (nameInput) nameInput.value = '';
   if (rankSelect) rankSelect.value = 'Common';
-  if (elementSelect) elementSelect.value = 'None';
-  if (typeSelect) typeSelect.value = 'Human';
   if (cancelBtn) cancelBtn.style.display = 'none';
   if (addBtn) addBtn.textContent = 'Add to Roster';
+
+  // Reset icon dropdowns
+  rosterElementDropdown?.setValue('None');
+  rosterTypeDropdown?.setValue('Human');
 
   rosterConditionalSelector?.clear();
 }

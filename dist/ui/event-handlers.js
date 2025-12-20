@@ -6,11 +6,17 @@ import { store, selectors } from '../state/store.js';
 import { setupNavigation } from './navigation.js';
 import { calculate, setCalcFamiliar, deleteCalcFamiliar, resetAllFamiliars, loadWave, saveToCurrentWave, addFamiliarToRoster, deleteFamiliarFromRoster, toggleFamiliarDisabled, switchCharacter, } from './actions.js';
 import { updateRosterList } from './components/roster-item.js';
+import { createIconDropdown, ELEMENT_OPTIONS, TYPE_OPTIONS } from './components/icon-dropdown.js';
 import { saveState } from '../state/persistence.js';
 import { createConditionalSelector } from './conditional-selector/index.js';
 // Module-level conditional selector instances
 let modalConditionalSelector = null;
 let rosterConditionalSelector = null;
+// Module-level icon dropdown instances
+let modalElementDropdown = null;
+let modalTypeDropdown = null;
+let rosterElementDropdown = null;
+let rosterTypeDropdown = null;
 /**
  * Setup all event handlers
  */
@@ -21,10 +27,38 @@ export function setupEventHandlers() {
     setupDiceEvents();
     setupWaveEvents();
     setupKeyboardShortcuts();
+    setupIconDropdowns();
     setupModalConditionalSelector();
     setupRosterConditionalSelector();
     setupFamiliarModalSave();
     setupRosterFormEvents();
+}
+/**
+ * Setup icon dropdowns for element and type selection
+ */
+function setupIconDropdowns() {
+    // Modal dropdowns
+    modalElementDropdown = createIconDropdown({
+        containerId: 'familiarEditElementContainer',
+        options: ELEMENT_OPTIONS,
+        defaultValue: 'None',
+    });
+    modalTypeDropdown = createIconDropdown({
+        containerId: 'familiarEditTypeContainer',
+        options: TYPE_OPTIONS,
+        defaultValue: 'Human',
+    });
+    // Roster form dropdowns
+    rosterElementDropdown = createIconDropdown({
+        containerId: 'rosterElementContainer',
+        options: ELEMENT_OPTIONS,
+        defaultValue: 'None',
+    });
+    rosterTypeDropdown = createIconDropdown({
+        containerId: 'rosterTypeContainer',
+        options: TYPE_OPTIONS,
+        defaultValue: 'Human',
+    });
 }
 /**
  * Setup calculator-related events
@@ -167,16 +201,13 @@ function openFamiliarModal(slot) {
     // Populate form
     const nameInput = document.getElementById('familiarEditName');
     const rankSelect = document.getElementById('familiarEditRank');
-    const elementSelect = document.getElementById('familiarEditElement');
-    const typeSelect = document.getElementById('familiarEditType');
     if (nameInput)
         nameInput.value = fam?.name || '';
     if (rankSelect)
         rankSelect.value = fam?.rank || '';
-    if (elementSelect)
-        elementSelect.value = fam?.element || 'None';
-    if (typeSelect)
-        typeSelect.value = fam?.type || 'Human';
+    // Set icon dropdowns
+    modalElementDropdown?.setValue(fam?.element || 'None');
+    modalTypeDropdown?.setValue(fam?.type || 'Human');
     // Set conditional if exists
     if (fam?.conditional && modalConditionalSelector) {
         modalConditionalSelector.setSelected(fam.conditional);
@@ -198,18 +229,15 @@ function openRosterEditModal(id) {
     // Populate inline form with familiar data
     const nameInput = document.getElementById('rosterName');
     const rankSelect = document.getElementById('rosterRank');
-    const elementSelect = document.getElementById('rosterElement');
-    const typeSelect = document.getElementById('rosterType');
     const cancelBtn = document.getElementById('rosterCancelBtn');
     const addBtn = document.getElementById('rosterAddBtn');
     if (nameInput)
         nameInput.value = familiar.name;
     if (rankSelect)
         rankSelect.value = familiar.rank;
-    if (elementSelect)
-        elementSelect.value = familiar.element;
-    if (typeSelect)
-        typeSelect.value = familiar.type;
+    // Set icon dropdowns
+    rosterElementDropdown?.setValue(familiar.element);
+    rosterTypeDropdown?.setValue(familiar.type);
     if (cancelBtn)
         cancelBtn.style.display = 'inline-block';
     if (addBtn)
@@ -431,8 +459,6 @@ function saveFamiliarFromModal() {
     const slotInput = document.getElementById('familiarEditSlot');
     const nameInput = document.getElementById('familiarEditName');
     const rankSelect = document.getElementById('familiarEditRank');
-    const elementSelect = document.getElementById('familiarEditElement');
-    const typeSelect = document.getElementById('familiarEditType');
     if (!slotInput || !rankSelect)
         return;
     const slot = parseInt(slotInput.value);
@@ -444,8 +470,8 @@ function saveFamiliarFromModal() {
     const familiar = {
         name: nameInput?.value || `Familiar ${slot + 1}`,
         rank,
-        element: (elementSelect?.value || 'None'),
-        type: (typeSelect?.value || 'Human'),
+        element: (modalElementDropdown?.getValue() || 'None'),
+        type: (modalTypeDropdown?.getValue() || 'Human'),
         conditional: modalConditionalSelector?.getSelected() ?? null,
     };
     setCalcFamiliar(slot, familiar);
@@ -477,13 +503,13 @@ function setupRosterFormEvents() {
 function addFamiliarFromRosterForm() {
     const nameInput = document.getElementById('rosterName');
     const rankSelect = document.getElementById('rosterRank');
-    const elementSelect = document.getElementById('rosterElement');
-    const typeSelect = document.getElementById('rosterType');
     const name = nameInput?.value?.trim();
     if (!name) {
         alert('Please enter a familiar name');
         return;
     }
+    const element = (rosterElementDropdown?.getValue() || 'None');
+    const type = (rosterTypeDropdown?.getValue() || 'Human');
     const state = store.getState();
     const editingId = state.editingFamiliarId;
     if (editingId) {
@@ -499,8 +525,8 @@ function addFamiliarFromRosterForm() {
                 ...roster[famIdx],
                 name,
                 rank: rankSelect.value,
-                element: elementSelect.value,
-                type: typeSelect.value,
+                element,
+                type,
                 conditional: rosterConditionalSelector?.getSelected() ?? null,
             };
             characters[charIdx].roster = roster;
@@ -514,8 +540,8 @@ function addFamiliarFromRosterForm() {
         addFamiliarToRoster({
             name,
             rank: rankSelect.value,
-            element: elementSelect.value,
-            type: typeSelect.value,
+            element,
+            type,
             conditional: rosterConditionalSelector?.getSelected() ?? null,
         });
     }
@@ -535,22 +561,19 @@ function cancelRosterEdit() {
 function clearRosterForm() {
     const nameInput = document.getElementById('rosterName');
     const rankSelect = document.getElementById('rosterRank');
-    const elementSelect = document.getElementById('rosterElement');
-    const typeSelect = document.getElementById('rosterType');
     const cancelBtn = document.getElementById('rosterCancelBtn');
     const addBtn = document.getElementById('rosterAddBtn');
     if (nameInput)
         nameInput.value = '';
     if (rankSelect)
         rankSelect.value = 'Common';
-    if (elementSelect)
-        elementSelect.value = 'None';
-    if (typeSelect)
-        typeSelect.value = 'Human';
     if (cancelBtn)
         cancelBtn.style.display = 'none';
     if (addBtn)
         addBtn.textContent = 'Add to Roster';
+    // Reset icon dropdowns
+    rosterElementDropdown?.setValue('None');
+    rosterTypeDropdown?.setValue('Human');
     rosterConditionalSelector?.clear();
 }
 /**

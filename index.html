@@ -36,6 +36,7 @@
           <input type="text" id="monster1Name" class="familiar-name-input" placeholder="Name (optional)">
           <label style="margin-top: 10px;">Fam. 1 Rank</label>
           <select id="monster1Rank" onchange="onRankChange(1)">
+            <option value="">-- Select Rank --</option>
             <option value="Common">Common (d3)</option>
             <option value="Rare">Rare (d4)</option>
             <option value="Epic">Epic (d5)</option>
@@ -70,6 +71,7 @@
           <input type="text" id="monster2Name" class="familiar-name-input" placeholder="Name (optional)">
           <label style="margin-top: 10px;">Fam. 2 Rank</label>
           <select id="monster2Rank" onchange="onRankChange(2)">
+            <option value="">-- Select Rank --</option>
             <option value="Common">Common (d3)</option>
             <option value="Rare">Rare (d4)</option>
             <option value="Epic">Epic (d5)</option>
@@ -104,6 +106,7 @@
           <input type="text" id="monster3Name" class="familiar-name-input" placeholder="Name (optional)">
           <label style="margin-top: 10px;">Fam. 3 Rank</label>
           <select id="monster3Rank" onchange="onRankChange(3)">
+            <option value="">-- Select Rank --</option>
             <option value="Common">Common (d3)</option>
             <option value="Rare">Rare (d4)</option>
             <option value="Epic">Epic (d5)</option>
@@ -554,7 +557,7 @@
           <li>Upload the screenshot to the Image Scanner</li>
           <li>The scanner will extract: Name, Rank, Element, Type, and Conditional bonus</li>
           <li>Review and adjust the extracted data if needed</li>
-          <li>Click "Confirm & Fill Form" to add to your roster</li>
+          <li>Click "Add to Roster" to add directly, or "Fill Form" to review first</li>
         </ol>
         <p><strong>How to capture the card in-game:</strong></p>
         <div class="howtouse-images">
@@ -685,7 +688,8 @@
       </details>
 
       <div class="modal-actions">
-        <button class="add-btn" onclick="confirmExtraction()">Add to Roster</button>
+        <button class="add-btn" onclick="addToRosterFromScan()">Add to Roster</button>
+        <button class="secondary-btn" onclick="confirmExtraction()">Fill Form</button>
         <button class="cancel-btn" onclick="closeExtractionModal()">Cancel</button>
       </div>
     </div>

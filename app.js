@@ -101,20 +101,40 @@ function loadWave(waveNum) {
   currentWave = waveNum;
 
   if (waveFamiliars.length === 0) {
-    // No familiars assigned to this wave
+    // No familiars assigned to this wave - clear the form
     label.textContent = `(Wave ${waveNum} - Empty)`;
+    for (let i = 1; i <= 3; i++) {
+      document.getElementById(`monster${i}Name`).value = '';
+      document.getElementById(`monster${i}Rank`).value = '';
+      document.getElementById(`monster${i}Element`).value = 'None';
+      document.getElementById(`monster${i}Type`).value = 'Human';
+    }
+    conditionalBonuses = [];
+    saveData();
+    renderConditionalBonuses();
+    for (let i = 1; i <= 3; i++) {
+      updateDiceOptions(i);
+    }
+    calculate();
     return;
   }
 
   // Load familiars into calculator
-  waveFamiliars.forEach((fam, i) => {
-    if (i < 3) {
-      document.getElementById(`monster${i + 1}Name`).value = fam.name || '';
-      document.getElementById(`monster${i + 1}Rank`).value = fam.rank;
-      document.getElementById(`monster${i + 1}Element`).value = fam.element;
-      document.getElementById(`monster${i + 1}Type`).value = fam.type;
+  for (let i = 1; i <= 3; i++) {
+    const fam = waveFamiliars[i - 1];
+    if (fam) {
+      document.getElementById(`monster${i}Name`).value = fam.name || '';
+      document.getElementById(`monster${i}Rank`).value = fam.rank;
+      document.getElementById(`monster${i}Element`).value = fam.element;
+      document.getElementById(`monster${i}Type`).value = fam.type;
+    } else {
+      // Clear slot if no familiar for this position
+      document.getElementById(`monster${i}Name`).value = '';
+      document.getElementById(`monster${i}Rank`).value = '';
+      document.getElementById(`monster${i}Element`).value = 'None';
+      document.getElementById(`monster${i}Type`).value = 'Human';
     }
-  });
+  }
 
   // Load conditionals from wave familiars
   conditionalBonuses = [];
@@ -3259,6 +3279,48 @@ const ImageScanner = {
     ctx.fillText(`Border: RGB(${croppedData.borderColor.r}, ${croppedData.borderColor.g}, ${croppedData.borderColor.b})`, 5, 32);
   }
 };
+
+function addToRosterFromScan() {
+  // Get extracted values directly from modal
+  const name = document.getElementById('extractedName').value.trim();
+  const rank = document.getElementById('extractedRank').value;
+  const element = document.getElementById('extractedElement').value;
+  const type = document.getElementById('extractedType').value;
+  const conditionalSelect = document.getElementById('extractedConditionalMatch');
+
+  // Parse conditional if selected
+  let conditional = null;
+  if (conditionalSelect.value) {
+    try {
+      conditional = JSON.parse(conditionalSelect.value);
+    } catch (e) {
+      console.error('Failed to parse conditional:', e);
+    }
+  }
+
+  // Create and add familiar directly
+  const familiar = {
+    id: Date.now(),
+    name,
+    rank,
+    element,
+    type,
+    conditional: conditional ? { ...conditional } : null
+  };
+  familiarRoster.unshift(familiar);
+
+  saveData();
+  renderRoster();
+
+  // Close modal
+  closeExtractionModal();
+
+  // Show brief confirmation
+  const rosterContainer = document.getElementById('rosterList');
+  if (rosterContainer) {
+    rosterContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
 
 function confirmExtraction() {
   const modal = document.getElementById('extractionModal');

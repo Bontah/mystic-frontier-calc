@@ -576,6 +576,47 @@ h2 {
 .bonus-pill.rarity-unique .pill-rarity { color: #ff8000; }
 .bonus-pill.rarity-legendary .pill-rarity { color: #1eff00; }
 
+/* Rank-based pill colors */
+.bonus-pill.common {
+  border-color: #9d9d9d;
+  background: rgba(157, 157, 157, 0.15);
+}
+.bonus-pill.common:hover {
+  background: rgba(157, 157, 157, 0.25);
+}
+
+.bonus-pill.rare {
+  border-color: #0070dd;
+  background: rgba(0, 112, 221, 0.15);
+}
+.bonus-pill.rare:hover {
+  background: rgba(0, 112, 221, 0.25);
+}
+
+.bonus-pill.epic {
+  border-color: #a335ee;
+  background: rgba(163, 53, 238, 0.15);
+}
+.bonus-pill.epic:hover {
+  background: rgba(163, 53, 238, 0.25);
+}
+
+.bonus-pill.unique {
+  border-color: #ff8000;
+  background: rgba(255, 128, 0, 0.15);
+}
+.bonus-pill.unique:hover {
+  background: rgba(255, 128, 0, 0.25);
+}
+
+.bonus-pill.legendary {
+  border-color: #1eff00;
+  background: rgba(30, 255, 0, 0.15);
+}
+.bonus-pill.legendary:hover {
+  background: rgba(30, 255, 0, 0.25);
+}
+
 .bonus-pill.bugged {
   opacity: 0.6;
   border-style: dashed;
@@ -2939,22 +2980,18 @@ select:focus, input:focus, textarea:focus {
 }
 
 .icon-dropdown-options {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
+  position: fixed;
   background: rgba(25, 25, 45, 0.98);
   border: 1px solid var(--accent-primary);
   border-top: none;
   border-radius: 0 0 var(--radius-md) var(--radius-md);
   max-height: 200px;
   overflow-y: auto;
-  z-index: 100;
   display: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.icon-dropdown.open .icon-dropdown-options {
+.icon-dropdown-options.open {
   display: block;
 }
 
@@ -3000,4 +3037,17 @@ select:focus, input:focus, textarea:focus {
 
 .icon-dropdown-options::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+/* Conditional label row - label and checkbox side by side */
+.conditional-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.conditional-label-row > label:first-child {
+  font-weight: 500;
+  color: var(--text-primary);
 }

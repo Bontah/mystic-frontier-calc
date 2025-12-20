@@ -71,7 +71,8 @@ export function createIconDropdown(config: IconDropdownConfig): {
   optionsList.className = 'icon-dropdown-options';
 
   wrapper.appendChild(selected);
-  wrapper.appendChild(optionsList);
+  // Append options to body for proper overflow handling
+  document.body.appendChild(optionsList);
 
   // Render selected option
   function renderSelected(): void {
@@ -103,16 +104,31 @@ export function createIconDropdown(config: IconDropdownConfig): {
       .join('');
   }
 
+  // Position the dropdown options relative to the selected element
+  function positionOptions(): void {
+    const rect = selected.getBoundingClientRect();
+    optionsList.style.position = 'fixed';
+    optionsList.style.top = `${rect.bottom}px`;
+    optionsList.style.left = `${rect.left}px`;
+    optionsList.style.width = `${rect.width}px`;
+    optionsList.style.zIndex = '10000';
+  }
+
   // Toggle dropdown
   function toggle(): void {
     isOpen = !isOpen;
     wrapper.classList.toggle('open', isOpen);
+    optionsList.classList.toggle('open', isOpen);
+    if (isOpen) {
+      positionOptions();
+    }
   }
 
   // Close dropdown
   function close(): void {
     isOpen = false;
     wrapper.classList.remove('open');
+    optionsList.classList.remove('open');
   }
 
   // Select option
@@ -164,6 +180,7 @@ export function createIconDropdown(config: IconDropdownConfig): {
     destroy: () => {
       document.removeEventListener('click', closeHandler);
       wrapper.remove();
+      optionsList.remove();
     },
   };
 }

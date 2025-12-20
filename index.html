@@ -185,8 +185,11 @@
           <button id="rosterCancelBtn" class="cancel-btn" data-action="cancel-edit" style="display: none;">Cancel</button>
         </div>
         <div class="roster-conditional-search">
+          <div class="conditional-label-row">
+            <label>Conditional Bonus</label>
+            <label class="prepatch-label"><input type="checkbox" id="prePatchFam"> Pre-patch</label>
+          </div>
           <input type="text" id="rosterConditionalSearch" placeholder="Search condition (e.g. Fire, Beast, dice)...">
-          <label class="prepatch-label"><input type="checkbox" id="prePatchFam"> Pre-patch fam</label>
           <div id="rosterConditionalResults" class="config-results" style="display: none;"></div>
           <!-- Step 2: Select bonus variant -->
           <div id="rosterBonusVariantSection" class="bonus-variant-section" style="display: none;">
@@ -533,11 +536,13 @@
       </div>
       <!-- Conditional Bonus Search - Two Step -->
       <div class="modal-conditional-section">
-        <label>Conditional Bonus</label>
+        <div class="conditional-label-row">
+          <label>Conditional Bonus</label>
+          <label class="prepatch-label"><input type="checkbox" id="modalPrePatch"> Pre-patch</label>
+        </div>
         <!-- Step 1: Search for condition trigger -->
         <div class="modal-conditional-search">
           <input type="text" id="modalCondSearch" placeholder="Search condition (e.g. Fire, Beast, dice)...">
-          <label class="prepatch-label"><input type="checkbox" id="modalPrePatch"> Pre-patch</label>
         </div>
         <div id="modalCondResults" class="config-results" style="display: none;"></div>
         <!-- Step 2: Select bonus variant (appears after trigger selection) -->

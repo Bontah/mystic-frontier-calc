@@ -2805,12 +2805,22 @@ select:focus, input:focus, textarea:focus {
     flex: 1 1 calc(50% - 4px);
   }
 
-  .monster-row, .dice-row {
+  .monster-row {
     gap: var(--spacing-sm);
   }
 
-  .monster-group, .dice-group {
+  .monster-group {
     min-width: 140px;
+  }
+
+  .dice-row {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .dice-group {
+    flex: none;
+    width: 100%;
   }
 
   .roster-list {
@@ -2892,7 +2902,7 @@ select:focus, input:focus, textarea:focus {
     min-height: auto;
   }
 
-  /* Stack monster groups, keep dice horizontal */
+  /* Stack monster groups vertically */
   .monster-row {
     flex-direction: column;
     gap: var(--spacing-md);
@@ -2900,14 +2910,6 @@ select:focus, input:focus, textarea:focus {
 
   .monster-group {
     min-width: 100%;
-  }
-
-  .dice-row {
-    flex-wrap: nowrap;
-  }
-
-  .dice-group {
-    min-width: 0;
   }
 
   /* Reduce section padding */

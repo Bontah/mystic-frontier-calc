@@ -26,9 +26,7 @@ function calculateItemBonuses(items: BonusItem[]): {
 
   for (const item of items) {
     flat += item.flatBonus || 0;
-    if (item.multiplierBonus !== 0 && item.multiplierBonus !== 1) {
-      multiplier += item.multiplierBonus;
-    }
+    multiplier += item.multiplierBonus || 0;
   }
 
   return { flat, multiplier };

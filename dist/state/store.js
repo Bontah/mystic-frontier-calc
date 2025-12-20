@@ -9,6 +9,11 @@ function createInitialState() {
     return {
         calcFamiliars: [null, null, null],
         currentWave: null,
+        savedWaves: {
+            1: [null, null, null],
+            2: [null, null, null],
+            3: [null, null, null],
+        },
         bonusItems: [],
         conditionalBonuses: [],
         characters: [],

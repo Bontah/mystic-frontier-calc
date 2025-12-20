@@ -4,7 +4,7 @@
  */
 
 import { store } from './store.js';
-import type { AppState } from './store.js';
+import type { AppState, SavedWaves } from './store.js';
 import type { Character, ConditionalBonus, Familiar } from '../types/index.js';
 import type { BonusItem } from '../types/bonus.js';
 
@@ -13,6 +13,7 @@ const STORAGE_KEYS = {
   CONDITIONAL_BONUSES: 'conditionalBonuses',
   CHARACTERS: 'characters',
   CURRENT_CHARACTER_ID: 'currentCharacterId',
+  SAVED_WAVES: 'savedWaves',
   // Legacy key for migration
   FAMILIAR_ROSTER: 'familiarRoster',
 } as const;
@@ -113,6 +114,15 @@ function ensureDefaultCharacter(characters: Character[]): {
 }
 
 /**
+ * Default empty waves
+ */
+const defaultSavedWaves: SavedWaves = {
+  1: [null, null, null],
+  2: [null, null, null],
+  3: [null, null, null],
+};
+
+/**
  * Load persisted state from localStorage
  */
 export function loadPersistedState(): Partial<AppState> {
@@ -121,6 +131,7 @@ export function loadPersistedState(): Partial<AppState> {
     STORAGE_KEYS.CONDITIONAL_BONUSES,
     []
   );
+  const savedWaves = safeGetItem<SavedWaves>(STORAGE_KEYS.SAVED_WAVES, defaultSavedWaves);
 
   let characters = safeGetItem<Character[]>(STORAGE_KEYS.CHARACTERS, []);
   let currentCharacterId = safeGetItem<number | null>(
@@ -143,6 +154,7 @@ export function loadPersistedState(): Partial<AppState> {
   return {
     bonusItems,
     conditionalBonuses,
+    savedWaves,
     characters,
     currentCharacterId,
   };
@@ -156,6 +168,7 @@ export function saveState(): void {
 
   safeSetItem(STORAGE_KEYS.BONUS_ITEMS, state.bonusItems);
   safeSetItem(STORAGE_KEYS.CONDITIONAL_BONUSES, state.conditionalBonuses);
+  safeSetItem(STORAGE_KEYS.SAVED_WAVES, state.savedWaves);
   safeSetItem(STORAGE_KEYS.CHARACTERS, state.characters);
   safeSetItem(STORAGE_KEYS.CURRENT_CHARACTER_ID, state.currentCharacterId);
 }

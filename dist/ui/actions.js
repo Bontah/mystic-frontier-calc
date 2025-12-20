@@ -10,6 +10,7 @@ import { renderRerollSuggestions } from './components/reroll-display.js';
 import { updateFamiliarsGrid } from './components/familiar-card.js';
 import { updateRosterList } from './components/roster-item.js';
 import { escapeHtml } from '../utils/html.js';
+import { showToast } from './toast.js';
 /**
  * Get current dice values from the DOM
  */
@@ -162,75 +163,40 @@ export function resetAllFamiliars() {
         label.textContent = '';
 }
 /**
+ * Save current lineup to a specific wave
+ */
+export function saveToWave(wave) {
+    const state = store.getState();
+    // Copy current calculator familiars to the wave slot
+    const savedWaves = {
+        ...state.savedWaves,
+        [wave]: [...state.calcFamiliars],
+    };
+    store.setState({ savedWaves, currentWave: wave });
+    saveState();
+    // Update wave label
+    const label = document.getElementById('currentWaveLabel');
+    if (label)
+        label.textContent = `(Wave ${wave})`;
+    // Show toast notification
+    showToast(`Saved to Wave ${wave}`);
+}
+/**
  * Load a wave lineup into calculator
  */
 export function loadWave(wave) {
     const state = store.getState();
-    const roster = selectors.getCurrentRoster(state);
-    const waveFamiliars = roster.filter((f) => f.wave === wave && !f.disabled);
-    // Take first 3 familiars from wave
-    const calcFamiliars = [null, null, null];
-    waveFamiliars.slice(0, 3).forEach((fam, idx) => {
-        calcFamiliars[idx] = {
-            name: fam.name,
-            rank: fam.rank,
-            element: fam.element,
-            type: fam.type,
-            conditional: fam.conditional,
-        };
-    });
+    // Load from saved waves
+    const calcFamiliars = [...state.savedWaves[wave]];
     store.setState({
         calcFamiliars,
         currentWave: wave,
     });
     updateFamiliarsGrid(calcFamiliars);
-    // Update wave tabs
-    document.querySelectorAll('.wave-tab').forEach((tab) => {
-        tab.classList.remove('active');
-        if (tab.classList.contains(`wave-${wave}`)) {
-            tab.classList.add('active');
-        }
-    });
     const label = document.getElementById('currentWaveLabel');
     if (label)
         label.textContent = `(Wave ${wave})`;
     calculate();
-}
-/**
- * Save current lineup to wave
- */
-export function saveToCurrentWave() {
-    const state = store.getState();
-    const wave = state.currentWave;
-    if (!wave) {
-        alert('Please select a wave first');
-        return;
-    }
-    // Get current character
-    const charIdx = state.characters.findIndex((c) => c.id === state.currentCharacterId);
-    if (charIdx === -1)
-        return;
-    // Update roster - assign current familiars to this wave
-    const characters = [...state.characters];
-    const roster = [...characters[charIdx].roster];
-    // First, unassign all familiars from this wave
-    roster.forEach((f) => {
-        if (f.wave === wave) {
-            f.wave = null;
-        }
-    });
-    // Then assign new familiars (matching by name for simplicity)
-    state.calcFamiliars.forEach((calcFam) => {
-        if (calcFam) {
-            const rosterFam = roster.find((f) => f.name === calcFam.name);
-            if (rosterFam) {
-                rosterFam.wave = wave;
-            }
-        }
-    });
-    characters[charIdx].roster = roster;
-    store.setState({ characters });
-    saveState();
 }
 /**
  * Add familiar to roster

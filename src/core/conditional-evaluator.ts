@@ -64,16 +64,10 @@ export function evaluateConditionalBonus(
     return { isActive: false, flatBonus: 0, multiplierBonus: 0 };
   }
 
-  // Normalize multiplier - 0 and 1 mean "no multiplier"
-  const multiplier =
-    bonus.multiplierBonus !== 0 && bonus.multiplierBonus !== 1
-      ? bonus.multiplierBonus
-      : 0;
-
   return {
     isActive: true,
     flatBonus: bonus.flatBonus || 0,
-    multiplierBonus: multiplier,
+    multiplierBonus: bonus.multiplierBonus || 0,
   };
 }
 

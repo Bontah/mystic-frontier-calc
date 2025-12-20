@@ -23,7 +23,6 @@
     <div class="section">
       <div class="familiars-header">
         <h2>Familiars <span id="currentWaveLabel"></span></h2>
-        <button class="reset-all-btn" data-action="reset-all">Reset All</button>
       </div>
       <div class="familiars-layout">
         <!-- Left: Stacked Familiars -->
@@ -32,13 +31,22 @@
         </div>
         <!-- Right: Waves -->
         <div class="waves-panel">
-          <div class="waves-header">Expedition Waves</div>
-          <div class="wave-buttons">
-            <button class="wave-tab wave-1">Wave 1</button>
-            <button class="wave-tab wave-2">Wave 2</button>
-            <button class="wave-tab wave-3">Wave 3</button>
+          <div class="waves-header-row">
+            <div class="waves-header">Expedition Waves</div>
+            <button class="reset-all-btn" data-action="reset-all">Reset</button>
           </div>
-          <button class="save-wave-btn" data-action="save-wave">Save to Wave</button>
+          <div class="wave-row wave-1">
+            <button class="load-wave-btn" data-action="load-wave" data-wave="1">Load Wave 1</button>
+            <button class="save-wave-btn" data-action="save-wave" data-wave="1">Save Wave 1</button>
+          </div>
+          <div class="wave-row wave-2">
+            <button class="load-wave-btn" data-action="load-wave" data-wave="2">Load Wave 2</button>
+            <button class="save-wave-btn" data-action="save-wave" data-wave="2">Save Wave 2</button>
+          </div>
+          <div class="wave-row wave-3">
+            <button class="load-wave-btn" data-action="load-wave" data-wave="3">Load Wave 3</button>
+            <button class="save-wave-btn" data-action="save-wave" data-wave="3">Save Wave 3</button>
+          </div>
         </div>
       </div>
     </div>
@@ -565,6 +573,21 @@
       </div>
     </div>
   </div>
+
+  <!-- Reset Confirmation Modal -->
+  <div id="resetConfirmModal" class="modal" style="display: none;">
+    <div class="modal-content confirm-modal">
+      <h3>Reset All Waves</h3>
+      <p>Are you sure you want to clear all 3 waves? This will remove all familiars from every wave.</p>
+      <div class="modal-actions">
+        <button class="cancel-btn" data-action="close-modal">Cancel</button>
+        <button class="delete-btn" data-action="confirm-reset">Reset All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
 
   <footer class="site-footer">
     <span>Built by <strong>Bonta</strong> · EU - Luna</span>

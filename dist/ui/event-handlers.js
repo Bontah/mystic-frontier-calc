@@ -4,7 +4,7 @@
  */
 import { store, selectors } from '../state/store.js';
 import { setupNavigation } from './navigation.js';
-import { calculate, setCalcFamiliar, deleteCalcFamiliar, resetAllFamiliars, loadWave, saveToCurrentWave, addFamiliarToRoster, deleteFamiliarFromRoster, toggleFamiliarDisabled, switchCharacter, deleteBonusItem, searchBonusItems, applyBonusItemFromSearch, renderBonusItemsList, } from './actions.js';
+import { calculate, setCalcFamiliar, deleteCalcFamiliar, resetAllFamiliars, loadWave, saveToWave, addFamiliarToRoster, deleteFamiliarFromRoster, toggleFamiliarDisabled, switchCharacter, deleteBonusItem, searchBonusItems, applyBonusItemFromSearch, renderBonusItemsList, } from './actions.js';
 import { updateRosterList } from './components/roster-item.js';
 import { createIconDropdown, RANK_OPTIONS, ELEMENT_OPTIONS, TYPE_OPTIONS } from './components/icon-dropdown.js';
 import { saveState } from '../state/persistence.js';
@@ -112,10 +112,26 @@ function setupCalculatorEvents() {
             }
         });
     }
-    // Reset all button
+    // Reset all button - show confirmation modal
     const resetBtn = document.querySelector('[data-action="reset-all"]');
     if (resetBtn) {
-        resetBtn.addEventListener('click', resetAllFamiliars);
+        resetBtn.addEventListener('click', () => {
+            const modal = document.getElementById('resetConfirmModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        });
+    }
+    // Confirm reset button
+    const confirmResetBtn = document.querySelector('[data-action="confirm-reset"]');
+    if (confirmResetBtn) {
+        confirmResetBtn.addEventListener('click', () => {
+            resetAllFamiliars();
+            const modal = document.getElementById('resetConfirmModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
     }
     // Difficulty change
     const difficultyInput = document.getElementById('difficulty');
@@ -178,23 +194,30 @@ function setupDiceEvents() {
  * Setup wave-related events
  */
 function setupWaveEvents() {
-    // Wave tabs
-    document.querySelectorAll('.wave-tab').forEach((tab) => {
-        tab.addEventListener('click', () => {
-            const waveClass = Array.from(tab.classList).find((c) => c.startsWith('wave-'));
-            if (waveClass) {
-                const wave = parseInt(waveClass.replace('wave-', ''));
+    // Load wave buttons
+    document.querySelectorAll('[data-action="load-wave"]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const waveAttr = btn.getAttribute('data-wave');
+            if (waveAttr) {
+                const wave = parseInt(waveAttr);
                 if (wave >= 1 && wave <= 3) {
                     loadWave(wave);
                 }
             }
         });
     });
-    // Save to wave button
-    const saveWaveBtn = document.querySelector('[data-action="save-wave"]');
-    if (saveWaveBtn) {
-        saveWaveBtn.addEventListener('click', saveToCurrentWave);
-    }
+    // Save wave buttons
+    document.querySelectorAll('[data-action="save-wave"]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const waveAttr = btn.getAttribute('data-wave');
+            if (waveAttr) {
+                const wave = parseInt(waveAttr);
+                if (wave >= 1 && wave <= 3) {
+                    saveToWave(wave);
+                }
+            }
+        });
+    });
 }
 /**
  * Setup keyboard shortcuts

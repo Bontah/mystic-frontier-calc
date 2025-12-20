@@ -11,7 +11,7 @@ import {
   deleteCalcFamiliar,
   resetAllFamiliars,
   loadWave,
-  saveToCurrentWave,
+  saveToWave,
   addFamiliarToRoster,
   deleteFamiliarFromRoster,
   toggleFamiliarDisabled,
@@ -142,10 +142,27 @@ function setupCalculatorEvents(): void {
     });
   }
 
-  // Reset all button
+  // Reset all button - show confirmation modal
   const resetBtn = document.querySelector('[data-action="reset-all"]');
   if (resetBtn) {
-    resetBtn.addEventListener('click', resetAllFamiliars);
+    resetBtn.addEventListener('click', () => {
+      const modal = document.getElementById('resetConfirmModal');
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+    });
+  }
+
+  // Confirm reset button
+  const confirmResetBtn = document.querySelector('[data-action="confirm-reset"]');
+  if (confirmResetBtn) {
+    confirmResetBtn.addEventListener('click', () => {
+      resetAllFamiliars();
+      const modal = document.getElementById('resetConfirmModal');
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    });
   }
 
   // Difficulty change
@@ -214,14 +231,12 @@ function setupDiceEvents(): void {
  * Setup wave-related events
  */
 function setupWaveEvents(): void {
-  // Wave tabs
-  document.querySelectorAll('.wave-tab').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      const waveClass = Array.from(tab.classList).find((c) =>
-        c.startsWith('wave-')
-      );
-      if (waveClass) {
-        const wave = parseInt(waveClass.replace('wave-', '')) as Wave;
+  // Load wave buttons
+  document.querySelectorAll('[data-action="load-wave"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const waveAttr = btn.getAttribute('data-wave');
+      if (waveAttr) {
+        const wave = parseInt(waveAttr) as Wave;
         if (wave >= 1 && wave <= 3) {
           loadWave(wave);
         }
@@ -229,11 +244,18 @@ function setupWaveEvents(): void {
     });
   });
 
-  // Save to wave button
-  const saveWaveBtn = document.querySelector('[data-action="save-wave"]');
-  if (saveWaveBtn) {
-    saveWaveBtn.addEventListener('click', saveToCurrentWave);
-  }
+  // Save wave buttons
+  document.querySelectorAll('[data-action="save-wave"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const waveAttr = btn.getAttribute('data-wave');
+      if (waveAttr) {
+        const wave = parseInt(waveAttr) as Wave;
+        if (wave >= 1 && wave <= 3) {
+          saveToWave(wave);
+        }
+      }
+    });
+  });
 }
 
 /**

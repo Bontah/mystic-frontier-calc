@@ -21,13 +21,13 @@ export declare function deleteCalcFamiliar(slot: number): void;
  */
 export declare function resetAllFamiliars(): void;
 /**
+ * Save current lineup to a specific wave
+ */
+export declare function saveToWave(wave: Wave): void;
+/**
  * Load a wave lineup into calculator
  */
 export declare function loadWave(wave: Wave): void;
-/**
- * Save current lineup to wave
- */
-export declare function saveToCurrentWave(): void;
 /**
  * Add familiar to roster
  */

@@ -12,12 +12,22 @@ import type {
 import type { BonusItem, BonusItemsConfig, ConditionalBonusesConfig } from '../types/bonus.js';
 
 /**
+ * Saved wave lineup type
+ */
+export type SavedWaves = {
+  [K in Wave]: [CalcFamiliar | null, CalcFamiliar | null, CalcFamiliar | null];
+};
+
+/**
  * Application state interface
  */
 export interface AppState {
   // Calculator state
   calcFamiliars: [CalcFamiliar | null, CalcFamiliar | null, CalcFamiliar | null];
   currentWave: Wave | null;
+
+  // Saved wave lineups (independent of roster)
+  savedWaves: SavedWaves;
 
   // Active bonus items (user-selected)
   bonusItems: BonusItem[];
@@ -61,6 +71,11 @@ function createInitialState(): AppState {
   return {
     calcFamiliars: [null, null, null],
     currentWave: null,
+    savedWaves: {
+      1: [null, null, null],
+      2: [null, null, null],
+      3: [null, null, null],
+    },
     bonusItems: [],
     conditionalBonuses: [],
     characters: [],

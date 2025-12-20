@@ -10,7 +10,7 @@ export {
   deleteCalcFamiliar,
   resetAllFamiliars,
   loadWave,
-  saveToCurrentWave,
+  saveToWave,
   addFamiliarToRoster,
   deleteFamiliarFromRoster,
   toggleFamiliarDisabled,

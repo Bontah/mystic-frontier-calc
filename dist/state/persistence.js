@@ -8,6 +8,7 @@ const STORAGE_KEYS = {
     CONDITIONAL_BONUSES: 'conditionalBonuses',
     CHARACTERS: 'characters',
     CURRENT_CHARACTER_ID: 'currentCharacterId',
+    SAVED_WAVES: 'savedWaves',
     // Legacy key for migration
     FAMILIAR_ROSTER: 'familiarRoster',
 };
@@ -101,11 +102,20 @@ function ensureDefaultCharacter(characters) {
     };
 }
 /**
+ * Default empty waves
+ */
+const defaultSavedWaves = {
+    1: [null, null, null],
+    2: [null, null, null],
+    3: [null, null, null],
+};
+/**
  * Load persisted state from localStorage
  */
 export function loadPersistedState() {
     const bonusItems = safeGetItem(STORAGE_KEYS.BONUS_ITEMS, []);
     const conditionalBonuses = safeGetItem(STORAGE_KEYS.CONDITIONAL_BONUSES, []);
+    const savedWaves = safeGetItem(STORAGE_KEYS.SAVED_WAVES, defaultSavedWaves);
     let characters = safeGetItem(STORAGE_KEYS.CHARACTERS, []);
     let currentCharacterId = safeGetItem(STORAGE_KEYS.CURRENT_CHARACTER_ID, null);
     // Run migrations
@@ -120,6 +130,7 @@ export function loadPersistedState() {
     return {
         bonusItems,
         conditionalBonuses,
+        savedWaves,
         characters,
         currentCharacterId,
     };
@@ -131,6 +142,7 @@ export function saveState() {
     const state = store.getState();
     safeSetItem(STORAGE_KEYS.BONUS_ITEMS, state.bonusItems);
     safeSetItem(STORAGE_KEYS.CONDITIONAL_BONUSES, state.conditionalBonuses);
+    safeSetItem(STORAGE_KEYS.SAVED_WAVES, state.savedWaves);
     safeSetItem(STORAGE_KEYS.CHARACTERS, state.characters);
     safeSetItem(STORAGE_KEYS.CURRENT_CHARACTER_ID, state.currentCharacterId);
 }

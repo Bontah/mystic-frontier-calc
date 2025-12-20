@@ -5,11 +5,18 @@
 import type { CalcFamiliar, ConditionalBonus, Character, Wave } from '../types/index.js';
 import type { BonusItem, BonusItemsConfig, ConditionalBonusesConfig } from '../types/bonus.js';
 /**
+ * Saved wave lineup type
+ */
+export type SavedWaves = {
+    [K in Wave]: [CalcFamiliar | null, CalcFamiliar | null, CalcFamiliar | null];
+};
+/**
  * Application state interface
  */
 export interface AppState {
     calcFamiliars: [CalcFamiliar | null, CalcFamiliar | null, CalcFamiliar | null];
     currentWave: Wave | null;
+    savedWaves: SavedWaves;
     bonusItems: BonusItem[];
     conditionalBonuses: ConditionalBonus[];
     characters: Character[];

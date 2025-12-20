@@ -11,10 +11,10 @@
 
   <!-- Navigation Bar -->
   <nav class="top-nav">
-    <button class="nav-btn active" data-page="calculator">Calculator</button>
-    <button class="nav-btn" data-page="roster">My Roster</button>
-    <button class="nav-btn" data-page="info">Additional Information</button>
-    <button class="nav-btn" data-page="howtouse">How to Use</button>
+    <button class="nav-btn active" onclick="showPage('calculator')">Calculator</button>
+    <button class="nav-btn" onclick="showPage('roster')">My Roster</button>
+    <button class="nav-btn" onclick="showPage('info')">Additional Information</button>
+    <button class="nav-btn" onclick="showPage('howtouse')">How to Use</button>
   </nav>
 
   <!-- Calculator Page -->
@@ -23,7 +23,7 @@
     <div class="section">
       <div class="familiars-header">
         <h2>Familiars <span id="currentWaveLabel"></span></h2>
-        <button class="reset-all-btn" data-action="reset-all">Reset All</button>
+        <button class="reset-all-btn" onclick="resetAllFamiliars()">Reset All</button>
       </div>
       <div class="familiars-layout">
         <!-- Left: Stacked Familiars -->
@@ -34,11 +34,11 @@
         <div class="waves-panel">
           <div class="waves-header">Expedition Waves</div>
           <div class="wave-buttons">
-            <button class="wave-tab wave-1">Wave 1</button>
-            <button class="wave-tab wave-2">Wave 2</button>
-            <button class="wave-tab wave-3">Wave 3</button>
+            <button class="wave-tab wave-1" onclick="loadWave(1)">Wave 1</button>
+            <button class="wave-tab wave-2" onclick="loadWave(2)">Wave 2</button>
+            <button class="wave-tab wave-3" onclick="loadWave(3)">Wave 3</button>
           </div>
-          <button class="save-wave-btn" data-action="save-wave">Save to Wave</button>
+          <button class="save-wave-btn" onclick="saveToCurrentWave()">Save to Wave</button>
         </div>
       </div>
     </div>
@@ -52,7 +52,7 @@
           <h2>Difficulty</h2>
           <div class="difficulty-input">
             <label for="difficulty" style="margin: 0;">Target to beat:</label>
-            <input type="number" id="difficulty" value="50" min="0">
+            <input type="number" id="difficulty" value="50" min="0" onchange="calculate()">
           </div>
         </div>
 
@@ -62,7 +62,7 @@
           <div class="dice-row">
             <div class="dice-group">
               <label>Dice 1</label>
-              <select id="dice1">
+              <select id="dice1" onchange="calculate()">
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -73,7 +73,7 @@
             </div>
             <div class="dice-group">
               <label>Dice 2</label>
-              <select id="dice2">
+              <select id="dice2" onchange="calculate()">
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -84,7 +84,7 @@
             </div>
             <div class="dice-group">
               <label>Dice 3</label>
-              <select id="dice3">
+              <select id="dice3" onchange="calculate()">
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -110,12 +110,31 @@
           <h2>Bonus Items</h2>
           <div class="config-section-title">Item Library</div>
           <div class="config-search">
-            <input type="text" id="bonusItemSearch" placeholder="Search items...">
+            <input type="text" id="bonusItemSearch" placeholder="Search items..." oninput="searchBonusItems()">
           </div>
           <div id="bonusItemSearchResults" class="config-results" style="display: none;"></div>
           <div class="config-section-title">Active Items</div>
           <div id="bonusItemsList" class="bonus-list">
             <!-- Populated by JavaScript -->
+          </div>
+
+          <div class="add-form" style="display: none">
+            <h3>+ Add Bonus Item</h3>
+            <div class="form-row">
+              <div class="form-group wide">
+                <label>Name</label>
+                <input type="text" id="newItemName" placeholder="e.g. Power Ring">
+              </div>
+              <div class="form-group">
+                <label>Flat Bonus</label>
+                <input type="number" id="newItemFlat" value="0" step="1">
+              </div>
+              <div class="form-group">
+                <label>Multiplier (e.g. 1.6)</label>
+                <input type="number" id="newItemMult" value="1" step="0.1">
+              </div>
+            </div>
+            <button class="add-btn" onclick="addBonusItem()">Add Item</button>
           </div>
         </div>
       </div>
@@ -172,7 +191,7 @@
       <div class="roster-add-form">
         <div class="roster-inputs">
           <input type="text" id="rosterName" placeholder="Familiar name...">
-          <select id="rosterRank">
+          <select id="rosterRank" onchange="clearRosterConditional()">
             <option value="Common">Common (d3)</option>
             <option value="Rare">Rare (d4)</option>
             <option value="Epic">Epic (d5)</option>
@@ -199,18 +218,18 @@
             <option value="Undead">Undead</option>
             <option value="Machine">Machine</option>
           </select>
-          <button id="rosterAddBtn" class="add-btn" data-action="add-to-roster">Add to Roster</button>
-          <button id="rosterCancelBtn" class="cancel-btn" data-action="cancel-edit" style="display: none;">Cancel</button>
+          <button id="rosterAddBtn" class="add-btn" onclick="addToRoster()">Add to Roster</button>
+          <button id="rosterCancelBtn" class="cancel-btn" onclick="cancelEdit()" style="display: none;">Cancel</button>
         </div>
         <div class="roster-conditional-search">
-          <input type="text" id="rosterConditionalSearch" placeholder="Search condition (e.g. Fire, Beast, dice)...">
-          <label class="prepatch-label"><input type="checkbox" id="prePatchFam"> Pre-patch fam</label>
+          <input type="text" id="rosterConditionalSearch" placeholder="Search condition (e.g. Fire, Beast, dice)..." oninput="searchRosterConditional()">
+          <label class="prepatch-label"><input type="checkbox" id="prePatchFam" onchange="searchRosterConditional()"> Pre-patch fam</label>
           <div id="rosterConditionalResults" class="config-results" style="display: none;"></div>
           <!-- Step 2: Select bonus variant -->
           <div id="rosterBonusVariantSection" class="bonus-variant-section" style="display: none;">
             <div class="bonus-variant-header">
               <span class="variant-trigger-name" id="rosterSelectedTriggerName"></span>
-              <button class="change-trigger-btn" data-action="clear-roster-trigger">Change</button>
+              <button class="change-trigger-btn" onclick="clearRosterTriggerSelection()">Change</button>
             </div>
             <div class="bonus-variant-pills" id="rosterBonusVariantPills"></div>
           </div>
@@ -222,13 +241,13 @@
       <div class="roster-stats">
         <span id="rosterCount">0 familiars in roster</span>
         <div class="roster-actions">
-          <button class="free-wave-btn wave-1" data-action="free-wave" data-wave="1">Free W1</button>
-          <button class="free-wave-btn wave-2" data-action="free-wave" data-wave="2">Free W2</button>
-          <button class="free-wave-btn wave-3" data-action="free-wave" data-wave="3">Free W3</button>
-          <button class="free-all-btn" data-action="free-all-waves">Free All</button>
-          <button class="export-btn" data-action="export-roster">Export</button>
-          <button class="import-btn" data-action="import-roster">Import</button>
-          <input type="file" id="importFile" accept=".json" style="display: none;">
+          <button class="free-wave-btn wave-1" onclick="freeWave(1)">Free W1</button>
+          <button class="free-wave-btn wave-2" onclick="freeWave(2)">Free W2</button>
+          <button class="free-wave-btn wave-3" onclick="freeWave(3)">Free W3</button>
+          <button class="free-all-btn" onclick="freeAllWaves()">Free All</button>
+          <button class="export-btn" onclick="exportRoster()">Export</button>
+          <button class="import-btn" onclick="document.getElementById('importFile').click()">Import</button>
+          <input type="file" id="importFile" accept=".json" onchange="importRoster(event)" style="display: none;">
         </div>
       </div>
     </div>
@@ -294,7 +313,7 @@
       </div>
 
       <div class="optimizer-help">
-        <div class="help-toggle" data-action="toggle-optimizer-help">
+        <div class="help-toggle" onclick="toggleOptimizerHelp()">
           How does scoring work? <span class="help-icon">?</span>
         </div>
         <div id="optimizerHelpContent" class="optimizer-help-content" style="display: none;">
@@ -314,7 +333,7 @@
       </div>
 
       <div class="optimizer-controls">
-        <button class="optimize-btn" data-action="run-optimizer">Find Best Lineups</button>
+        <button class="optimize-btn" onclick="runOptimizer()">Find Best Lineups</button>
       </div>
       <div id="optimizerResults" class="optimizer-results"></div>
     </div>
@@ -511,10 +530,33 @@
         </div>
       </div>
 
+      <!-- Debug Section for Element/Type -->
+      <details class="debug-section">
+        <summary>Debug: Element & Type Detection</summary>
+        <div class="debug-icons-container">
+          <div class="debug-icon-section">
+            <h4>Element Detection</h4>
+            <div class="debug-extracted">
+              <span>Extracted:</span>
+              <canvas id="debugElementExtracted" width="64" height="64"></canvas>
+            </div>
+            <div class="debug-references" id="debugElementReferences"></div>
+          </div>
+          <div class="debug-icon-section">
+            <h4>Type Detection</h4>
+            <div class="debug-extracted">
+              <span>Extracted:</span>
+              <canvas id="debugTypeExtracted" width="64" height="64"></canvas>
+            </div>
+            <div class="debug-references" id="debugTypeReferences"></div>
+          </div>
+        </div>
+      </details>
+
       <div class="modal-actions">
-        <button class="add-btn" data-action="add-from-scan">Add to Roster</button>
-        <button class="secondary-btn" data-action="fill-form">Fill Form</button>
-        <button class="cancel-btn" data-action="close-modal">Cancel</button>
+        <button class="add-btn" onclick="addToRosterFromScan()">Add to Roster</button>
+        <button class="secondary-btn" onclick="confirmExtraction()">Fill Form</button>
+        <button class="cancel-btn" onclick="closeExtractionModal()">Cancel</button>
       </div>
     </div>
   </div>
@@ -531,7 +573,7 @@
         </div>
         <div class="form-group">
           <label>Rank</label>
-          <select id="familiarEditRank">
+          <select id="familiarEditRank" onchange="showRankBasedConditionals()">
             <option value="">-- Select Rank --</option>
             <option value="Common">Common (d3)</option>
             <option value="Rare">Rare (d4)</option>
@@ -572,15 +614,15 @@
         <label>Conditional Bonus</label>
         <!-- Step 1: Search for condition trigger -->
         <div class="modal-conditional-search">
-          <input type="text" id="modalCondSearch" placeholder="Search condition (e.g. Fire, Beast, dice)...">
-          <label class="prepatch-label"><input type="checkbox" id="modalPrePatch"> Pre-patch</label>
+          <input type="text" id="modalCondSearch" placeholder="Search condition (e.g. Fire, Beast, dice)..." oninput="searchModalConditional()">
+          <label class="prepatch-label"><input type="checkbox" id="modalPrePatch" onchange="searchModalConditional()"> Pre-patch</label>
         </div>
         <div id="modalCondResults" class="config-results" style="display: none;"></div>
         <!-- Step 2: Select bonus variant (appears after trigger selection) -->
         <div id="bonusVariantSection" class="bonus-variant-section" style="display: none;">
           <div class="bonus-variant-header">
             <span class="variant-trigger-name" id="selectedTriggerName"></span>
-            <button class="change-trigger-btn" data-action="clear-trigger">Change</button>
+            <button class="change-trigger-btn" onclick="clearTriggerSelection()">Change</button>
           </div>
           <div class="bonus-variant-pills" id="bonusVariantPills">
             <!-- Pills rendered by JS -->
@@ -589,8 +631,8 @@
         <div id="selectedCondDisplay" class="selected-conditional" style="display: none;"></div>
       </div>
       <div class="modal-actions">
-        <button class="cancel-btn" data-action="close-modal">Cancel</button>
-        <button class="add-btn" data-action="save-familiar">Save</button>
+        <button class="cancel-btn" onclick="closeFamiliarModal()">Cancel</button>
+        <button class="add-btn" onclick="saveFamiliar()">Save</button>
       </div>
     </div>
   </div>
@@ -601,6 +643,6 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script type="module" src="dist/index.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

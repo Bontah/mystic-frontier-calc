@@ -1,0 +1,50 @@
+/**
+ * Formatting utilities
+ */
+
+import type { ConditionalBonus } from '../types/index.js';
+
+/**
+ * Format bonus values for display
+ */
+export function formatBonusValues(bonus: ConditionalBonus): string {
+  const parts: string[] = [];
+
+  if (bonus.flatBonus && bonus.flatBonus !== 0) {
+    parts.push(`${bonus.flatBonus >= 0 ? '+' : ''}${bonus.flatBonus}`);
+  }
+
+  if (
+    bonus.multiplierBonus &&
+    bonus.multiplierBonus !== 0 &&
+    bonus.multiplierBonus !== 1
+  ) {
+    parts.push(`×${bonus.multiplierBonus}`);
+  }
+
+  return parts.length > 0 ? parts.join(', ') : 'No bonus';
+}
+
+/**
+ * Format conditional display text
+ */
+export function formatConditionalDisplay(bonus: ConditionalBonus): string {
+  const stats = formatBonusValues(bonus);
+  return stats !== 'No bonus' ? `${bonus.name} (${stats})` : bonus.name;
+}
+
+/**
+ * Format percentage with optional decimal places
+ */
+export function formatPercent(value: number, decimals: number = 0): string {
+  return `${value.toFixed(decimals)}%`;
+}
+
+/**
+ * Format confidence level with color class
+ */
+export function getConfidenceClass(confidence: number): string {
+  if (confidence >= 80) return 'confidence-high';
+  if (confidence >= 50) return 'confidence-medium';
+  return 'confidence-low';
+}

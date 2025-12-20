@@ -1,0 +1,16 @@
+{
+  "name": "mystic-frontier-calc",
+  "version": "2.0.0",
+  "description": "Mystic Frontier Calculator - Familiar lineup optimizer",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "author": "Bonta (EU - Luna)",
+  "license": "MIT"
+}

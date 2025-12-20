@@ -4,7 +4,7 @@
  */
 import { store, selectors } from '../state/store.js';
 import { setupNavigation } from './navigation.js';
-import { calculate, setCalcFamiliar, deleteCalcFamiliar, resetAllFamiliars, loadWave, saveToCurrentWave, addFamiliarToRoster, deleteFamiliarFromRoster, toggleFamiliarDisabled, switchCharacter, } from './actions.js';
+import { calculate, setCalcFamiliar, deleteCalcFamiliar, resetAllFamiliars, loadWave, saveToCurrentWave, addFamiliarToRoster, deleteFamiliarFromRoster, toggleFamiliarDisabled, switchCharacter, deleteBonusItem, searchBonusItems, applyBonusItemFromSearch, renderBonusItemsList, } from './actions.js';
 import { updateRosterList } from './components/roster-item.js';
 import { createIconDropdown, RANK_OPTIONS, ELEMENT_OPTIONS, TYPE_OPTIONS } from './components/icon-dropdown.js';
 import { saveState } from '../state/persistence.js';
@@ -34,6 +34,9 @@ export function setupEventHandlers() {
     setupRosterConditionalSelector();
     setupFamiliarModalSave();
     setupRosterFormEvents();
+    setupBonusItemEvents();
+    // Initial render of bonus items list
+    renderBonusItemsList();
 }
 /**
  * Setup icon dropdowns for element and type selection
@@ -118,6 +121,7 @@ function setupCalculatorEvents() {
     const difficultyInput = document.getElementById('difficulty');
     if (difficultyInput) {
         difficultyInput.addEventListener('change', calculate);
+        difficultyInput.addEventListener('input', calculate);
     }
 }
 /**
@@ -574,6 +578,63 @@ function clearRosterForm() {
     rosterElementDropdown?.setValue('None');
     rosterTypeDropdown?.setValue('Human');
     rosterConditionalSelector?.clear();
+}
+/**
+ * Setup bonus item modal events
+ */
+function setupBonusItemEvents() {
+    // Open modal button
+    const openModalBtn = document.querySelector('[data-action="open-bonus-modal"]');
+    if (openModalBtn) {
+        openModalBtn.addEventListener('click', () => {
+            const modal = document.getElementById('bonusItemModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                // Focus the search input
+                const searchInput = document.getElementById('bonusItemSearch');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchBonusItems('');
+                }
+            }
+        });
+    }
+    // Search input
+    const searchInput = document.getElementById('bonusItemSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value;
+            searchBonusItems(query);
+        });
+    }
+    // Search results click delegation
+    const resultsContainer = document.getElementById('bonusItemSearchResults');
+    if (resultsContainer) {
+        resultsContainer.addEventListener('click', (e) => {
+            const target = e.target;
+            const resultItem = target.closest('.bonus-item-result');
+            if (resultItem) {
+                const itemIndex = parseInt(resultItem.getAttribute('data-item-index') || '-1');
+                const query = resultItem.getAttribute('data-query') || '';
+                if (itemIndex >= 0) {
+                    applyBonusItemFromSearch(itemIndex, query);
+                }
+            }
+        });
+    }
+    // Bonus items list delete delegation
+    const bonusItemsList = document.getElementById('bonusItemsList');
+    if (bonusItemsList) {
+        bonusItemsList.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.getAttribute('data-action') === 'delete-bonus-item') {
+                const index = parseInt(target.getAttribute('data-index') || '-1');
+                if (index >= 0) {
+                    deleteBonusItem(index);
+                }
+            }
+        });
+    }
 }
 /**
  * Get the modal conditional selector instance

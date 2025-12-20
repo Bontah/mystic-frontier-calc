@@ -2,8 +2,17 @@
  * Calculation result display component
  */
 
-import type { CalculationResultWithStatus } from '../../types/index.js';
+import type { CalculationResultWithStatus, ConditionalBonus } from '../../types/index.js';
 import { getElementById } from '../../utils/html.js';
+
+/**
+ * Conditional display data
+ */
+export interface ConditionalDisplayData {
+  conditional: ConditionalBonus;
+  isActive: boolean;
+  familiarName?: string;
+}
 
 /**
  * Update the result display
@@ -59,17 +68,43 @@ export function renderResultDisplay(result: CalculationResultWithStatus): void {
 }
 
 /**
+ * Format bonus values for display
+ */
+function formatBonusValues(flat: number, mult: number): string {
+  const parts: string[] = [];
+  if (flat !== 0) {
+    parts.push(`<span class="cond-flat">${flat >= 0 ? '+' : ''}${flat}</span>`);
+  }
+  if (mult !== 0) {
+    parts.push(`<span class="cond-mult">×${mult.toFixed(2)}</span>`);
+  }
+  return parts.length > 0 ? parts.join(' ') : '';
+}
+
+/**
  * Update active conditionals summary
  */
-export function updateActiveConditionals(names: string[]): void {
+export function updateActiveConditionals(conditionals: ConditionalDisplayData[]): void {
   const container = getElementById<HTMLElement>('waveSummaryConditionals');
   if (!container) return;
 
-  if (names.length === 0) {
-    container.innerHTML = '<span class="no-conditionals">No active conditionals</span>';
+  if (conditionals.length === 0) {
+    container.innerHTML = '<span class="no-conditionals">No conditionals</span>';
   } else {
-    container.innerHTML = names
-      .map((name) => `<span class="conditional-pill">${name}</span>`)
+    container.innerHTML = conditionals
+      .map((data) => {
+        const { conditional, isActive, familiarName } = data;
+        const statusClass = isActive ? 'active' : 'inactive';
+        const bonusText = formatBonusValues(conditional.flatBonus, conditional.multiplierBonus);
+        const nameDisplay = familiarName
+          ? `<span class="cond-familiar">${familiarName}:</span> ${conditional.name}`
+          : conditional.name;
+
+        return `<span class="conditional-pill ${statusClass}">
+          <span class="cond-name">${nameDisplay}</span>
+          ${bonusText ? `<span class="cond-values">${bonusText}</span>` : ''}
+        </span>`;
+      })
       .join('');
   }
 }

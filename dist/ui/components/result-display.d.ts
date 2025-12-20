@@ -1,7 +1,15 @@
 /**
  * Calculation result display component
  */
-import type { CalculationResultWithStatus } from '../../types/index.js';
+import type { CalculationResultWithStatus, ConditionalBonus } from '../../types/index.js';
+/**
+ * Conditional display data
+ */
+export interface ConditionalDisplayData {
+    conditional: ConditionalBonus;
+    isActive: boolean;
+    familiarName?: string;
+}
 /**
  * Update the result display
  */
@@ -9,5 +17,5 @@ export declare function renderResultDisplay(result: CalculationResultWithStatus)
 /**
  * Update active conditionals summary
  */
-export declare function updateActiveConditionals(names: string[]): void;
+export declare function updateActiveConditionals(conditionals: ConditionalDisplayData[]): void;
 //# sourceMappingURL=result-display.d.ts.map

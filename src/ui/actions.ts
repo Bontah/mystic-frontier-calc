@@ -5,12 +5,14 @@
 
 import { store, selectors } from '../state/store.js';
 import { saveState } from '../state/persistence.js';
-import { calculateScore, calculateRerollSuggestions } from '../core/index.js';
+import { calculateScore, calculateRerollSuggestions, evaluateConditionalBonus } from '../core/index.js';
 import type { CalcFamiliar, Wave, Familiar, ConditionalBonus } from '../types/index.js';
-import { renderResultDisplay, updateActiveConditionals } from './components/result-display.js';
+import type { BonusItem } from '../types/bonus.js';
+import { renderResultDisplay, updateActiveConditionals, type ConditionalDisplayData } from './components/result-display.js';
 import { renderRerollSuggestions } from './components/reroll-display.js';
 import { updateFamiliarsGrid } from './components/familiar-card.js';
 import { updateRosterList } from './components/roster-item.js';
+import { escapeHtml } from '../utils/html.js';
 
 /**
  * Get current dice values from the DOM
@@ -39,6 +41,21 @@ function getDifficulty(): number {
 }
 
 /**
+ * Update the disabled state of calculator sections
+ */
+function updateCalculatorDisabledState(disabled: boolean): void {
+  const calcRow = document.querySelector('.calc-row') as HTMLElement;
+  const results = document.querySelector('.results') as HTMLElement;
+
+  if (calcRow) {
+    calcRow.classList.toggle('calculator-disabled', disabled);
+  }
+  if (results) {
+    results.classList.toggle('calculator-disabled', disabled);
+  }
+}
+
+/**
  * Perform calculation and update display
  */
 export function calculate(): void {
@@ -47,7 +64,12 @@ export function calculate(): void {
     (f): f is CalcFamiliar => f !== null && f.rank !== undefined
   );
 
+  // Update disabled state for calculator sections
+  updateCalculatorDisabledState(familiars.length === 0);
+
   if (familiars.length === 0) {
+    // Clear the conditionals display when no familiars
+    updateActiveConditionals([]);
     return;
   }
 
@@ -79,9 +101,49 @@ export function calculate(): void {
   const passed = result.finalResult >= difficulty;
   const difference = result.finalResult - difficulty;
 
+  // Build conditionals display data with active status
+  const conditionalsDisplayData: ConditionalDisplayData[] = [];
+
+  // Add familiar conditionals with their familiar names
+  for (const fam of familiars) {
+    if (fam.conditional) {
+      const evalResult = evaluateConditionalBonus(fam.conditional, dice, familiarContexts);
+      conditionalsDisplayData.push({
+        conditional: fam.conditional,
+        isActive: evalResult.isActive,
+        familiarName: fam.name,
+      });
+    }
+  }
+
+  // Add user-added conditionals (no familiar name)
+  for (const cond of state.conditionalBonuses) {
+    const evalResult = evaluateConditionalBonus(cond, dice, familiarContexts);
+    conditionalsDisplayData.push({
+      conditional: cond,
+      isActive: evalResult.isActive,
+    });
+  }
+
   // Update display
   renderResultDisplay({ ...result, passed, difference });
-  updateActiveConditionals(result.activeConditionalNames);
+  updateActiveConditionals(conditionalsDisplayData);
+
+  // Update active bonus items display
+  const activeBonusesEl = document.getElementById('activeBonusesDisplay');
+  if (activeBonusesEl) {
+    if (state.bonusItems.length > 0) {
+      const itemsHtml = state.bonusItems.map(item => {
+        const flatStr = item.flatBonus !== 0 ? `+${item.flatBonus}` : '';
+        const multStr = item.multiplierBonus && item.multiplierBonus !== 0 && item.multiplierBonus !== 1
+          ? `×${item.multiplierBonus}` : '';
+        return `<span class="active-item">${escapeHtml(item.name)} (${flatStr}${flatStr && multStr ? ', ' : ''}${multStr})</span>`;
+      }).join(', ');
+      activeBonusesEl.innerHTML = `<strong>Active Items:</strong> ${itemsHtml}`;
+    } else {
+      activeBonusesEl.innerHTML = '';
+    }
+  }
 
   // Calculate reroll suggestions
   const familiarsWithRank = familiars.map((f) => ({
@@ -319,4 +381,160 @@ export function switchCharacter(id: number): void {
 
   const label = document.getElementById('currentWaveLabel');
   if (label) label.textContent = '';
+}
+
+/**
+ * Add a bonus item
+ */
+export function addBonusItem(item: BonusItem): void {
+  store.setState((state) => ({
+    bonusItems: [...state.bonusItems, item],
+  }));
+  saveState();
+  renderBonusItemsList();
+  calculate();
+}
+
+/**
+ * Delete a bonus item by index
+ */
+export function deleteBonusItem(index: number): void {
+  store.setState((state) => ({
+    bonusItems: state.bonusItems.filter((_, i) => i !== index),
+  }));
+  saveState();
+  renderBonusItemsList();
+  calculate();
+}
+
+/**
+ * Render the bonus items list
+ */
+export function renderBonusItemsList(): void {
+  const container = document.getElementById('bonusItemsList');
+  if (!container) return;
+
+  const { bonusItems } = store.getState();
+
+  if (bonusItems.length === 0) {
+    container.innerHTML = '<div class="no-items">No bonus items added. Click "+ Add Item" to add one.</div>';
+    return;
+  }
+
+  container.innerHTML = bonusItems
+    .map((item, index) => {
+      const flatClass = item.flatBonus < 0 ? 'flat negative' : 'flat';
+      const flatStr =
+        item.flatBonus !== 0
+          ? `<span class="${flatClass}">${item.flatBonus >= 0 ? '+' : ''}${item.flatBonus} flat</span>`
+          : '';
+      const multStr =
+        item.multiplierBonus !== 1 && item.multiplierBonus !== 0
+          ? `<span class="mult">×${item.multiplierBonus}</span>`
+          : '';
+      const separator = flatStr && multStr ? ', ' : '';
+
+      return `
+        <div class="bonus-item">
+          <span class="bonus-name">${escapeHtml(item.name)}</span>
+          <span class="bonus-stats">${flatStr}${separator}${multStr}</span>
+          <button class="delete-btn" data-action="delete-bonus-item" data-index="${index}">Delete</button>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+/**
+ * Search bonus items and render results
+ */
+export function searchBonusItems(query: string): void {
+  const resultsContainer = document.getElementById('bonusItemSearchResults');
+  if (!resultsContainer) return;
+
+  const state = store.getState();
+  const items = state.configBonusItems.items || [];
+
+  if (!query.trim()) {
+    resultsContainer.innerHTML = '<div class="search-prompt">Type to search for items...</div>';
+    return;
+  }
+
+  const lowerQuery = query.toLowerCase();
+  const matches = items.filter((item) => {
+    const nameMatch = item.name.toLowerCase().includes(lowerQuery);
+    const descMatch = item.description?.toLowerCase().includes(lowerQuery);
+    return nameMatch || descMatch;
+  });
+
+  if (matches.length === 0) {
+    resultsContainer.innerHTML = '<div class="no-results">No items found</div>';
+    return;
+  }
+
+  resultsContainer.innerHTML = matches
+    .map((item, index) => {
+      const flatStr =
+        item.flatBonus !== 0
+          ? `<span class="flat${item.flatBonus < 0 ? ' negative' : ''}">${
+              item.flatBonus >= 0 ? '+' : ''
+            }${item.flatBonus}</span>`
+          : '';
+      const multStr =
+        item.multiplierBonus && item.multiplierBonus !== 0
+          ? `<span class="mult">×${item.multiplierBonus}</span>`
+          : '';
+      const descStr = item.description || '';
+
+      return `
+        <div class="bonus-item-result" data-action="apply-bonus-item" data-item-index="${index}" data-query="${escapeHtml(query)}">
+          <div class="bonus-item-result-info">
+            <div class="bonus-item-result-name">${escapeHtml(item.name)}</div>
+            <div class="bonus-item-result-stats">${flatStr}${flatStr && multStr ? ' ' : ''}${multStr}</div>
+            ${descStr ? `<div class="bonus-item-result-desc">${escapeHtml(descStr)}</div>` : ''}
+          </div>
+          <button class="apply-btn">Add</button>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+/**
+ * Apply a bonus item from search results
+ */
+export function applyBonusItemFromSearch(itemIndex: number, query: string): void {
+  const state = store.getState();
+  const items = state.configBonusItems.items || [];
+
+  const lowerQuery = query.toLowerCase();
+  const matches = items.filter((item) => {
+    const nameMatch = item.name.toLowerCase().includes(lowerQuery);
+    const descMatch = item.description?.toLowerCase().includes(lowerQuery);
+    return nameMatch || descMatch;
+  });
+
+  const item = matches[itemIndex];
+  if (!item) return;
+
+  addBonusItem({
+    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    name: item.name,
+    description: item.description || '',
+    flatBonus: item.flatBonus || 0,
+    multiplierBonus: item.multiplierBonus || 0,
+  });
+
+  // Close the modal
+  const modal = document.getElementById('bonusItemModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+
+  // Clear the search
+  const searchInput = document.getElementById('bonusItemSearch') as HTMLInputElement;
+  if (searchInput) {
+    searchInput.value = '';
+  }
+  searchBonusItems('');
 }

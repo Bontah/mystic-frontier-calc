@@ -12,6 +12,7 @@ export {
 export {
   renderResultDisplay,
   updateActiveConditionals,
+  type ConditionalDisplayData,
 } from './result-display.js';
 
 export {

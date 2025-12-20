@@ -3,6 +3,7 @@
  * Functions that handle user interactions and update state
  */
 import type { CalcFamiliar, Wave, Familiar } from '../types/index.js';
+import type { BonusItem } from '../types/bonus.js';
 /**
  * Perform calculation and update display
  */
@@ -43,4 +44,24 @@ export declare function toggleFamiliarDisabled(id: number): void;
  * Switch to a different character
  */
 export declare function switchCharacter(id: number): void;
+/**
+ * Add a bonus item
+ */
+export declare function addBonusItem(item: BonusItem): void;
+/**
+ * Delete a bonus item by index
+ */
+export declare function deleteBonusItem(index: number): void;
+/**
+ * Render the bonus items list
+ */
+export declare function renderBonusItemsList(): void;
+/**
+ * Search bonus items and render results
+ */
+export declare function searchBonusItems(query: string): void;
+/**
+ * Apply a bonus item from search results
+ */
+export declare function applyBonusItemFromSearch(itemIndex: number, query: string): void;
 //# sourceMappingURL=actions.d.ts.map

@@ -112,21 +112,21 @@
         },
         {
           "id": "110704",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "110707",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 1,
           "multiplierBonus": 1,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "110710",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
@@ -147,21 +147,21 @@
         },
         {
           "id": "110719",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -1,
           "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "110722",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 1,
           "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "110725",
-          "name": "+6% chance to roll 1 or 6 for each Fire or Dark elemental...",
+          "name": "+6% chance to roll 1 or 6 for each Fire or Dark elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -169,7 +169,7 @@
         },
         {
           "id": "110726",
-          "name": "+6% chance to roll 1 or 6 for each Fire or Dark elemental...",
+          "name": "+6% chance to roll 1 or 6 for each Fire or Dark elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -177,7 +177,7 @@
         },
         {
           "id": "110727",
-          "name": "+6% chance to roll 2 or 5 for each Electric or Poison ele...",
+          "name": "+6% chance to roll 2 or 5 for each Electric or Poison elelement",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -185,7 +185,7 @@
         },
         {
           "id": "110728",
-          "name": "+6% chance to roll 2 or 5 for each Electric or Poison ele...",
+          "name": "+6% chance to roll 2 or 5 for each Electric or Poison elelement",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -193,7 +193,7 @@
         },
         {
           "id": "110729",
-          "name": "+6% chance to roll 3 or 4 for each Ice or Holy elemental ...",
+          "name": "+6% chance to roll 3 or 4 for each Ice or Holy elementalFamiliar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -201,7 +201,7 @@
         },
         {
           "id": "110730",
-          "name": "+6% chance to roll 3 or 4 for each Ice or Holy elemental ...",
+          "name": "+6% chance to roll 3 or 4 for each Ice or Holy elementalFamiliar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -391,7 +391,7 @@
         },
         {
           "id": "111925",
-          "name": "+6% chance to roll 1 or 6 for each Human, Aquatic, or Dev...",
+          "name": "+6% chance to roll 1 or 6 for each Human, Aquatic, or Devil type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -399,7 +399,7 @@
         },
         {
           "id": "111926",
-          "name": "+6% chance to roll 1 or 6 for each Human, Aquatic, or Dev...",
+          "name": "+6% chance to roll 1 or 6 for each Human, Aquatic, or Devil type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -407,7 +407,7 @@
         },
         {
           "id": "111927",
-          "name": "+6% chance to roll 2 or 5 for each Beast, Reptile, or Und...",
+          "name": "+6% chance to roll 2 or 5 for each Beast, Reptile, or Undead type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -415,7 +415,7 @@
         },
         {
           "id": "111928",
-          "name": "+6% chance to roll 2 or 5 for each Beast, Reptile, or Und...",
+          "name": "+6% chance to roll 2 or 5 for each Beast, Reptile, or Undead type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -423,7 +423,7 @@
         },
         {
           "id": "111929",
-          "name": "+6% chance to roll 3 or 4 for each Plant, Fairy, or Mecha...",
+          "name": "+6% chance to roll 3 or 4 for each Plant, Fairy, or Mechanical type Familiar on your active",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -431,7 +431,7 @@
         },
         {
           "id": "111930",
-          "name": "+6% chance to roll 3 or 4 for each Plant, Fairy, or Mecha...",
+          "name": "+6% chance to roll 3 or 4 for each Plant, Fairy, or Mechanical type Familiar on your active",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -1217,42 +1217,42 @@
         },
         {
           "id": "120704",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120705",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120707",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 3,
           "multiplierBonus": 1,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120708",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 2,
           "multiplierBonus": 1,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120710",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120711",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
@@ -1287,35 +1287,35 @@
         },
         {
           "id": "120719",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -1,
           "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120720",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -1,
           "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120722",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 1,
           "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120723",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 2,
           "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120725",
-          "name": "+12% chance to roll 1 or 6 for each Fire or Dark elementa...",
+          "name": "+12% chance to roll 1 or 6 for each Fire or Dark elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -1323,7 +1323,7 @@
         },
         {
           "id": "120726",
-          "name": "+12% chance to roll 1 or 6 for each Fire or Dark elementa...",
+          "name": "+12% chance to roll 1 or 6 for each Fire or Dark elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -1331,7 +1331,7 @@
         },
         {
           "id": "120727",
-          "name": "+12% chance to roll 2 or 5 for each Electric or Poison el...",
+          "name": "+12% chance to roll 2 or 5 for each Electric or Poison elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -1339,7 +1339,7 @@
         },
         {
           "id": "120728",
-          "name": "+12% chance to roll 2 or 5 for each Electric or Poison el...",
+          "name": "+12% chance to roll 2 or 5 for each Electric or Poison elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -1347,7 +1347,7 @@
         },
         {
           "id": "120729",
-          "name": "+12% chance to roll 3 or 4 for each Ice or Holy elemental...",
+          "name": "+12% chance to roll 3 or 4 for each Ice or Holy elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -1355,7 +1355,7 @@
         },
         {
           "id": "120730",
-          "name": "+12% chance to roll 3 or 4 for each Ice or Holy elemental...",
+          "name": "+12% chance to roll 3 or 4 for each Ice or Holy elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -1727,7 +1727,7 @@
         },
         {
           "id": "121925",
-          "name": "+12% chance to roll 1 or 6 for each Human, Aquatic, or De...",
+          "name": "+12% chance to roll 1 or 6 for each Human, Aquatic, or Delement",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -1735,7 +1735,7 @@
         },
         {
           "id": "121926",
-          "name": "+12% chance to roll 1 or 6 for each Human, Aquatic, or De...",
+          "name": "+12% chance to roll 1 or 6 for each Human, Aquatic, or Delement",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -1743,7 +1743,7 @@
         },
         {
           "id": "121927",
-          "name": "+12% chance to roll 2 or 5 for each Beast, Reptile, or Un...",
+          "name": "+12% chance to roll 2 or 5 for each Beast, Reptile, or Undead type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -1751,7 +1751,7 @@
         },
         {
           "id": "121928",
-          "name": "+12% chance to roll 2 or 5 for each Beast, Reptile, or Un...",
+          "name": "+12% chance to roll 2 or 5 for each Beast, Reptile, or Undead type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -1759,7 +1759,7 @@
         },
         {
           "id": "121929",
-          "name": "+12% chance to roll 3 or 4 for each Plant, Fairy, or Mech...",
+          "name": "+12% chance to roll 3 or 4 for each Plant, Fairy, or Mechanical type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -1767,7 +1767,7 @@
         },
         {
           "id": "121930",
-          "name": "+12% chance to roll 3 or 4 for each Plant, Fairy, or Mech...",
+          "name": "+12% chance to roll 3 or 4 for each Plant, Fairy, or Mechanical type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -3043,63 +3043,63 @@
         },
         {
           "id": "130704",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130705",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130706",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130707",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 6,
           "multiplierBonus": 1,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130708",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 5,
           "multiplierBonus": 1,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130709",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 4,
           "multiplierBonus": 1,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130710",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130711",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130712",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
@@ -3148,49 +3148,49 @@
         },
         {
           "id": "130719",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -2,
           "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130720",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -1,
           "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130721",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -1,
           "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130722",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 1,
           "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130723",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 2,
           "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130724",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 3,
           "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130725",
-          "name": "+24% chance to roll 1 or 6 for each Fire or Dark elementa...",
+          "name": "+24% chance to roll 1 or 6 for each Fire or Dark elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -3198,7 +3198,7 @@
         },
         {
           "id": "130726",
-          "name": "+24% chance to roll 1 or 6 for each Fire or Dark elementa...",
+          "name": "+24% chance to roll 1 or 6 for each Fire or Dark elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -3206,7 +3206,7 @@
         },
         {
           "id": "130727",
-          "name": "+24% chance to roll 2 or 5 for each Electric or Poison el...",
+          "name": "+24% chance to roll 2 or 5 for each Electric or Poison elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -3214,7 +3214,7 @@
         },
         {
           "id": "130728",
-          "name": "+24% chance to roll 2 or 5 for each Electric or Poison el...",
+          "name": "+24% chance to roll 2 or 5 for each Electric or Poison elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -3222,7 +3222,7 @@
         },
         {
           "id": "130729",
-          "name": "+24% chance to roll 3 or 4 for each Ice or Holy elemental...",
+          "name": "+24% chance to roll 3 or 4 for each Ice or Holy elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -3230,7 +3230,7 @@
         },
         {
           "id": "130730",
-          "name": "+24% chance to roll 3 or 4 for each Ice or Holy elemental...",
+          "name": "+24% chance to roll 3 or 4 for each Ice or Holy elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -3784,7 +3784,7 @@
         },
         {
           "id": "131925",
-          "name": "+24% chance to roll 1 or 6 for each Human, Aquatic, or De...",
+          "name": "+24% chance to roll 1 or 6 for each Human, Aquatic, or Delement",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -3792,7 +3792,7 @@
         },
         {
           "id": "131926",
-          "name": "+24% chance to roll 1 or 6 for each Human, Aquatic, or De...",
+          "name": "+24% chance to roll 1 or 6 for each Human, Aquatic, or Delement",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -3800,7 +3800,7 @@
         },
         {
           "id": "131927",
-          "name": "+24% chance to roll 2 or 5 for each Beast, Reptile, or Un...",
+          "name": "+24% chance to roll 2 or 5 for each Beast, Reptile, or Undead type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -3808,7 +3808,7 @@
         },
         {
           "id": "131928",
-          "name": "+24% chance to roll 2 or 5 for each Beast, Reptile, or Un...",
+          "name": "+24% chance to roll 2 or 5 for each Beast, Reptile, or Undead type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -3816,7 +3816,7 @@
         },
         {
           "id": "131929",
-          "name": "+24% chance to roll 3 or 4 for each Plant, Fairy, or Mech...",
+          "name": "+24% chance to roll 3 or 4 for each Plant, Fairy, or Mechanical type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -3824,7 +3824,7 @@
         },
         {
           "id": "131930",
-          "name": "+24% chance to roll 3 or 4 for each Plant, Fairy, or Mech...",
+          "name": "+24% chance to roll 3 or 4 for each Plant, Fairy, or Mechanical type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -5541,63 +5541,63 @@
         },
         {
           "id": "140704",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140705",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140706",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140707",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 9,
           "multiplierBonus": 1,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140708",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 8,
           "multiplierBonus": 1,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140709",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 7,
           "multiplierBonus": 1,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140710",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140711",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140712",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
@@ -5646,49 +5646,49 @@
         },
         {
           "id": "140719",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -2,
           "multiplierBonus": 2.0,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140720",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -2,
           "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140721",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -1,
           "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140722",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 1,
           "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140723",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 2,
           "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140724",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 3,
           "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140725",
-          "name": "+36% chance to roll 1 or 6 for each Fire or Dark elementa...",
+          "name": "+36% chance to roll 1 or 6 for each Fire or Dark elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -5696,7 +5696,7 @@
         },
         {
           "id": "140726",
-          "name": "+36% chance to roll 1 or 6 for each Fire or Dark elementa...",
+          "name": "+36% chance to roll 1 or 6 for each Fire or Dark elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -5704,7 +5704,7 @@
         },
         {
           "id": "140727",
-          "name": "+36% chance to roll 2 or 5 for each Electric or Poison el...",
+          "name": "+36% chance to roll 2 or 5 for each Electric or Poison elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -5712,7 +5712,7 @@
         },
         {
           "id": "140728",
-          "name": "+36% chance to roll 2 or 5 for each Electric or Poison el...",
+          "name": "+36% chance to roll 2 or 5 for each Electric or Poison elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -5720,7 +5720,7 @@
         },
         {
           "id": "140729",
-          "name": "+36% chance to roll 3 or 4 for each Ice or Holy elemental...",
+          "name": "+36% chance to roll 3 or 4 for each Ice or Holy elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -5728,7 +5728,7 @@
         },
         {
           "id": "140730",
-          "name": "+36% chance to roll 3 or 4 for each Ice or Holy elemental...",
+          "name": "+36% chance to roll 3 or 4 for each Ice or Holy elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -6282,7 +6282,7 @@
         },
         {
           "id": "141925",
-          "name": "+36% chance to roll 1 or 6 for each Human, Aquatic, or De...",
+          "name": "+36% chance to roll 1 or 6 for each Human, Aquatic, or Delement",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -6290,7 +6290,7 @@
         },
         {
           "id": "141926",
-          "name": "+36% chance to roll 1 or 6 for each Human, Aquatic, or De...",
+          "name": "+36% chance to roll 1 or 6 for each Human, Aquatic, or Delement",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -6298,7 +6298,7 @@
         },
         {
           "id": "141927",
-          "name": "+36% chance to roll 2 or 5 for each Beast, Reptile, or Un...",
+          "name": "+36% chance to roll 2 or 5 for each Beast, Reptile, or Undead type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -6306,7 +6306,7 @@
         },
         {
           "id": "141928",
-          "name": "+36% chance to roll 2 or 5 for each Beast, Reptile, or Un...",
+          "name": "+36% chance to roll 2 or 5 for each Beast, Reptile, or Undead type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -6314,7 +6314,7 @@
         },
         {
           "id": "141929",
-          "name": "+36% chance to roll 3 or 4 for each Plant, Fairy, or Mech...",
+          "name": "+36% chance to roll 3 or 4 for each Plant, Fairy, or Mechanical type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -6322,7 +6322,7 @@
         },
         {
           "id": "141930",
-          "name": "+36% chance to roll 3 or 4 for each Plant, Fairy, or Mech...",
+          "name": "+36% chance to roll 3 or 4 for each Plant, Fairy, or Mechanical type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -8123,63 +8123,63 @@
         },
         {
           "id": "150704",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 2.0,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150705",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150706",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150707",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 12,
           "multiplierBonus": 1,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150708",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 11,
           "multiplierBonus": 1,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150709",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 10,
           "multiplierBonus": 1,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150710",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 2.0,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150711",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150712",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
           "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
@@ -8228,49 +8228,49 @@
         },
         {
           "id": "150719",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -2,
           "multiplierBonus": 2.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150720",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -2,
           "multiplierBonus": 2.0,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150721",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -2,
           "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150722",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 1,
           "multiplierBonus": 2.0,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150723",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 2,
           "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150724",
-          "name": "If all Familiars on your active lineup have a different e...",
+          "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 3,
           "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150725",
-          "name": "+48% chance to roll 1 or 6 for each Fire or Dark elementa...",
+          "name": "+48% chance to roll 1 or 6 for each Fire or Dark elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -8278,7 +8278,7 @@
         },
         {
           "id": "150726",
-          "name": "+48% chance to roll 1 or 6 for each Fire or Dark elementa...",
+          "name": "+48% chance to roll 1 or 6 for each Fire or Dark elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -8286,7 +8286,7 @@
         },
         {
           "id": "150727",
-          "name": "+48% chance to roll 2 or 5 for each Electric or Poison el...",
+          "name": "+48% chance to roll 2 or 5 for each Electric or Poison elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -8294,7 +8294,7 @@
         },
         {
           "id": "150728",
-          "name": "+48% chance to roll 2 or 5 for each Electric or Poison el...",
+          "name": "+48% chance to roll 2 or 5 for each Electric or Poison elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -8302,7 +8302,7 @@
         },
         {
           "id": "150729",
-          "name": "+48% chance to roll 3 or 4 for each Ice or Holy elemental...",
+          "name": "+48% chance to roll 3 or 4 for each Ice or Holy elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -8310,7 +8310,7 @@
         },
         {
           "id": "150730",
-          "name": "+48% chance to roll 3 or 4 for each Ice or Holy elemental...",
+          "name": "+48% chance to roll 3 or 4 for each Ice or Holy elemental Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -8864,7 +8864,7 @@
         },
         {
           "id": "151925",
-          "name": "+48% chance to roll 1 or 6 for each Human, Aquatic, or De...",
+          "name": "+48% chance to roll 1 or 6 for each Human, Aquatic, or Delement",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -8872,7 +8872,7 @@
         },
         {
           "id": "151926",
-          "name": "+48% chance to roll 1 or 6 for each Human, Aquatic, or De...",
+          "name": "+48% chance to roll 1 or 6 for each Human, Aquatic, or Delement",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -8880,7 +8880,7 @@
         },
         {
           "id": "151927",
-          "name": "+48% chance to roll 2 or 5 for each Beast, Reptile, or Un...",
+          "name": "+48% chance to roll 2 or 5 for each Beast, Reptile, or Undead type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -8888,7 +8888,7 @@
         },
         {
           "id": "151928",
-          "name": "+48% chance to roll 2 or 5 for each Beast, Reptile, or Un...",
+          "name": "+48% chance to roll 2 or 5 for each Beast, Reptile, or Undead type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -8896,7 +8896,7 @@
         },
         {
           "id": "151929",
-          "name": "+48% chance to roll 3 or 4 for each Plant, Fairy, or Mech...",
+          "name": "+48% chance to roll 3 or 4 for each Plant, Fairy, or Mechanical type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",
@@ -8904,7 +8904,7 @@
         },
         {
           "id": "151930",
-          "name": "+48% chance to roll 3 or 4 for each Plant, Fairy, or Mech...",
+          "name": "+48% chance to roll 3 or 4 for each Plant, Fairy, or Mechanical type Familiar on your active lineup",
           "flatBonus": 0,
           "multiplierBonus": 1,
           "condition": "true",

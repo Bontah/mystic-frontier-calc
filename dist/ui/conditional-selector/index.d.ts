@@ -13,7 +13,7 @@ export interface ConditionalSelectorConfig {
     variantPillsId: string;
     triggerNameId: string;
     displayId: string;
-    rankSelectId?: string;
+    getRank?: () => string | null;
     prePatchCheckboxId?: string;
     onSelect?: (conditional: ConditionalBonus) => void;
     onClear?: () => void;

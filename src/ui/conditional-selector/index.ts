@@ -19,7 +19,7 @@ export interface ConditionalSelectorConfig {
   variantPillsId: string;
   triggerNameId: string;
   displayId: string;
-  rankSelectId?: string;
+  getRank?: () => string | null;
   prePatchCheckboxId?: string;
   onSelect?: (conditional: ConditionalBonus) => void;
   onClear?: () => void;
@@ -97,9 +97,7 @@ export function createConditionalSelector(
     if (!searchInput || !resultsContainer) return;
 
     const query = searchInput.value.toLowerCase().trim();
-    const selectedRank = config.rankSelectId
-      ? getElement<HTMLSelectElement>(config.rankSelectId)?.value
-      : null;
+    const selectedRank = config.getRank?.() || null;
     const prePatch = config.prePatchCheckboxId
       ? getElement<HTMLInputElement>(config.prePatchCheckboxId)?.checked
       : false;

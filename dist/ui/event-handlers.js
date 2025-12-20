@@ -6,15 +6,17 @@ import { store, selectors } from '../state/store.js';
 import { setupNavigation } from './navigation.js';
 import { calculate, setCalcFamiliar, deleteCalcFamiliar, resetAllFamiliars, loadWave, saveToCurrentWave, addFamiliarToRoster, deleteFamiliarFromRoster, toggleFamiliarDisabled, switchCharacter, } from './actions.js';
 import { updateRosterList } from './components/roster-item.js';
-import { createIconDropdown, ELEMENT_OPTIONS, TYPE_OPTIONS } from './components/icon-dropdown.js';
+import { createIconDropdown, RANK_OPTIONS, ELEMENT_OPTIONS, TYPE_OPTIONS } from './components/icon-dropdown.js';
 import { saveState } from '../state/persistence.js';
 import { createConditionalSelector } from './conditional-selector/index.js';
 // Module-level conditional selector instances
 let modalConditionalSelector = null;
 let rosterConditionalSelector = null;
 // Module-level icon dropdown instances
+let modalRankDropdown = null;
 let modalElementDropdown = null;
 let modalTypeDropdown = null;
+let rosterRankDropdown = null;
 let rosterElementDropdown = null;
 let rosterTypeDropdown = null;
 /**
@@ -38,6 +40,15 @@ export function setupEventHandlers() {
  */
 function setupIconDropdowns() {
     // Modal dropdowns
+    modalRankDropdown = createIconDropdown({
+        containerId: 'familiarEditRankContainer',
+        options: RANK_OPTIONS,
+        defaultValue: '',
+        onChange: () => {
+            // Trigger conditional search update when rank changes
+            modalConditionalSelector?.search();
+        },
+    });
     modalElementDropdown = createIconDropdown({
         containerId: 'familiarEditElementContainer',
         options: ELEMENT_OPTIONS,
@@ -49,6 +60,15 @@ function setupIconDropdowns() {
         defaultValue: 'Human',
     });
     // Roster form dropdowns
+    rosterRankDropdown = createIconDropdown({
+        containerId: 'rosterRankContainer',
+        options: RANK_OPTIONS,
+        defaultValue: 'Common',
+        onChange: () => {
+            // Trigger conditional search update when rank changes
+            rosterConditionalSelector?.search();
+        },
+    });
     rosterElementDropdown = createIconDropdown({
         containerId: 'rosterElementContainer',
         options: ELEMENT_OPTIONS,
@@ -200,12 +220,10 @@ function openFamiliarModal(slot) {
     }
     // Populate form
     const nameInput = document.getElementById('familiarEditName');
-    const rankSelect = document.getElementById('familiarEditRank');
     if (nameInput)
         nameInput.value = fam?.name || '';
-    if (rankSelect)
-        rankSelect.value = fam?.rank || '';
-    // Set icon dropdowns
+    // Set dropdowns
+    modalRankDropdown?.setValue(fam?.rank || '');
     modalElementDropdown?.setValue(fam?.element || 'None');
     modalTypeDropdown?.setValue(fam?.type || 'Human');
     // Set conditional if exists
@@ -228,14 +246,12 @@ function openRosterEditModal(id) {
     store.setState({ editingFamiliarId: id });
     // Populate inline form with familiar data
     const nameInput = document.getElementById('rosterName');
-    const rankSelect = document.getElementById('rosterRank');
     const cancelBtn = document.getElementById('rosterCancelBtn');
     const addBtn = document.getElementById('rosterAddBtn');
     if (nameInput)
         nameInput.value = familiar.name;
-    if (rankSelect)
-        rankSelect.value = familiar.rank;
-    // Set icon dropdowns
+    // Set dropdowns
+    rosterRankDropdown?.setValue(familiar.rank);
     rosterElementDropdown?.setValue(familiar.element);
     rosterTypeDropdown?.setValue(familiar.type);
     if (cancelBtn)
@@ -292,7 +308,7 @@ function setupModalConditionalSelector() {
         variantPillsId: 'bonusVariantPills',
         triggerNameId: 'selectedTriggerName',
         displayId: 'selectedCondDisplay',
-        rankSelectId: 'familiarEditRank',
+        getRank: () => modalRankDropdown?.getValue() || null,
         prePatchCheckboxId: 'modalPrePatch',
     });
     // Search input event
@@ -354,13 +370,6 @@ function setupModalConditionalSelector() {
             modalConditionalSelector?.search();
         });
     }
-    // Rank select change - re-search when rank changes
-    const rankSelect = document.getElementById('familiarEditRank');
-    if (rankSelect) {
-        rankSelect.addEventListener('change', () => {
-            modalConditionalSelector?.search();
-        });
-    }
 }
 /**
  * Setup roster conditional selector
@@ -373,7 +382,7 @@ function setupRosterConditionalSelector() {
         variantPillsId: 'rosterBonusVariantPills',
         triggerNameId: 'rosterSelectedTriggerName',
         displayId: 'selectedConditionalDisplay',
-        rankSelectId: 'rosterRank',
+        getRank: () => rosterRankDropdown?.getValue() || null,
         prePatchCheckboxId: 'prePatchFam',
     });
     // Search input event
@@ -435,13 +444,6 @@ function setupRosterConditionalSelector() {
             rosterConditionalSelector?.search();
         });
     }
-    // Rank select change - re-search when rank changes
-    const rankSelect = document.getElementById('rosterRank');
-    if (rankSelect) {
-        rankSelect.addEventListener('change', () => {
-            rosterConditionalSelector?.search();
-        });
-    }
 }
 /**
  * Setup familiar modal save button
@@ -458,11 +460,10 @@ function setupFamiliarModalSave() {
 function saveFamiliarFromModal() {
     const slotInput = document.getElementById('familiarEditSlot');
     const nameInput = document.getElementById('familiarEditName');
-    const rankSelect = document.getElementById('familiarEditRank');
-    if (!slotInput || !rankSelect)
+    if (!slotInput)
         return;
     const slot = parseInt(slotInput.value);
-    const rank = rankSelect.value;
+    const rank = (modalRankDropdown?.getValue() || '');
     if (!rank) {
         alert('Please select a rank');
         return;
@@ -502,12 +503,12 @@ function setupRosterFormEvents() {
  */
 function addFamiliarFromRosterForm() {
     const nameInput = document.getElementById('rosterName');
-    const rankSelect = document.getElementById('rosterRank');
     const name = nameInput?.value?.trim();
     if (!name) {
         alert('Please enter a familiar name');
         return;
     }
+    const rank = (rosterRankDropdown?.getValue() || 'Common');
     const element = (rosterElementDropdown?.getValue() || 'None');
     const type = (rosterTypeDropdown?.getValue() || 'Human');
     const state = store.getState();
@@ -524,7 +525,7 @@ function addFamiliarFromRosterForm() {
             roster[famIdx] = {
                 ...roster[famIdx],
                 name,
-                rank: rankSelect.value,
+                rank,
                 element,
                 type,
                 conditional: rosterConditionalSelector?.getSelected() ?? null,
@@ -539,7 +540,7 @@ function addFamiliarFromRosterForm() {
         // Add new familiar
         addFamiliarToRoster({
             name,
-            rank: rankSelect.value,
+            rank,
             element,
             type,
             conditional: rosterConditionalSelector?.getSelected() ?? null,
@@ -560,18 +561,16 @@ function cancelRosterEdit() {
  */
 function clearRosterForm() {
     const nameInput = document.getElementById('rosterName');
-    const rankSelect = document.getElementById('rosterRank');
     const cancelBtn = document.getElementById('rosterCancelBtn');
     const addBtn = document.getElementById('rosterAddBtn');
     if (nameInput)
         nameInput.value = '';
-    if (rankSelect)
-        rankSelect.value = 'Common';
     if (cancelBtn)
         cancelBtn.style.display = 'none';
     if (addBtn)
         addBtn.textContent = 'Add to Roster';
-    // Reset icon dropdowns
+    // Reset dropdowns
+    rosterRankDropdown?.setValue('Common');
     rosterElementDropdown?.setValue('None');
     rosterTypeDropdown?.setValue('Human');
     rosterConditionalSelector?.clear();

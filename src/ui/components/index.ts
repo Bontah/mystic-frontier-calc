@@ -28,6 +28,7 @@ export {
 
 export {
   createIconDropdown,
+  RANK_OPTIONS,
   ELEMENT_OPTIONS,
   TYPE_OPTIONS,
 } from './icon-dropdown.js';

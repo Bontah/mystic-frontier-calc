@@ -172,13 +172,7 @@
       <div class="roster-add-form">
         <div class="roster-inputs">
           <input type="text" id="rosterName" placeholder="Familiar name...">
-          <select id="rosterRank">
-            <option value="Common">Common (d3)</option>
-            <option value="Rare">Rare (d4)</option>
-            <option value="Epic">Epic (d5)</option>
-            <option value="Unique">Unique (d6)</option>
-            <option value="Legendary">Legendary (d6)</option>
-          </select>
+          <div id="rosterRankContainer"></div>
           <div id="rosterElementContainer"></div>
           <div id="rosterTypeContainer"></div>
           <button id="rosterAddBtn" class="add-btn" data-action="add-to-roster">Add to Roster</button>
@@ -516,14 +510,7 @@
         </div>
         <div class="form-group">
           <label>Rank</label>
-          <select id="familiarEditRank">
-            <option value="">-- Select Rank --</option>
-            <option value="Common">Common (d3)</option>
-            <option value="Rare">Rare (d4)</option>
-            <option value="Epic">Epic (d5)</option>
-            <option value="Unique">Unique (d6)</option>
-            <option value="Legendary">Legendary (d6)</option>
-          </select>
+          <div id="familiarEditRankContainer"></div>
         </div>
         <div class="form-group">
           <label>Element</label>

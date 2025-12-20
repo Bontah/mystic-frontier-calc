@@ -49,9 +49,7 @@ export function createConditionalSelector(config) {
         if (!searchInput || !resultsContainer)
             return;
         const query = searchInput.value.toLowerCase().trim();
-        const selectedRank = config.rankSelectId
-            ? getElement(config.rankSelectId)?.value
-            : null;
+        const selectedRank = config.getRank?.() || null;
         const prePatch = config.prePatchCheckboxId
             ? getElement(config.prePatchCheckboxId)?.checked
             : false;

@@ -2,6 +2,17 @@
  * Custom dropdown component with icon support
  */
 /**
+ * Rank options with colors
+ */
+export const RANK_OPTIONS = [
+    { value: '', label: '-- Select Rank --' },
+    { value: 'Common', label: 'Common (D3)', color: '#9d9d9d' },
+    { value: 'Rare', label: 'Rare (D4)', color: '#0070dd' },
+    { value: 'Epic', label: 'Epic (D5)', color: '#a335ee' },
+    { value: 'Unique', label: 'Unique (D6)', color: '#ff8000' },
+    { value: 'Legendary', label: 'Legendary (D6)', color: '#1eff00' },
+];
+/**
  * Element options with icons
  */
 export const ELEMENT_OPTIONS = [
@@ -51,9 +62,10 @@ export function createIconDropdown(config) {
     function renderSelected() {
         const option = config.options.find(o => o.value === currentValue);
         if (option) {
+            const colorStyle = option.color ? `style="color: ${option.color}"` : '';
             selected.innerHTML = `
         ${option.icon ? `<img src="${option.icon}" alt="" class="icon-dropdown-icon">` : ''}
-        <span class="icon-dropdown-label">${option.label}</span>
+        <span class="icon-dropdown-label" ${colorStyle}>${option.label}</span>
         <span class="icon-dropdown-arrow">▼</span>
       `;
         }
@@ -67,13 +79,16 @@ export function createIconDropdown(config) {
     // Render options list
     function renderOptions() {
         optionsList.innerHTML = config.options
-            .map(option => `
+            .map(option => {
+            const colorStyle = option.color ? `style="color: ${option.color}"` : '';
+            return `
         <div class="icon-dropdown-option ${option.value === currentValue ? 'selected' : ''}"
              data-value="${option.value}">
           ${option.icon ? `<img src="${option.icon}" alt="" class="icon-dropdown-icon">` : ''}
-          <span class="icon-dropdown-label">${option.label}</span>
+          <span class="icon-dropdown-label" ${colorStyle}>${option.label}</span>
         </div>
-      `)
+      `;
+        })
             .join('');
     }
     // Position the dropdown options relative to the selected element

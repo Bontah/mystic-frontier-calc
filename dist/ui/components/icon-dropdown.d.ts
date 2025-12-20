@@ -5,6 +5,7 @@ export interface DropdownOption {
     value: string;
     label: string;
     icon?: string;
+    color?: string;
 }
 export interface IconDropdownConfig {
     containerId: string;
@@ -13,6 +14,10 @@ export interface IconDropdownConfig {
     placeholder?: string;
     onChange?: (value: string) => void;
 }
+/**
+ * Rank options with colors
+ */
+export declare const RANK_OPTIONS: DropdownOption[];
 /**
  * Element options with icons
  */

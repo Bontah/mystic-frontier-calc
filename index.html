@@ -19,297 +19,155 @@
 
   <!-- Calculator Page -->
   <div id="page-calculator" class="page active">
-    <!-- Wave Selector -->
-    <div class="wave-selector">
-      <button class="wave-tab wave-1" onclick="loadWave(1)">Wave 1</button>
-      <button class="wave-tab wave-2" onclick="loadWave(2)">Wave 2</button>
-      <button class="wave-tab wave-3" onclick="loadWave(3)">Wave 3</button>
-      <button class="save-wave-btn" onclick="saveToCurrentWave()">Save to Wave</button>
-    </div>
-
-    <!-- Familiars Section -->
+    <!-- Familiars & Waves Section -->
     <div class="section">
-      <h2>Familiars <span id="currentWaveLabel"></span></h2>
-      <div class="monster-row">
-        <div class="monster-group">
-          <label>Fam. 1 Name</label>
-          <input type="text" id="monster1Name" class="familiar-name-input" placeholder="Name (optional)">
-          <label style="margin-top: 10px;">Fam. 1 Rank</label>
-          <select id="monster1Rank" onchange="onRankChange(1)">
-            <option value="">-- Select Rank --</option>
-            <option value="Common">Common (d3)</option>
-            <option value="Rare">Rare (d4)</option>
-            <option value="Epic">Epic (d5)</option>
-            <option value="Unique">Unique (d6)</option>
-            <option value="Legendary">Legendary (d6)</option>
-          </select>
-          <label style="margin-top: 10px;">Fam. 1 Element</label>
-          <select id="monster1Element" onchange="calculate()">
-            <option value="None">None</option>
-            <option value="Fire">Fire</option>
-            <option value="Poison">Poison</option>
-            <option value="Lightning">Lightning</option>
-            <option value="Ice">Ice</option>
-            <option value="Dark">Dark</option>
-            <option value="Holy">Holy</option>
-          </select>
-          <label style="margin-top: 10px;">Fam. 1 Type</label>
-          <select id="monster1Type" onchange="calculate()">
-            <option value="Human">Human</option>
-            <option value="Beast">Beast</option>
-            <option value="Plant">Plant</option>
-            <option value="Aquatic">Aquatic</option>
-            <option value="Fairy">Fairy</option>
-            <option value="Reptile">Reptile</option>
-            <option value="Devil">Devil</option>
-            <option value="Undead">Undead</option>
-            <option value="Machine">Machine</option>
-          </select>
+      <div class="familiars-header">
+        <h2>Familiars <span id="currentWaveLabel"></span></h2>
+        <button class="reset-all-btn" onclick="resetAllFamiliars()">Reset All</button>
+      </div>
+      <div class="familiars-layout">
+        <!-- Left: Stacked Familiars -->
+        <div class="familiars-stack" id="familiarsGrid">
+          <!-- Populated by JavaScript -->
         </div>
-        <div class="monster-group">
-          <label>Fam. 2 Name</label>
-          <input type="text" id="monster2Name" class="familiar-name-input" placeholder="Name (optional)">
-          <label style="margin-top: 10px;">Fam. 2 Rank</label>
-          <select id="monster2Rank" onchange="onRankChange(2)">
-            <option value="">-- Select Rank --</option>
-            <option value="Common">Common (d3)</option>
-            <option value="Rare">Rare (d4)</option>
-            <option value="Epic">Epic (d5)</option>
-            <option value="Unique">Unique (d6)</option>
-            <option value="Legendary">Legendary (d6)</option>
-          </select>
-          <label style="margin-top: 10px;">Fam. 2 Element</label>
-          <select id="monster2Element" onchange="calculate()">
-            <option value="None">None</option>
-            <option value="Fire">Fire</option>
-            <option value="Poison">Poison</option>
-            <option value="Lightning">Lightning</option>
-            <option value="Ice">Ice</option>
-            <option value="Dark">Dark</option>
-            <option value="Holy">Holy</option>
-          </select>
-          <label style="margin-top: 10px;">Fam. 2 Type</label>
-          <select id="monster2Type" onchange="calculate()">
-            <option value="Human">Human</option>
-            <option value="Beast">Beast</option>
-            <option value="Plant">Plant</option>
-            <option value="Aquatic">Aquatic</option>
-            <option value="Fairy">Fairy</option>
-            <option value="Reptile">Reptile</option>
-            <option value="Devil">Devil</option>
-            <option value="Undead">Undead</option>
-            <option value="Machine">Machine</option>
-          </select>
-        </div>
-        <div class="monster-group">
-          <label>Fam. 3 Name</label>
-          <input type="text" id="monster3Name" class="familiar-name-input" placeholder="Name (optional)">
-          <label style="margin-top: 10px;">Fam. 3 Rank</label>
-          <select id="monster3Rank" onchange="onRankChange(3)">
-            <option value="">-- Select Rank --</option>
-            <option value="Common">Common (d3)</option>
-            <option value="Rare">Rare (d4)</option>
-            <option value="Epic">Epic (d5)</option>
-            <option value="Unique">Unique (d6)</option>
-            <option value="Legendary">Legendary (d6)</option>
-          </select>
-          <label style="margin-top: 10px;">Fam. 3 Element</label>
-          <select id="monster3Element" onchange="calculate()">
-            <option value="None">None</option>
-            <option value="Fire">Fire</option>
-            <option value="Poison">Poison</option>
-            <option value="Lightning">Lightning</option>
-            <option value="Ice">Ice</option>
-            <option value="Dark">Dark</option>
-            <option value="Holy">Holy</option>
-          </select>
-          <label style="margin-top: 10px;">Fam. 3 Type</label>
-          <select id="monster3Type" onchange="calculate()">
-            <option value="Human">Human</option>
-            <option value="Beast">Beast</option>
-            <option value="Plant">Plant</option>
-            <option value="Aquatic">Aquatic</option>
-            <option value="Fairy">Fairy</option>
-            <option value="Reptile">Reptile</option>
-            <option value="Devil">Devil</option>
-            <option value="Undead">Undead</option>
-            <option value="Machine">Machine</option>
-          </select>
+        <!-- Right: Waves -->
+        <div class="waves-panel">
+          <div class="waves-header">Expedition Waves</div>
+          <div class="wave-buttons">
+            <button class="wave-tab wave-1" onclick="loadWave(1)">Wave 1</button>
+            <button class="wave-tab wave-2" onclick="loadWave(2)">Wave 2</button>
+            <button class="wave-tab wave-3" onclick="loadWave(3)">Wave 3</button>
+          </div>
+          <button class="save-wave-btn" onclick="saveToCurrentWave()">Save to Wave</button>
         </div>
       </div>
     </div>
 
-    <!-- Wave Presets Section -->
-    <div class="section">
-      <h2>Save Wave as Preset</h2>
-      <div class="lineup-controls">
-        <input type="text" id="lineupName" class="lineup-name-input" placeholder="Enter preset name...">
-        <button class="save-lineup-btn" onclick="saveLineup()">Save Preset</button>
-      </div>
-      <div id="savedLineupsList" class="saved-lineups-list">
-        <!-- Populated by JavaScript -->
-      </div>
-    </div>
-
-    <!-- Conditional Bonuses Section -->
-    <div class="section">
-      <h2>Conditional Bonuses</h2>
-      <div class="config-section-title">Bonus Library</div>
-      <div class="config-search">
-        <input type="text" id="condBonusSearch" placeholder="Search bonuses..." oninput="searchCondBonuses()">
-        <label class="prepatch-label"><input type="checkbox" id="prePatchCalc" onchange="searchCondBonuses()"> Pre-patch fam</label>
-      </div>
-      <div id="condBonusSearchResults" class="config-results" style="display: none;"></div>
-      <div class="config-section-title">Active Conditionals</div>
-      <div id="conditionalList" class="conditional-list">
-        <!-- Populated by JavaScript -->
-      </div>
-
-      <div class="add-form" style="display: none">
-        <h3>+ Add Custom Conditional Bonus</h3>
-        <div class="form-row">
-          <div class="form-group wide">
-            <label>Name</label>
-            <input type="text" id="newCondName" placeholder="e.g. Odd Dice 2 Bonus">
-          </div>
-          <div class="form-group">
-            <label>Flat Bonus</label>
-            <input type="number" id="newCondFlat" value="0" step="1">
-          </div>
-          <div class="form-group">
-            <label>Multiplier (e.g. 1.6)</label>
-            <input type="number" id="newCondMult" value="1" step="0.1">
+    <!-- Two-Column Layout: Difficulty+Dice | Bonus Items -->
+    <div class="calc-row">
+      <!-- Left Column: Difficulty + Dice stacked -->
+      <div class="calc-left">
+        <!-- Difficulty Section -->
+        <div class="section">
+          <h2>Difficulty</h2>
+          <div class="difficulty-input">
+            <label for="difficulty" style="margin: 0;">Target to beat:</label>
+            <input type="number" id="difficulty" value="50" min="0" onchange="calculate()">
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group" style="flex: 1; min-width: 100%;">
-            <label>Condition (JavaScript)</label>
-            <textarea id="newCondCondition" placeholder="e.g. dice[1] % 2 === 1"></textarea>
-            <div class="help-text">
-              Available variables: <code>dice[0]</code>, <code>dice[1]</code>, <code>dice[2]</code> (values based on rank),
-              <code>familiars[0]</code>, <code>familiars[1]</code>, <code>familiars[2]</code> (each has <code>.type</code>, <code>.element</code>, and <code>.rank</code>)
+
+        <!-- Dice Section -->
+        <div class="section">
+          <h2>Dice</h2>
+          <div class="dice-row">
+            <div class="dice-group">
+              <label>Dice 1</label>
+              <select id="dice1" onchange="calculate()">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+              </select>
             </div>
-            <div class="help-text">
-              Examples: <code>dice[0] >= 5</code> · <code>familiars[0].type === "Beast"</code> · <code>dice.every(d => d % 2 === 0)</code>
+            <div class="dice-group">
+              <label>Dice 2</label>
+              <select id="dice2" onchange="calculate()">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+              </select>
             </div>
-            <div id="conditionError" class="error-text"></div>
+            <div class="dice-group">
+              <label>Dice 3</label>
+              <select id="dice3" onchange="calculate()">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+              </select>
+            </div>
+          </div>
+          <!-- Active Conditionals Summary -->
+          <div class="conditionals-summary">
+            <div class="conditionals-summary-header">Active Conditionals</div>
+            <div id="waveSummaryConditionals" class="conditionals-summary-list">
+              <!-- Populated by JavaScript -->
+            </div>
           </div>
         </div>
-        <button class="add-btn" onclick="addConditionalBonus()">Add Conditional</button>
-      </div>
-    </div>
-
-    <!-- Bonus Items Section -->
-    <div class="section">
-      <h2>Bonus Items</h2>
-      <div class="config-section-title">Item Library</div>
-      <div class="config-search">
-        <input type="text" id="bonusItemSearch" placeholder="Search items..." oninput="searchBonusItems()">
-      </div>
-      <div id="bonusItemSearchResults" class="config-results" style="display: none;"></div>
-      <div class="config-section-title">Active Items</div>
-      <div id="bonusItemsList" class="bonus-list">
-        <!-- Populated by JavaScript -->
       </div>
 
-      <div class="add-form" style="display: none">
-        <h3>+ Add Bonus Item</h3>
-        <div class="form-row">
-          <div class="form-group wide">
-            <label>Name</label>
-            <input type="text" id="newItemName" placeholder="e.g. Power Ring">
+      <!-- Right Column: Bonus Items -->
+      <div class="calc-right">
+        <div class="section">
+          <h2>Bonus Items</h2>
+          <div class="config-section-title">Item Library</div>
+          <div class="config-search">
+            <input type="text" id="bonusItemSearch" placeholder="Search items..." oninput="searchBonusItems()">
           </div>
-          <div class="form-group">
-            <label>Flat Bonus</label>
-            <input type="number" id="newItemFlat" value="0" step="1">
+          <div id="bonusItemSearchResults" class="config-results" style="display: none;"></div>
+          <div class="config-section-title">Active Items</div>
+          <div id="bonusItemsList" class="bonus-list">
+            <!-- Populated by JavaScript -->
           </div>
-          <div class="form-group">
-            <label>Multiplier (e.g. 1.6)</label>
-            <input type="number" id="newItemMult" value="1" step="0.1">
+
+          <div class="add-form" style="display: none">
+            <h3>+ Add Bonus Item</h3>
+            <div class="form-row">
+              <div class="form-group wide">
+                <label>Name</label>
+                <input type="text" id="newItemName" placeholder="e.g. Power Ring">
+              </div>
+              <div class="form-group">
+                <label>Flat Bonus</label>
+                <input type="number" id="newItemFlat" value="0" step="1">
+              </div>
+              <div class="form-group">
+                <label>Multiplier (e.g. 1.6)</label>
+                <input type="number" id="newItemMult" value="1" step="0.1">
+              </div>
+            </div>
+            <button class="add-btn" onclick="addBonusItem()">Add Item</button>
           </div>
-        </div>
-        <button class="add-btn" onclick="addBonusItem()">Add Item</button>
-      </div>
-    </div>
-
-    <!-- Difficulty Section -->
-    <div class="section">
-      <h2>Difficulty</h2>
-      <div class="difficulty-input">
-        <label for="difficulty" style="margin: 0;">Target to beat:</label>
-        <input type="number" id="difficulty" value="50" min="0" onchange="calculate()">
-      </div>
-    </div>
-
-    <!-- Dice Section -->
-    <div class="section">
-      <h2>Dice</h2>
-      <div class="dice-row">
-        <div class="dice-group">
-          <label>Dice 1</label>
-          <select id="dice1" onchange="calculate()">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-          </select>
-        </div>
-        <div class="dice-group">
-          <label>Dice 2</label>
-          <select id="dice2" onchange="calculate()">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-          </select>
-        </div>
-        <div class="dice-group">
-          <label>Dice 3</label>
-          <select id="dice3" onchange="calculate()">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-          </select>
         </div>
       </div>
     </div>
 
     <!-- Results Section -->
     <div class="results">
-      <h2 style="margin-top: 0;">Results</h2>
-      <div class="result-breakdown">
-        <div class="result-item">
-          <div class="label">Total Flat Bonus</div>
-          <div class="value" id="flatBonus">+0</div>
+      <div class="result-main">
+        <div class="result-left">
+          <div class="final-result" id="finalResult">3</div>
+          <div class="result-status" id="resultStatus">FAIL</div>
+          <div class="difference" id="difference">Failed by 47</div>
         </div>
-        <div class="result-item">
-          <div class="label">Dice Sum</div>
-          <div class="value" id="diceSum">3</div>
-        </div>
-        <div class="result-item">
-          <div class="label">Total Multiplier</div>
-          <div class="value" id="totalMult">×1.0</div>
-        </div>
-        <div class="result-item">
-          <div class="label">Before Rounding</div>
-          <div class="value" id="beforeRound">3</div>
+        <div class="result-right">
+          <div class="result-stat">
+            <span class="stat-label">Flat Bonus</span>
+            <span class="stat-value" id="flatBonus">+0</span>
+          </div>
+          <div class="result-stat">
+            <span class="stat-label">Dice Sum</span>
+            <span class="stat-value" id="diceSum">3</span>
+          </div>
+          <div class="result-stat">
+            <span class="stat-label">Multiplier</span>
+            <span class="stat-value" id="totalMult">×1.0</span>
+          </div>
         </div>
       </div>
-      <div class="final-result" id="finalResult">3</div>
-      <div class="result-status" id="resultStatus">FAIL</div>
-      <div class="difference" id="difference">Failed by 47</div>
-      <div id="activeBonusesDisplay" style="margin-top: 15px; font-size: 12px; color: #888;"></div>
+      <div id="activeBonusesDisplay" class="active-bonuses-display"></div>
 
       <!-- Reroll Suggestions -->
       <div id="rerollSection" class="reroll-section" style="display: none;">
-        <div class="reroll-title">🎯 Reroll Suggestions</div>
+        <div class="reroll-title">Reroll Suggestions</div>
         <div id="rerollSuggestions" class="reroll-suggestions">
           <!-- Populated by JavaScript -->
         </div>
@@ -364,9 +222,17 @@
           <button id="rosterCancelBtn" class="cancel-btn" onclick="cancelEdit()" style="display: none;">Cancel</button>
         </div>
         <div class="roster-conditional-search">
-          <input type="text" id="rosterConditionalSearch" placeholder="Search conditional bonus..." oninput="searchRosterConditional()">
+          <input type="text" id="rosterConditionalSearch" placeholder="Search condition (e.g. Fire, Beast, dice)..." oninput="searchRosterConditional()">
           <label class="prepatch-label"><input type="checkbox" id="prePatchFam" onchange="searchRosterConditional()"> Pre-patch fam</label>
           <div id="rosterConditionalResults" class="config-results" style="display: none;"></div>
+          <!-- Step 2: Select bonus variant -->
+          <div id="rosterBonusVariantSection" class="bonus-variant-section" style="display: none;">
+            <div class="bonus-variant-header">
+              <span class="variant-trigger-name" id="rosterSelectedTriggerName"></span>
+              <button class="change-trigger-btn" onclick="clearRosterTriggerSelection()">Change</button>
+            </div>
+            <div class="bonus-variant-pills" id="rosterBonusVariantPills"></div>
+          </div>
           <div id="selectedConditionalDisplay" class="selected-conditional" style="display: none;"></div>
         </div>
       </div>
@@ -691,6 +557,82 @@
         <button class="add-btn" onclick="addToRosterFromScan()">Add to Roster</button>
         <button class="secondary-btn" onclick="confirmExtraction()">Fill Form</button>
         <button class="cancel-btn" onclick="closeExtractionModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Familiar Edit Modal -->
+  <div id="familiarModal" class="modal" style="display: none;">
+    <div class="modal-content familiar-modal">
+      <h3 id="familiarModalTitle">Add Familiar</h3>
+      <input type="hidden" id="familiarEditSlot">
+      <div class="familiar-form">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="familiarEditName" placeholder="Familiar name...">
+        </div>
+        <div class="form-group">
+          <label>Rank</label>
+          <select id="familiarEditRank" onchange="showRankBasedConditionals()">
+            <option value="">-- Select Rank --</option>
+            <option value="Common">Common (d3)</option>
+            <option value="Rare">Rare (d4)</option>
+            <option value="Epic">Epic (d5)</option>
+            <option value="Unique">Unique (d6)</option>
+            <option value="Legendary">Legendary (d6)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Element</label>
+          <select id="familiarEditElement">
+            <option value="None">None</option>
+            <option value="Fire">Fire</option>
+            <option value="Poison">Poison</option>
+            <option value="Lightning">Lightning</option>
+            <option value="Ice">Ice</option>
+            <option value="Dark">Dark</option>
+            <option value="Holy">Holy</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="familiarEditType">
+            <option value="Human">Human</option>
+            <option value="Beast">Beast</option>
+            <option value="Plant">Plant</option>
+            <option value="Aquatic">Aquatic</option>
+            <option value="Fairy">Fairy</option>
+            <option value="Reptile">Reptile</option>
+            <option value="Devil">Devil</option>
+            <option value="Undead">Undead</option>
+            <option value="Machine">Machine</option>
+          </select>
+        </div>
+      </div>
+      <!-- Conditional Bonus Search - Two Step -->
+      <div class="modal-conditional-section">
+        <label>Conditional Bonus</label>
+        <!-- Step 1: Search for condition trigger -->
+        <div class="modal-conditional-search">
+          <input type="text" id="modalCondSearch" placeholder="Search condition (e.g. Fire, Beast, dice)..." oninput="searchModalConditional()">
+          <label class="prepatch-label"><input type="checkbox" id="modalPrePatch" onchange="searchModalConditional()"> Pre-patch</label>
+        </div>
+        <div id="modalCondResults" class="config-results" style="display: none;"></div>
+        <!-- Step 2: Select bonus variant (appears after trigger selection) -->
+        <div id="bonusVariantSection" class="bonus-variant-section" style="display: none;">
+          <div class="bonus-variant-header">
+            <span class="variant-trigger-name" id="selectedTriggerName"></span>
+            <button class="change-trigger-btn" onclick="clearTriggerSelection()">Change</button>
+          </div>
+          <div class="bonus-variant-pills" id="bonusVariantPills">
+            <!-- Pills rendered by JS -->
+          </div>
+        </div>
+        <div id="selectedCondDisplay" class="selected-conditional" style="display: none;"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" onclick="closeFamiliarModal()">Cancel</button>
+        <button class="add-btn" onclick="saveFamiliar()">Save</button>
       </div>
     </div>
   </div>

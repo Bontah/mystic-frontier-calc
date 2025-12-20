@@ -27,6 +27,458 @@ function showPage(pageName) {
   }
 }
 
+// ============================================
+// CALCULATOR FAMILIARS
+// ============================================
+
+// Array of 3 familiar slots for the calculator (null = empty slot)
+let calcFamiliars = [null, null, null];
+
+function renderFamiliarCards() {
+  const grid = document.getElementById('familiarsGrid');
+  if (!grid) return;
+
+  grid.innerHTML = calcFamiliars.map((fam, index) => {
+    if (!fam || !fam.rank) {
+      // Empty slot
+      return `
+        <div class="familiar-card empty" onclick="openFamiliarModal(${index})">
+          <div class="familiar-card-add">+ Add Familiar ${index + 1}</div>
+        </div>
+      `;
+    }
+
+    const rankClass = `rank-${fam.rank.toLowerCase()}`;
+
+    // Build conditional text with stats
+    let condText = null;
+    if (fam.conditional) {
+      const stats = [];
+      if (fam.conditional.flatBonus && fam.conditional.flatBonus !== 0) stats.push(`+${fam.conditional.flatBonus}`);
+      if (fam.conditional.multiplierBonus && fam.conditional.multiplierBonus !== 1 && fam.conditional.multiplierBonus !== 0) {
+        stats.push(`×${fam.conditional.multiplierBonus}`);
+      }
+      condText = `${fam.conditional.name}${stats.length ? ` (${stats.join(', ')})` : ''}`;
+    }
+
+    return `
+      <div class="familiar-card ${rankClass}">
+        <div class="familiar-card-info">
+          <div class="familiar-card-name">${fam.name || `Familiar ${index + 1}`}</div>
+          <div class="familiar-card-details">
+            ${fam.rank} · ${fam.element !== 'None' ? fam.element + ' · ' : ''}${fam.type}
+          </div>
+          <div class="familiar-card-conditional ${condText ? '' : 'none'}">
+            ${condText || 'No conditional'}
+          </div>
+        </div>
+        <div class="familiar-card-actions">
+          <button class="familiar-edit-btn" onclick="openFamiliarModal(${index})">Edit</button>
+          <button class="familiar-delete-btn" onclick="deleteFamiliar(${index})">×</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Track selected conditional in modal
+let modalSelectedConditional = null;
+// Track selected trigger for two-step selection
+let modalSelectedTrigger = null;
+let modalTriggerVariants = [];
+// Store grouped triggers for search
+let modalTriggerMatches = [];
+
+function openFamiliarModal(slot) {
+  const modal = document.getElementById('familiarModal');
+  const title = document.getElementById('familiarModalTitle');
+  const fam = calcFamiliars[slot];
+
+  document.getElementById('familiarEditSlot').value = slot;
+  title.textContent = fam && fam.rank ? 'Edit Familiar' : 'Add Familiar';
+
+  // Populate form
+  document.getElementById('familiarEditName').value = fam?.name || '';
+  document.getElementById('familiarEditRank').value = fam?.rank || '';
+  document.getElementById('familiarEditElement').value = fam?.element || 'None';
+  document.getElementById('familiarEditType').value = fam?.type || 'Human';
+
+  // Reset conditional search and two-step state
+  document.getElementById('modalCondSearch').value = '';
+  modalSelectedTrigger = null;
+  modalTriggerVariants = [];
+  document.getElementById('bonusVariantSection').style.display = 'none';
+
+  // Load existing conditional if any
+  modalSelectedConditional = fam?.conditional || null;
+  updateModalCondDisplay();
+
+  modal.style.display = 'flex';
+
+  // Show rank-based trigger suggestions
+  showRankBasedTriggers();
+}
+
+function updateModalCondDisplay() {
+  const display = document.getElementById('selectedCondDisplay');
+  if (modalSelectedConditional) {
+    const stats = [];
+    if (modalSelectedConditional.flatBonus && modalSelectedConditional.flatBonus !== 0) stats.push(`+${modalSelectedConditional.flatBonus}`);
+    if (modalSelectedConditional.multiplierBonus && modalSelectedConditional.multiplierBonus !== 1 && modalSelectedConditional.multiplierBonus !== 0) {
+      stats.push(`×${modalSelectedConditional.multiplierBonus}`);
+    }
+    display.innerHTML = `
+      <div class="cond-info">
+        <div class="cond-name">${escapeHtml(modalSelectedConditional.name)}</div>
+        <div class="cond-stats">${stats.join(' ')}</div>
+      </div>
+      <button class="remove-cond" onclick="removeModalConditional()">×</button>
+    `;
+    display.style.display = 'flex';
+  } else {
+    display.style.display = 'none';
+  }
+}
+
+// Group conditionals by their trigger (name) - returns Map of trigger name -> array of variants
+function groupConditionsByTrigger(bonuses) {
+  const grouped = new Map();
+  for (const bonus of bonuses) {
+    const key = bonus.name;
+    if (!grouped.has(key)) {
+      grouped.set(key, []);
+    }
+    grouped.get(key).push(bonus);
+  }
+  return grouped;
+}
+
+// Convert grouped triggers to array format for rendering
+function getTriggersArray(bonuses) {
+  const grouped = groupConditionsByTrigger(bonuses);
+  const triggers = [];
+  for (const [name, variants] of grouped) {
+    triggers.push({
+      name,
+      variants,
+      variantCount: variants.length
+    });
+  }
+  return triggers;
+}
+
+function searchModalConditional() {
+  const query = document.getElementById('modalCondSearch').value.toLowerCase().trim();
+  const prePatch = document.getElementById('modalPrePatch').checked;
+  const resultsContainer = document.getElementById('modalCondResults');
+  const rank = document.getElementById('familiarEditRank').value;
+
+  // If no query, show rank-based suggestions
+  if (query.length < 2) {
+    showRankBasedTriggers();
+    return;
+  }
+
+  // Filter bonuses by query and rank
+  let matchingBonuses = configConditionalBonuses.bonuses.filter(b => {
+    const nameMatch = b.name.toLowerCase().includes(query);
+    const rankMatch = !rank || !b.rank || b.rank === rank || b.rarity === rank;
+    const prePatchMatch = prePatch || !b.prePatch;
+    return nameMatch && rankMatch && prePatchMatch;
+  });
+
+  // Group by trigger and render
+  renderTriggerResults(getTriggersArray(matchingBonuses));
+}
+
+// Store current trigger matches for selection
+let modalCondMatches = [];
+
+function getRankColor(rank) {
+  const colors = {
+    'Common': '#9d9d9d',
+    'Rare': '#0070dd',
+    'Epic': '#a335ee',
+    'Unique': '#ff8000',
+    'Legendary': '#1eff00'
+  };
+  return colors[rank] || '#ffffff';
+}
+
+function showRankBasedTriggers() {
+  const rank = document.getElementById('familiarEditRank').value;
+  const prePatch = document.getElementById('modalPrePatch').checked;
+  const resultsContainer = document.getElementById('modalCondResults');
+
+  if (!rank) {
+    resultsContainer.innerHTML = '<div class="cond-suggestions-header">Select a rank to see conditionals</div>';
+    resultsContainer.style.display = 'block';
+    return;
+  }
+
+  // Filter conditionals matching the selected rank
+  const matchingBonuses = configConditionalBonuses.bonuses.filter(b => {
+    const rankMatch = b.rank === rank || b.rarity === rank;
+    const prePatchMatch = prePatch || !b.prePatch;
+    return rankMatch && prePatchMatch;
+  });
+
+  const triggers = getTriggersArray(matchingBonuses);
+
+  if (triggers.length === 0) {
+    resultsContainer.innerHTML = '<div class="cond-suggestions-header">No conditionals for ' + rank + '</div>';
+  } else {
+    const header = `<div class="cond-suggestions-header">${rank} conditions (${triggers.length}):</div>`;
+    resultsContainer.innerHTML = header + renderTriggerList(triggers);
+  }
+  resultsContainer.style.display = 'block';
+}
+
+function renderTriggerResults(triggers) {
+  const resultsContainer = document.getElementById('modalCondResults');
+  modalTriggerMatches = triggers;
+
+  if (triggers.length === 0) {
+    resultsContainer.innerHTML = '<div class="trigger-result-item">No matches found</div>';
+  } else {
+    resultsContainer.innerHTML = renderTriggerList(triggers);
+  }
+  resultsContainer.style.display = 'block';
+}
+
+function renderTriggerList(triggers) {
+  modalTriggerMatches = triggers;
+  return triggers.map((trigger, idx) => {
+    return `
+      <div class="trigger-result-item" onclick="selectTrigger(${idx})">
+        <span class="trigger-name">${escapeHtml(trigger.name)}</span>
+        <span class="trigger-variants">${trigger.variantCount} variant${trigger.variantCount > 1 ? 's' : ''}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectTrigger(idx) {
+  if (!modalTriggerMatches[idx]) return;
+
+  const trigger = modalTriggerMatches[idx];
+  modalSelectedTrigger = trigger.name;
+  modalTriggerVariants = trigger.variants;
+
+  // Hide search results, show bonus variant section
+  document.getElementById('modalCondResults').style.display = 'none';
+  document.getElementById('modalCondSearch').value = '';
+
+  // Show Step 2: Bonus variant selection
+  const variantSection = document.getElementById('bonusVariantSection');
+  document.getElementById('selectedTriggerName').textContent = trigger.name;
+
+  renderBonusPills(trigger.variants);
+  variantSection.style.display = 'block';
+}
+
+function renderBonusPills(variants) {
+  const container = document.getElementById('bonusVariantPills');
+
+  container.innerHTML = variants.map((v, idx) => {
+    const flat = v.flatBonus || 0;
+    const mult = v.multiplierBonus || 1;
+    const rarity = (v.rarity || v.rank || 'Common').toLowerCase();
+    const isBugged = isBuggedConditional(v);
+    const isSelected = modalSelectedConditional && modalSelectedConditional.id === v.id;
+
+    let bonusText = '';
+    if (flat !== 0) bonusText += `<span class="pill-flat">+${flat}</span>`;
+    if (mult !== 1) bonusText += `<span class="pill-mult">×${mult}</span>`;
+    if (!bonusText) bonusText = '<span class="pill-flat">+0</span>';
+
+    return `
+      <div class="bonus-pill rarity-${rarity}${isBugged ? ' bugged' : ''}${isSelected ? ' selected' : ''}"
+           onclick="selectBonusVariant(${idx})"
+           title="${isBugged ? 'This conditional is bugged in-game' : ''}">
+        ${bonusText}
+        <span class="pill-rarity">${v.rarity || v.rank || ''}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectBonusVariant(idx) {
+  if (!modalTriggerVariants[idx]) return;
+
+  modalSelectedConditional = modalTriggerVariants[idx];
+  updateModalCondDisplay();
+
+  // Re-render pills to show selection
+  renderBonusPills(modalTriggerVariants);
+}
+
+function clearTriggerSelection() {
+  modalSelectedTrigger = null;
+  modalTriggerVariants = [];
+  document.getElementById('bonusVariantSection').style.display = 'none';
+
+  // Show search again
+  showRankBasedTriggers();
+}
+
+function selectCondByIndex(idx) {
+  if (modalCondMatches[idx]) {
+    selectModalConditional(modalCondMatches[idx]);
+  }
+}
+
+function selectModalConditional(cond) {
+  modalSelectedConditional = cond;
+  updateModalCondDisplay();
+  document.getElementById('modalCondSearch').value = '';
+  document.getElementById('modalCondResults').style.display = 'none';
+  document.getElementById('bonusVariantSection').style.display = 'none';
+}
+
+function removeModalConditional() {
+  modalSelectedConditional = null;
+  updateModalCondDisplay();
+
+  // If we have a trigger selected, re-render pills without selection
+  if (modalTriggerVariants.length > 0) {
+    renderBonusPills(modalTriggerVariants);
+  }
+}
+
+function closeFamiliarModal() {
+  document.getElementById('familiarModal').style.display = 'none';
+}
+
+function saveFamiliar() {
+  const slot = parseInt(document.getElementById('familiarEditSlot').value);
+  const rank = document.getElementById('familiarEditRank').value;
+
+  if (!rank) {
+    alert('Please select a rank');
+    return;
+  }
+
+  calcFamiliars[slot] = {
+    name: document.getElementById('familiarEditName').value,
+    rank: rank,
+    element: document.getElementById('familiarEditElement').value,
+    type: document.getElementById('familiarEditType').value,
+    conditional: modalSelectedConditional
+  };
+
+  closeFamiliarModal();
+  rebuildConditionalBonuses();
+  renderFamiliarCards();
+  updateAllDiceOptions();
+  calculate();
+}
+
+function deleteFamiliar(slot) {
+  calcFamiliars[slot] = null;
+  rebuildConditionalBonuses();
+  renderFamiliarCards();
+  updateAllDiceOptions();
+  calculate();
+}
+
+function rebuildConditionalBonuses() {
+  // Rebuild conditionalBonuses array from all familiars
+  conditionalBonuses = [];
+  calcFamiliars.forEach(fam => {
+    if (fam?.conditional) {
+      conditionalBonuses.push({
+        name: fam.conditional.name,
+        flatBonus: fam.conditional.flatBonus || 0,
+        multiplierBonus: fam.conditional.multiplierBonus || 1,
+        condition: fam.conditional.condition
+      });
+    }
+  });
+  saveData();
+  renderWaveSummary();
+}
+
+function renderWaveSummary() {
+  const container = document.getElementById('waveSummaryConditionals');
+  if (!container) return;
+
+  // Get conditionals from current familiars
+  const activeConditionals = calcFamiliars
+    .filter(fam => fam?.conditional)
+    .map(fam => fam.conditional);
+
+  if (activeConditionals.length === 0) {
+    container.innerHTML = '<div class="conditionals-summary-empty">No conditionals</div>';
+    return;
+  }
+
+  container.innerHTML = activeConditionals.map(cond => {
+    const stats = [];
+    if (cond.flatBonus && cond.flatBonus !== 0) stats.push(`+${cond.flatBonus}`);
+    if (cond.multiplierBonus && cond.multiplierBonus !== 1 && cond.multiplierBonus !== 0) {
+      stats.push(`×${cond.multiplierBonus}`);
+    }
+    return `
+      <div class="conditionals-summary-item">
+        <span class="cond-name">${escapeHtml(cond.name)}</span>
+        ${stats.length ? `<span class="cond-stats">${stats.join(' ')}</span>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function resetAllFamiliars() {
+  calcFamiliars = [null, null, null];
+  conditionalBonuses = [];
+  renderFamiliarCards();
+  renderConditionalBonuses();
+  renderWaveSummary();
+  updateAllDiceOptions();
+  calculate();
+}
+
+function updateAllDiceOptions() {
+  for (let i = 1; i <= 3; i++) {
+    const fam = calcFamiliars[i - 1];
+    const rank = fam?.rank || '';
+    const diceGroup = document.getElementById(`dice${i}`)?.closest('.dice-group');
+
+    if (fam && fam.rank) {
+      // Show dice group and update options
+      if (diceGroup) diceGroup.style.display = '';
+      updateDiceOptionsForRank(i, rank);
+    } else {
+      // Hide dice group for empty slots
+      if (diceGroup) diceGroup.style.display = 'none';
+    }
+  }
+}
+
+function updateDiceOptionsForRank(diceNum, rank) {
+  const diceSelect = document.getElementById(`dice${diceNum}`);
+  if (!diceSelect) return;
+
+  const maxValues = { Common: 3, Rare: 4, Epic: 5, Unique: 6, Legendary: 6 };
+  const max = maxValues[rank] || 6;
+  const currentValue = parseInt(diceSelect.value) || 1;
+
+  diceSelect.innerHTML = '';
+  for (let i = 1; i <= max; i++) {
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = i;
+    diceSelect.appendChild(option);
+  }
+
+  diceSelect.value = Math.min(currentValue, max);
+}
+
+// Initialize familiar cards on page load
+document.addEventListener('DOMContentLoaded', function() {
+  renderFamiliarCards();
+});
+
 let currentWave = null;
 
 function saveToCurrentWave() {
@@ -35,15 +487,12 @@ function saveToCurrentWave() {
     return;
   }
 
-  // Get current calculator values
-  const calcFamiliars = [];
-  for (let i = 1; i <= 3; i++) {
-    calcFamiliars.push({
-      name: document.getElementById(`monster${i}Name`).value,
-      rank: document.getElementById(`monster${i}Rank`).value,
-      element: document.getElementById(`monster${i}Element`).value,
-      type: document.getElementById(`monster${i}Type`).value
-    });
+  // Get current calculator familiars (filter out empty slots)
+  const activeFamiliars = calcFamiliars.filter(f => f && f.rank);
+
+  if (activeFamiliars.length === 0) {
+    alert('Add at least one familiar first');
+    return;
   }
 
   // Free current wave first
@@ -53,13 +502,13 @@ function saveToCurrentWave() {
   const matched = [];
   const availableFamiliars = [...familiarRoster.filter(f => !f.wave)];
 
-  for (const calc of calcFamiliars) {
+  for (const calc of activeFamiliars) {
     const matchIndex = availableFamiliars.findIndex(f =>
       f.rank === calc.rank && f.element === calc.element && f.type === calc.type
     );
     if (matchIndex !== -1) {
       matched.push(availableFamiliars[matchIndex]);
-      availableFamiliars.splice(matchIndex, 1); // Remove so we don't match same familiar twice
+      availableFamiliars.splice(matchIndex, 1);
     }
   }
 
@@ -79,10 +528,10 @@ function saveToCurrentWave() {
 
   // Update label
   const label = document.getElementById('currentWaveLabel');
-  label.textContent = `(Wave ${currentWave} - ${matched.length}/3 assigned)`;
+  label.textContent = `(Wave ${currentWave} - ${matched.length}/${activeFamiliars.length} assigned)`;
 
-  if (matched.length < 3) {
-    alert(`Only ${matched.length} of 3 familiars found in roster. Add the missing ones to your roster first.`);
+  if (matched.length < activeFamiliars.length) {
+    alert(`Only ${matched.length} of ${activeFamiliars.length} familiars found in roster. Add the missing ones to your roster first.`);
   }
 }
 
@@ -101,60 +550,49 @@ function loadWave(waveNum) {
   currentWave = waveNum;
 
   if (waveFamiliars.length === 0) {
-    // No familiars assigned to this wave - clear the form
+    // No familiars assigned to this wave - clear all
     label.textContent = `(Wave ${waveNum} - Empty)`;
-    for (let i = 1; i <= 3; i++) {
-      document.getElementById(`monster${i}Name`).value = '';
-      document.getElementById(`monster${i}Rank`).value = '';
-      document.getElementById(`monster${i}Element`).value = 'None';
-      document.getElementById(`monster${i}Type`).value = 'Human';
-    }
+    calcFamiliars = [null, null, null];
     conditionalBonuses = [];
     saveData();
+    renderFamiliarCards();
     renderConditionalBonuses();
-    for (let i = 1; i <= 3; i++) {
-      updateDiceOptions(i);
-    }
+    renderWaveSummary();
+    updateAllDiceOptions();
     calculate();
     return;
   }
 
-  // Load familiars into calculator
-  for (let i = 1; i <= 3; i++) {
-    const fam = waveFamiliars[i - 1];
-    if (fam) {
-      document.getElementById(`monster${i}Name`).value = fam.name || '';
-      document.getElementById(`monster${i}Rank`).value = fam.rank;
-      document.getElementById(`monster${i}Element`).value = fam.element;
-      document.getElementById(`monster${i}Type`).value = fam.type;
-    } else {
-      // Clear slot if no familiar for this position
-      document.getElementById(`monster${i}Name`).value = '';
-      document.getElementById(`monster${i}Rank`).value = '';
-      document.getElementById(`monster${i}Element`).value = 'None';
-      document.getElementById(`monster${i}Type`).value = 'Human';
-    }
-  }
-
-  // Load conditionals from wave familiars
+  // Load familiars into calcFamiliars array
+  calcFamiliars = [null, null, null];
   conditionalBonuses = [];
-  waveFamiliars.forEach(fam => {
-    if (fam.conditional) {
-      conditionalBonuses.push({
-        name: fam.conditional.name,
-        flatBonus: fam.conditional.flatBonus || 0,
-        multiplierBonus: fam.conditional.multiplierBonus || 1,
-        condition: fam.conditional.condition
-      });
+
+  waveFamiliars.forEach((fam, index) => {
+    if (index < 3) {
+      calcFamiliars[index] = {
+        name: fam.name || '',
+        rank: fam.rank,
+        element: fam.element,
+        type: fam.type,
+        conditional: fam.conditional || null
+      };
+
+      if (fam.conditional) {
+        conditionalBonuses.push({
+          name: fam.conditional.name,
+          flatBonus: fam.conditional.flatBonus || 0,
+          multiplierBonus: fam.conditional.multiplierBonus || 1,
+          condition: fam.conditional.condition
+        });
+      }
     }
   });
-  saveData();
-  renderConditionalBonuses();
 
-  // Update dice options and recalculate
-  for (let i = 1; i <= 3; i++) {
-    updateDiceOptions(i);
-  }
+  saveData();
+  renderFamiliarCards();
+  renderConditionalBonuses();
+  renderWaveSummary();
+  updateAllDiceOptions();
   calculate();
 }
 
@@ -165,7 +603,6 @@ function loadWave(waveNum) {
 // Load from localStorage or use defaults (with fallback for environments where localStorage doesn't work)
 let bonusItems = [];
 let conditionalBonuses = [];
-let savedLineups = [];
 
 let characters = [];
 let currentCharacterId = null;
@@ -191,7 +628,6 @@ Object.defineProperty(window, 'familiarRoster', {
 try {
   bonusItems = JSON.parse(localStorage.getItem('bonusItems')) || [];
   conditionalBonuses = JSON.parse(localStorage.getItem('conditionalBonuses')) || [];
-  savedLineups = JSON.parse(localStorage.getItem('savedLineups')) || [];
   characters = JSON.parse(localStorage.getItem('characters')) || [];
   currentCharacterId = JSON.parse(localStorage.getItem('currentCharacterId')) || null;
 
@@ -225,7 +661,6 @@ try {
   console.log('localStorage not available, using in-memory storage');
   bonusItems = [];
   conditionalBonuses = [];
-  savedLineups = [];
   characters = [{ id: Date.now(), name: 'Main', roster: [] }];
   currentCharacterId = characters[0].id;
 }
@@ -234,7 +669,6 @@ function saveData() {
   try {
     localStorage.setItem('bonusItems', JSON.stringify(bonusItems));
     localStorage.setItem('conditionalBonuses', JSON.stringify(conditionalBonuses));
-    localStorage.setItem('savedLineups', JSON.stringify(savedLineups));
     localStorage.setItem('characters', JSON.stringify(characters));
     localStorage.setItem('currentCharacterId', JSON.stringify(currentCharacterId));
   } catch (e) {
@@ -325,13 +759,24 @@ function deleteCharacter() {
 
 let selectedRosterConditional = null;
 let editingFamiliarId = null;
+// Two-step selection state for roster
+let rosterSelectedTrigger = null;
+let rosterTriggerVariants = [];
+let rosterTriggerMatches = [];
 
 function searchRosterConditional() {
   const query = document.getElementById('rosterConditionalSearch').value.toLowerCase().trim();
   const resultsContainer = document.getElementById('rosterConditionalResults');
   const selectedRank = document.getElementById('rosterRank').value;
   const prePatch = document.getElementById('prePatchFam').checked;
-  if (!query) { resultsContainer.style.display = 'none'; return; }
+
+  // Hide variant section when searching
+  document.getElementById('rosterBonusVariantSection').style.display = 'none';
+
+  if (!query) {
+    resultsContainer.style.display = 'none';
+    return;
+  }
 
   const allBonuses = configConditionalBonuses.bonuses || [];
   const matches = allBonuses.filter(b => {
@@ -339,34 +784,113 @@ function searchRosterConditional() {
     return b.name.toLowerCase().includes(query) || b.condition.toLowerCase().includes(query);
   });
 
-  if (matches.length === 0) {
-    resultsContainer.innerHTML = '<div style="padding: 10px; color: #666;">No bonuses found</div>';
+  // Group by trigger and render
+  const triggers = getTriggersArray(matches);
+  rosterTriggerMatches = triggers;
+
+  if (triggers.length === 0) {
+    resultsContainer.innerHTML = '<div style="padding: 10px; color: #666;">No conditions found</div>';
   } else {
-    const limitedMatches = matches.slice(0, 20);
-    resultsContainer.innerHTML = limitedMatches.map(bonus => {
-      const flatStr = bonus.flatBonus !== 0 ? '<span class="flat' + (bonus.flatBonus < 0 ? ' negative' : '') + '">' + (bonus.flatBonus >= 0 ? '+' : '') + bonus.flatBonus + '</span>' : '';
-      const multStr = bonus.multiplierBonus && bonus.multiplierBonus !== 1 ? '<span class="mult">x' + bonus.multiplierBonus + '</span>' : '';
-      return '<div class="config-item" style="border-left: 3px solid ' + bonus.color + ';" onclick="selectRosterConditional(' + JSON.stringify(bonus).replace(/"/g, "&quot;") + ')"><div class="config-item-info"><div class="config-item-name">' + escapeHtml(bonus.name) + ' <span style="font-size:11px;color:' + bonus.color + ';">[' + bonus.rarity + ']</span></div><div class="config-item-stats">' + flatStr + (flatStr && multStr ? ', ' : '') + multStr + '</div></div></div>';
+    resultsContainer.innerHTML = triggers.slice(0, 15).map((trigger, idx) => {
+      return `
+        <div class="trigger-result-item" onclick="selectRosterTrigger(${idx})">
+          <span class="trigger-name">${escapeHtml(trigger.name)}</span>
+          <span class="trigger-variants">${trigger.variantCount} variant${trigger.variantCount > 1 ? 's' : ''}</span>
+        </div>
+      `;
     }).join('');
   }
   resultsContainer.style.display = 'block';
+}
+
+function selectRosterTrigger(idx) {
+  if (!rosterTriggerMatches[idx]) return;
+
+  const trigger = rosterTriggerMatches[idx];
+  rosterSelectedTrigger = trigger.name;
+  rosterTriggerVariants = trigger.variants;
+
+  // Hide search results, show bonus variant section
+  document.getElementById('rosterConditionalResults').style.display = 'none';
+  document.getElementById('rosterConditionalSearch').value = '';
+
+  // Show Step 2: Bonus variant selection
+  const variantSection = document.getElementById('rosterBonusVariantSection');
+  document.getElementById('rosterSelectedTriggerName').textContent = trigger.name;
+
+  renderRosterBonusPills(trigger.variants);
+  variantSection.style.display = 'block';
+}
+
+function renderRosterBonusPills(variants) {
+  const container = document.getElementById('rosterBonusVariantPills');
+
+  container.innerHTML = variants.map((v, idx) => {
+    const flat = v.flatBonus || 0;
+    const mult = v.multiplierBonus || 1;
+    const rarity = (v.rarity || v.rank || 'Common').toLowerCase();
+    const isBugged = isBuggedConditional(v);
+    const isSelected = selectedRosterConditional && selectedRosterConditional.id === v.id;
+
+    let bonusText = '';
+    if (flat !== 0) bonusText += `<span class="pill-flat">+${flat}</span>`;
+    if (mult !== 1) bonusText += `<span class="pill-mult">×${mult}</span>`;
+    if (!bonusText) bonusText = '<span class="pill-flat">+0</span>';
+
+    return `
+      <div class="bonus-pill rarity-${rarity}${isBugged ? ' bugged' : ''}${isSelected ? ' selected' : ''}"
+           onclick="selectRosterBonusVariant(${idx})"
+           title="${isBugged ? 'This conditional is bugged in-game' : ''}">
+        ${bonusText}
+        <span class="pill-rarity">${v.rarity || v.rank || ''}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectRosterBonusVariant(idx) {
+  if (!rosterTriggerVariants[idx]) return;
+
+  selectedRosterConditional = rosterTriggerVariants[idx];
+  updateRosterCondDisplay();
+
+  // Re-render pills to show selection
+  renderRosterBonusPills(rosterTriggerVariants);
+}
+
+function updateRosterCondDisplay() {
+  const displayEl = document.getElementById('selectedConditionalDisplay');
+  if (selectedRosterConditional) {
+    const bonus = selectedRosterConditional;
+    const flatStr = bonus.flatBonus !== 0 ? (bonus.flatBonus >= 0 ? '+' : '') + bonus.flatBonus : '';
+    const multStr = bonus.multiplierBonus && bonus.multiplierBonus !== 1 ? 'x' + bonus.multiplierBonus : '';
+    displayEl.innerHTML = `<span class="selected-conditional-name">${escapeHtml(bonus.name)}</span> <span style="color:${bonus.color};">[${bonus.rarity}]</span> ${flatStr}${flatStr && multStr ? ', ' : ''}${multStr} <button class="clear-conditional-btn" onclick="clearRosterConditional()">×</button>`;
+    displayEl.style.display = 'block';
+  } else {
+    displayEl.style.display = 'none';
+  }
+}
+
+function clearRosterTriggerSelection() {
+  rosterSelectedTrigger = null;
+  rosterTriggerVariants = [];
+  document.getElementById('rosterBonusVariantSection').style.display = 'none';
 }
 
 function selectRosterConditional(bonus) {
   selectedRosterConditional = bonus;
   document.getElementById('rosterConditionalSearch').value = '';
   document.getElementById('rosterConditionalResults').style.display = 'none';
-
-  const displayEl = document.getElementById('selectedConditionalDisplay');
-  const flatStr = bonus.flatBonus !== 0 ? (bonus.flatBonus >= 0 ? '+' : '') + bonus.flatBonus : '';
-  const multStr = bonus.multiplierBonus && bonus.multiplierBonus !== 1 ? 'x' + bonus.multiplierBonus : '';
-  displayEl.innerHTML = `<span class="selected-conditional-name">${escapeHtml(bonus.name)}</span> <span style="color:${bonus.color};">[${bonus.rarity}]</span> ${flatStr}${flatStr && multStr ? ', ' : ''}${multStr} <button class="clear-conditional-btn" onclick="clearRosterConditional()">×</button>`;
-  displayEl.style.display = 'block';
+  document.getElementById('rosterBonusVariantSection').style.display = 'none';
+  updateRosterCondDisplay();
 }
 
 function clearRosterConditional() {
   selectedRosterConditional = null;
+  rosterSelectedTrigger = null;
+  rosterTriggerVariants = [];
   document.getElementById('selectedConditionalDisplay').style.display = 'none';
+  document.getElementById('rosterBonusVariantSection').style.display = 'none';
 }
 
 function addToRoster() {
@@ -1125,12 +1649,18 @@ function renderOptimizerResults({ bestOverall, bestLow, bestHigh, filterElement,
 }
 
 function useOptimizedLineup(familiars) {
-  // Populate the main Familiars section with this lineup
+  // Populate calcFamiliars with this lineup
+  calcFamiliars = [null, null, null];
   familiars.forEach((fam, i) => {
-    document.getElementById(`monster${i + 1}Name`).value = fam.name || '';
-    document.getElementById(`monster${i + 1}Rank`).value = fam.rank;
-    document.getElementById(`monster${i + 1}Element`).value = fam.element;
-    document.getElementById(`monster${i + 1}Type`).value = fam.type;
+    if (i < 3) {
+      calcFamiliars[i] = {
+        name: fam.name || '',
+        rank: fam.rank,
+        element: fam.element || 'None',
+        type: fam.type || 'Human',
+        conditional: fam.conditional || null
+      };
+    }
   });
 
   // Clear existing conditionals and add each familiar's conditional
@@ -1146,12 +1676,9 @@ function useOptimizedLineup(familiars) {
     }
   });
   saveData();
+  renderFamiliarCards();
   renderConditionalBonuses();
-
-  // Update dice options and recalculate
-  for (let i = 1; i <= 3; i++) {
-    updateDiceOptions(i);
-  }
+  updateAllDiceOptions();
   calculate();
 
   // Navigate to calculator page
@@ -1217,46 +1744,6 @@ function applyBonusItem(item) {
   document.getElementById('bonusItemSearchResults').style.display = 'none';
 }
 
-function searchCondBonuses() {
-  const query = document.getElementById('condBonusSearch').value.toLowerCase().trim();
-  const resultsContainer = document.getElementById('condBonusSearchResults');
-  const prePatch = document.getElementById('prePatchCalc').checked;
-  if (!query) { resultsContainer.style.display = 'none'; return; }
-
-  // Get current familiar ranks from calculator
-  const calcRanks = [
-    document.getElementById('monster1Rank').value,
-    document.getElementById('monster2Rank').value,
-    document.getElementById('monster3Rank').value
-  ];
-
-  // Use pre-flattened bonuses array from loadConfigFiles
-  const allBonuses = configConditionalBonuses.bonuses || [];
-  const matches = allBonuses.filter(b => {
-    if (!prePatch && !calcRanks.includes(b.rarity)) return false;
-    return b.name.toLowerCase().includes(query) || b.condition.toLowerCase().includes(query);
-  });
-
-  if (matches.length === 0) {
-    resultsContainer.innerHTML = '<div style="padding: 10px; color: #666;">No bonuses found</div>';
-  } else {
-    const limitedMatches = matches.slice(0, 50);
-    const moreText = matches.length > 50 ? '<div style="padding: 10px; color: #666; text-align: center;">Showing 50 of ' + matches.length + ' results. Refine your search for more specific results.</div>' : '';
-    resultsContainer.innerHTML = limitedMatches.map(bonus => {
-      const flatStr = bonus.flatBonus !== 0 ? '<span class="flat' + (bonus.flatBonus < 0 ? ' negative' : '') + '">' + (bonus.flatBonus >= 0 ? '+' : '') + bonus.flatBonus + '</span>' : '';
-      const multStr = bonus.multiplierBonus && bonus.multiplierBonus !== 1 ? '<span class="mult">x' + bonus.multiplierBonus + '</span>' : '';
-      return '<div class="config-item" style="border-left: 3px solid ' + bonus.color + ';" onclick="applyCondBonus(' + JSON.stringify(bonus).replace(/"/g, "&quot;") + ')"><div class="config-item-info"><div class="config-item-name">' + escapeHtml(bonus.name) + ' <span style="font-size:11px;color:' + bonus.color + ';">[' + bonus.rarity + ']</span></div><div class="config-item-stats">' + flatStr + (flatStr && multStr ? ', ' : '') + multStr + '</div><div class="config-item-tags" style="font-family:monospace;">' + escapeHtml(bonus.condition) + '</div></div><button class="apply-btn" onclick="event.stopPropagation()">Apply</button></div>';
-    }).join('') + moreText;
-  }
-  resultsContainer.style.display = 'block';
-}
-
-function applyCondBonus(bonus) {
-  conditionalBonuses.push({ name: bonus.name, flatBonus: bonus.flatBonus || 0, multiplierBonus: bonus.multiplierBonus || 1, condition: bonus.condition });
-  saveData(); renderConditionalBonuses(); calculate();
-  document.getElementById('condBonusSearch').value = '';
-  document.getElementById('condBonusSearchResults').style.display = 'none';
-}
 
 // ============================================
 // FAMILIAR RANK DICE SYSTEM
@@ -1275,39 +1762,6 @@ function getMaxDiceForRank(rank) {
   }
 }
 
-function updateDiceOptions(familiarIndex) {
-  const rank = document.getElementById(`monster${familiarIndex}Rank`).value;
-  const maxDice = getMaxDiceForRank(rank);
-  const diceSelect = document.getElementById(`dice${familiarIndex}`);
-  const currentValue = parseInt(diceSelect.value);
-
-  // Rebuild options
-  diceSelect.innerHTML = '';
-  for (let i = 1; i <= maxDice; i++) {
-    const option = document.createElement('option');
-    option.value = i;
-    option.textContent = i;
-    diceSelect.appendChild(option);
-  }
-
-  // Keep current value if valid, otherwise set to max
-  if (currentValue <= maxDice) {
-    diceSelect.value = currentValue;
-  } else {
-    diceSelect.value = maxDice;
-  }
-}
-
-function onRankChange(familiarIndex) {
-  updateDiceOptions(familiarIndex);
-  calculate();
-}
-
-function initializeDiceFromRanks() {
-  for (let i = 1; i <= 3; i++) {
-    updateDiceOptions(i);
-  }
-}
 
 // ============================================
 // BONUS ITEMS
@@ -1394,9 +1848,10 @@ function isBuggedConditional(cond) {
 
 function renderConditionalBonuses() {
   const container = document.getElementById('conditionalList');
+  if (!container) return; // Container may not exist on calculator page
 
   if (conditionalBonuses.length === 0) {
-    container.innerHTML = '<div style="color: #666; padding: 10px;">No conditional bonuses yet. Add one below.</div>';
+    container.innerHTML = '<div style="color: #666; padding: 10px;">No conditional bonuses yet.</div>';
     return;
   }
 
@@ -1479,124 +1934,6 @@ function deleteConditionalBonus(index) {
   saveData();
   renderConditionalBonuses();
   calculate();
-}
-
-// ============================================
-// SAVED LINEUPS
-// ============================================
-
-function renderSavedLineups() {
-  const container = document.getElementById('savedLineupsList');
-
-  if (savedLineups.length === 0) {
-    container.innerHTML = '<div style="color: #666; padding: 10px;">No presets yet. Enter a name and click "Save Preset" to save your first wave preset.</div>';
-    return;
-  }
-
-  container.innerHTML = savedLineups.map((lineup, index) => {
-    // Build familiar summary (support both old 'monsters' and new 'familiars' key)
-    const familiars = lineup.familiars || lineup.monsters;
-    const familiarSummary = familiars.map((m, i) =>
-      `F${i + 1}: ${m.rank} ${m.type}${m.element !== 'None' ? ' (' + m.element + ')' : ''}`
-    ).join(' | ');
-
-    const condCount = lineup.conditionalBonuses.length;
-    const condText = condCount === 1 ? '1 conditional' : `${condCount} conditionals`;
-
-    return `
-      <div class="saved-lineup-item">
-        <div class="lineup-info">
-          <div class="lineup-name">${escapeHtml(lineup.name)}</div>
-          <div class="lineup-details">
-            <span class="lineup-detail-item">${familiarSummary}</span>
-            <span class="lineup-detail-item lineup-conditionals-count">${condText}</span>
-          </div>
-        </div>
-        <button class="load-lineup-btn" onclick="loadLineup(${index})">Load</button>
-        <button class="delete-btn" onclick="deleteLineup(${index})">Delete</button>
-      </div>
-    `;
-  }).join('');
-}
-
-function saveLineup() {
-  const nameInput = document.getElementById('lineupName');
-  const name = nameInput.value.trim();
-
-  if (!name) {
-    alert('Please enter a name for this lineup');
-    return;
-  }
-
-  // Get current familiar configuration
-  const familiars = [
-    {
-      name: document.getElementById('monster1Name').value,
-      type: document.getElementById('monster1Type').value,
-      element: document.getElementById('monster1Element').value,
-      rank: document.getElementById('monster1Rank').value,
-    },
-    {
-      name: document.getElementById('monster2Name').value,
-      type: document.getElementById('monster2Type').value,
-      element: document.getElementById('monster2Element').value,
-      rank: document.getElementById('monster2Rank').value,
-    },
-    {
-      name: document.getElementById('monster3Name').value,
-      type: document.getElementById('monster3Type').value,
-      element: document.getElementById('monster3Element').value,
-      rank: document.getElementById('monster3Rank').value,
-    },
-  ];
-
-  // Save the lineup
-  const lineup = {
-    name,
-    familiars,
-    conditionalBonuses: [...conditionalBonuses]
-  };
-
-  savedLineups.push(lineup);
-  saveData();
-  renderSavedLineups();
-
-  // Clear the name input
-  nameInput.value = '';
-}
-
-function loadLineup(index) {
-  const lineup = savedLineups[index];
-  if (!lineup) return;
-
-  // Load familiar configuration (support both old 'monsters' and new 'familiars' key)
-  const familiars = lineup.familiars || lineup.monsters;
-  for (let i = 0; i < 3; i++) {
-    const m = familiars[i];
-    document.getElementById(`monster${i + 1}Name`).value = m.name || '';
-    document.getElementById(`monster${i + 1}Rank`).value = m.rank;
-    document.getElementById(`monster${i + 1}Element`).value = m.element;
-    document.getElementById(`monster${i + 1}Type`).value = m.type;
-
-    // Update dice options based on new rank
-    updateDiceOptions(i + 1);
-  }
-
-  // Load conditional bonuses
-  conditionalBonuses = [...lineup.conditionalBonuses];
-  saveData();
-  renderConditionalBonuses();
-  calculate();
-}
-
-function deleteLineup(index) {
-  if (!confirm('Are you sure you want to delete this lineup?')) {
-    return;
-  }
-
-  savedLineups.splice(index, 1);
-  saveData();
-  renderSavedLineups();
 }
 
 // ============================================
@@ -1738,7 +2075,6 @@ function renderRerollSuggestions(suggestions, passed, difficulty) {
     let itemClass = 'reroll-item';
     let targetClass = 'reroll-target';
     let targetText = '';
-    let conditionalsHtml = '';
 
     if (s.passingValues.length === 0) {
       // Impossible to pass by rerolling this die alone
@@ -1752,12 +2088,6 @@ function renderRerollSuggestions(suggestions, passed, difficulty) {
 
       const passingNums = s.passingValues.map(p => p.value);
       targetText = `Need: ${passingNums.join(', ')}`;
-
-      // Show which conditionals would activate
-      const r = s.passingValues[0];
-      if (r.activeConditionals.length > 0) {
-        conditionalsHtml = `<div class="reroll-conditionals">Activates: ${r.activeConditionals.join(', ')}</div>`;
-      }
     }
 
     return `
@@ -1766,7 +2096,6 @@ function renderRerollSuggestions(suggestions, passed, difficulty) {
         <div class="reroll-current">Current: ${s.currentValue} | ${s.rank}</div>
         <div class="${targetClass}">${targetText}</div>
         ${s.odds !== null ? `<div class="reroll-odds">${s.odds}% chance (${s.passingValues.length}/${s.maxDice})</div>` : ''}
-        ${conditionalsHtml}
       </div>
     `;
   }).join('');
@@ -1777,29 +2106,21 @@ function renderRerollSuggestions(suggestions, passed, difficulty) {
 // ============================================
 
 function getState() {
-  const dice = [
-    parseInt(document.getElementById('dice1').value),
-    parseInt(document.getElementById('dice2').value),
-    parseInt(document.getElementById('dice3').value),
-  ];
+  // Only include dice for slots that have familiars with ranks
+  const dice = [];
+  const familiars = [];
 
-  const familiars = [
-    {
-      type: document.getElementById('monster1Type').value,
-      element: document.getElementById('monster1Element').value,
-      rank: document.getElementById('monster1Rank').value,
-    },
-    {
-      type: document.getElementById('monster2Type').value,
-      element: document.getElementById('monster2Element').value,
-      rank: document.getElementById('monster2Rank').value,
-    },
-    {
-      type: document.getElementById('monster3Type').value,
-      element: document.getElementById('monster3Element').value,
-      rank: document.getElementById('monster3Rank').value,
-    },
-  ];
+  for (let i = 0; i < 3; i++) {
+    const fam = calcFamiliars[i];
+    if (fam && fam.rank) {
+      dice.push(parseInt(document.getElementById(`dice${i + 1}`).value) || 1);
+      familiars.push({
+        type: fam.type || 'Human',
+        element: fam.element || 'None',
+        rank: fam.rank,
+      });
+    }
+  }
 
   const activeBonusItems = [...bonusItems];
 
@@ -1891,18 +2212,13 @@ function calculate() {
     (totalFlat >= 0 ? '+' : '') + totalFlat;
 
   const multEl = document.getElementById('totalMult');
-  const beforeRoundEl = document.getElementById('beforeRound');
-  const multContainer = multEl.closest('.result-item');
-  const beforeRoundContainer = beforeRoundEl.closest('.result-item');
+  const multContainer = multEl.closest('.result-stat');
 
   if (finalMultiplier !== null) {
     multContainer.style.display = '';
-    beforeRoundContainer.style.display = '';
     multEl.textContent = '×' + finalMultiplier.toFixed(2);
-    beforeRoundEl.textContent = beforeRounding.toFixed(2);
   } else {
     multContainer.style.display = 'none';
-    beforeRoundContainer.style.display = 'none';
   }
 
   const finalResultEl = document.getElementById('finalResult');
@@ -3376,9 +3692,10 @@ function escapeHtml(text) {
 renderCharacterSelector();
 renderBonusItems();
 renderConditionalBonuses();
-renderSavedLineups();
+renderWaveSummary();
 renderRoster();
-initializeDiceFromRanks();
+renderFamiliarCards();
+updateAllDiceOptions();
 loadConfigFiles();
 calculate();
 ImageScanner.init();

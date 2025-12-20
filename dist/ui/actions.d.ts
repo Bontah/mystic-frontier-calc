@@ -5,6 +5,10 @@
 import type { CalcFamiliar, Wave, Familiar } from '../types/index.js';
 import type { BonusItem } from '../types/bonus.js';
 /**
+ * Update dice dropdown options based on familiar ranks and conditional caps
+ */
+export declare function updateDiceDropdowns(): void;
+/**
  * Perform calculation and update display
  */
 export declare function calculate(): void;

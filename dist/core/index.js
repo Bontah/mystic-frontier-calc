@@ -2,7 +2,7 @@
  * Core business logic exports
  */
 // Dice utilities
-export { getMaxDiceForRank, getMaxDiceForFamiliars, getAverageDiceForRank, getAverageDiceForFamiliars, generateDiceCombinations, countDiceCombinations, } from './dice.js';
+export { getMaxDiceForRank, getMaxDiceForFamiliars, getAverageDiceForRank, getAverageDiceForFamiliars, generateDiceCombinations, countDiceCombinations, getDiceCapFromConditional, getEffectiveDiceCap, getGlobalDiceCap, } from './dice.js';
 // Conditional evaluation
 export { evaluateCondition, evaluateConditionalBonus, evaluateConditionalBonuses, clearConditionCache, } from './conditional-evaluator.js';
 // Score calculation

@@ -1,7 +1,7 @@
 /**
  * Core business logic exports
  */
-export { getMaxDiceForRank, getMaxDiceForFamiliars, getAverageDiceForRank, getAverageDiceForFamiliars, generateDiceCombinations, countDiceCombinations, } from './dice.js';
+export { getMaxDiceForRank, getMaxDiceForFamiliars, getAverageDiceForRank, getAverageDiceForFamiliars, generateDiceCombinations, countDiceCombinations, getDiceCapFromConditional, getEffectiveDiceCap, getGlobalDiceCap, } from './dice.js';
 export { evaluateCondition, evaluateConditionalBonus, evaluateConditionalBonuses, clearConditionCache, } from './conditional-evaluator.js';
 export { calculateScore, evaluateLineup, calculateExpectedScore, } from './calculator.js';
 export { generateCombinations, findBestLineup, findBestLineupAsync, runAllStrategies, filterRosterForOptimization, } from './optimizer.js';

@@ -10,6 +10,9 @@ export {
   getAverageDiceForFamiliars,
   generateDiceCombinations,
   countDiceCombinations,
+  getDiceCapFromConditional,
+  getEffectiveDiceCap,
+  getGlobalDiceCap,
 } from './dice.js';
 
 // Conditional evaluation

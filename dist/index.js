@@ -6,7 +6,7 @@ import { store, selectors } from './state/store.js';
 import { initializePersistence, enableAutoSave } from './state/persistence.js';
 import { loadAllConfigs } from './services/config-loader.js';
 import { initScanner } from './scanner/index.js';
-import { setupEventHandlers, setupModalCloseButtons, calculate, } from './ui/index.js';
+import { setupEventHandlers, setupModalCloseButtons, calculate, updateDiceDropdowns, } from './ui/index.js';
 import { updateFamiliarsGrid } from './ui/components/familiar-card.js';
 import { updateRosterList } from './ui/components/roster-item.js';
 /**
@@ -145,15 +145,15 @@ function deleteCharacter() {
     updateRosterList(roster);
 }
 /**
- * Initialize dice dropdowns based on familiar ranks
+ * Initialize dice dropdowns based on familiar ranks and conditional caps
  */
 function initializeDiceDropdowns() {
-    const state = store.getState();
+    // Update dropdowns to respect rank maximums and conditional caps
+    updateDiceDropdowns();
+    // Set all dice to 1 initially
     for (let i = 0; i < 3; i++) {
-        const fam = state.calcFamiliars[i];
         const select = document.getElementById(`dice${i + 1}`);
-        if (select && fam && fam.rank) {
-            // Set dice value to 1 initially
+        if (select) {
             select.value = '1';
         }
     }

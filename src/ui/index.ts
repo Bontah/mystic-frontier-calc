@@ -15,6 +15,7 @@ export {
   deleteFamiliarFromRoster,
   toggleFamiliarDisabled,
   switchCharacter,
+  updateDiceDropdowns,
 } from './actions.js';
 
 export {

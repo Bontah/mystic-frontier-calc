@@ -76,4 +76,53 @@ export function countDiceCombinations(familiars) {
     const maxDice = getMaxDiceForFamiliars(familiars);
     return maxDice.reduce((acc, max) => acc * max, 1);
 }
+/**
+ * Extract dice cap from a conditional bonus name
+ * Matches patterns like "Prevents dice from rolling over 3"
+ * Returns null if no cap found
+ */
+export function getDiceCapFromConditional(conditional) {
+    if (!conditional?.name)
+        return null;
+    const match = conditional.name.match(/prevents dice from rolling over (\d+)/i);
+    if (match) {
+        return parseInt(match[1], 10);
+    }
+    return null;
+}
+/**
+ * Get the effective dice cap for a familiar slot
+ * Takes the minimum of rank-based max and any conditional caps
+ */
+export function getEffectiveDiceCap(familiar, globalCap) {
+    if (!familiar?.rank)
+        return 6;
+    const rankMax = getMaxDiceForRank(familiar.rank);
+    const conditionalCap = getDiceCapFromConditional(familiar.conditional);
+    // Take minimum of all applicable caps
+    let effectiveCap = rankMax;
+    if (conditionalCap !== null) {
+        effectiveCap = Math.min(effectiveCap, conditionalCap);
+    }
+    if (globalCap !== null) {
+        effectiveCap = Math.min(effectiveCap, globalCap);
+    }
+    return effectiveCap;
+}
+/**
+ * Find the global dice cap from all familiars' conditionals
+ * Returns the minimum cap if any familiar has a "prevents rolling over" conditional
+ */
+export function getGlobalDiceCap(familiars) {
+    let minCap = null;
+    for (const fam of familiars) {
+        if (fam?.conditional) {
+            const cap = getDiceCapFromConditional(fam.conditional);
+            if (cap !== null) {
+                minCap = minCap === null ? cap : Math.min(minCap, cap);
+            }
+        }
+    }
+    return minCap;
+}
 //# sourceMappingURL=dice.js.map

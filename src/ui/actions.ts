@@ -5,7 +5,7 @@
 
 import { store, selectors } from '../state/store.js';
 import { saveState } from '../state/persistence.js';
-import { calculateScore, calculateRerollSuggestions, evaluateConditionalBonus } from '../core/index.js';
+import { calculateScore, calculateRerollSuggestions, evaluateConditionalBonus, getGlobalDiceCap, getEffectiveDiceCap } from '../core/index.js';
 import type { CalcFamiliar, Wave, Familiar, ConditionalBonus } from '../types/index.js';
 import type { BonusItem } from '../types/bonus.js';
 import { renderResultDisplay, updateActiveConditionals, type ConditionalDisplayData } from './components/result-display.js';
@@ -31,6 +31,40 @@ function getDiceValues(): number[] {
   }
 
   return dice;
+}
+
+/**
+ * Update dice dropdown options based on familiar ranks and conditional caps
+ */
+export function updateDiceDropdowns(): void {
+  const state = store.getState();
+  const familiars = state.calcFamiliars;
+
+  // Get global cap from any "prevents dice rolling over X" conditionals
+  const globalCap = getGlobalDiceCap(familiars);
+
+  for (let i = 0; i < 3; i++) {
+    const select = document.getElementById(`dice${i + 1}`) as HTMLSelectElement;
+    if (!select) continue;
+
+    const fam = familiars[i];
+    const maxValue = getEffectiveDiceCap(fam, globalCap);
+
+    // Get current value before changing options
+    const currentValue = parseInt(select.value) || 1;
+
+    // Rebuild options
+    select.innerHTML = '';
+    for (let v = 1; v <= maxValue; v++) {
+      const option = document.createElement('option');
+      option.value = String(v);
+      option.textContent = String(v);
+      select.appendChild(option);
+    }
+
+    // Restore value if still valid, otherwise set to max
+    select.value = String(Math.min(currentValue, maxValue));
+  }
 }
 
 /**
@@ -175,6 +209,7 @@ export function setCalcFamiliar(slot: number, familiar: CalcFamiliar | null): vo
   });
 
   updateFamiliarsGrid(store.getState().calcFamiliars);
+  updateDiceDropdowns();
   calculate();
 }
 
@@ -195,6 +230,7 @@ export function resetAllFamiliars(): void {
   });
 
   updateFamiliarsGrid(store.getState().calcFamiliars);
+  updateDiceDropdowns();
   calculate();
 
   // Clear wave selection UI
@@ -244,6 +280,7 @@ export function loadWave(wave: Wave): void {
   });
 
   updateFamiliarsGrid(calcFamiliars);
+  updateDiceDropdowns();
 
   const label = document.getElementById('currentWaveLabel');
   if (label) label.textContent = `(Wave ${wave})`;

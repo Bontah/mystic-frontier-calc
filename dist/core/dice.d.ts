@@ -2,7 +2,7 @@
  * Dice utilities
  * Rank determines the max dice value (number of sides)
  */
-import type { Rank, CalcFamiliar } from '../types/index.js';
+import type { Rank, CalcFamiliar, ConditionalBonus } from '../types/index.js';
 /**
  * Get maximum dice value for a rank
  */
@@ -28,4 +28,20 @@ export declare function generateDiceCombinations(familiars: CalcFamiliar[]): Gen
  * Count total possible dice combinations for familiars
  */
 export declare function countDiceCombinations(familiars: CalcFamiliar[]): number;
+/**
+ * Extract dice cap from a conditional bonus name
+ * Matches patterns like "Prevents dice from rolling over 3"
+ * Returns null if no cap found
+ */
+export declare function getDiceCapFromConditional(conditional: ConditionalBonus | null): number | null;
+/**
+ * Get the effective dice cap for a familiar slot
+ * Takes the minimum of rank-based max and any conditional caps
+ */
+export declare function getEffectiveDiceCap(familiar: CalcFamiliar | null, globalCap: number | null): number;
+/**
+ * Find the global dice cap from all familiars' conditionals
+ * Returns the minimum cap if any familiar has a "prevents rolling over" conditional
+ */
+export declare function getGlobalDiceCap(familiars: (CalcFamiliar | null)[]): number | null;
 //# sourceMappingURL=dice.d.ts.map

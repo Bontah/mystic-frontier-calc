@@ -428,6 +428,15 @@ function cancelEdit() {
   clearRosterConditional();
 }
 
+function toggleFamiliarDisabled(id) {
+  const fam = familiarRoster.find(f => f.id === id);
+  if (fam) {
+    fam.disabled = !fam.disabled;
+    saveData();
+    renderRoster();
+  }
+}
+
 function deleteFromRoster(id) {
   if (!confirm('Remove this familiar from your roster?')) return;
 
@@ -537,14 +546,28 @@ function renderRoster() {
     const displayName = fam.name || `${fam.element} ${fam.type}`;
     const rankClass = `rank-${fam.rank.toLowerCase()}`;
 
+    // Check if conditional is bugged in-game
+    const buggedReason = fam.conditional ? isBuggedConditional(fam.conditional) : false;
+    const buggedClass = buggedReason ? ' bugged-familiar' : '';
+    const buggedBadge = buggedReason
+      ? `<span class="bugged-badge" title="${escapeHtml(buggedReason)}">BUGGED</span>`
+      : '';
+
+    // Check if manually disabled
+    const disabledClass = fam.disabled ? ' disabled-familiar' : '';
+    const disableBtn = fam.disabled
+      ? `<button class="roster-item-enable" onclick="toggleFamiliarDisabled(${fam.id})">Enable</button>`
+      : `<button class="roster-item-disable" onclick="toggleFamiliarDisabled(${fam.id})">Disable</button>`;
+
     let conditionalHtml = '';
     if (fam.conditional) {
       const flatStr = fam.conditional.flatBonus !== 0 ? (fam.conditional.flatBonus >= 0 ? '+' : '') + fam.conditional.flatBonus : '';
       const multStr = fam.conditional.multiplierBonus && fam.conditional.multiplierBonus !== 1 ? 'x' + fam.conditional.multiplierBonus : '';
-      const color = fam.conditional.color || '#888';
+      const color = buggedReason ? '#ff6666' : (fam.conditional.color || '#888');
       conditionalHtml = `
-        <div class="roster-item-conditional" style="border-left: 2px solid ${color};">
+        <div class="roster-item-conditional${buggedReason ? ' bugged' : ''}" style="border-left: 2px solid ${color};">
           <span class="conditional-name">${escapeHtml(fam.conditional.name)}</span>
+          ${buggedBadge}
           <span class="conditional-stats">${flatStr}${flatStr && multStr ? ', ' : ''}${multStr}</span>
         </div>
       `;
@@ -556,7 +579,7 @@ function renderRoster() {
     const waveBadge = fam.wave ? `<div class="wave-badge wave-${fam.wave}">Wave ${fam.wave}</div>` : '';
 
     return `
-      <div class="roster-item ${rankClass} ${waveClass}">
+      <div class="roster-item ${rankClass} ${waveClass}${buggedClass}${disabledClass}">
         <div class="roster-item-header">
           <span class="roster-item-name">${escapeHtml(displayName)}</span>
           <span class="roster-item-rank ${rankClass}">${fam.rank}</span>
@@ -568,6 +591,7 @@ function renderRoster() {
         </div>
         ${conditionalHtml}
         <div class="roster-item-actions">
+          ${disableBtn}
           <button class="roster-item-edit" onclick="editFamiliar(${fam.id})">Edit</button>
           <button class="roster-item-delete" onclick="deleteFromRoster(${fam.id})">Remove</button>
         </div>
@@ -883,15 +907,17 @@ async function runOptimizer() {
   const filterType = document.getElementById('filterType')?.value || '';
   const requireMatch = document.getElementById('filterRequireMatch')?.checked || false;
 
-  // Filter out familiars that are assigned to a wave
-  const availableFamiliars = familiarRoster.filter(f => !f.wave);
+  // Filter out familiars that are assigned to a wave or disabled
+  const availableFamiliars = familiarRoster.filter(f => !f.wave && !f.disabled);
 
   if (availableFamiliars.length < 3) {
     const assignedCount = familiarRoster.filter(f => f.wave).length;
+    const disabledCount = familiarRoster.filter(f => f.disabled).length;
     resultsContainer.innerHTML = `
       <div class="optimizer-error">
         Need at least 3 available familiars!
         ${assignedCount > 0 ? `<br><small>${assignedCount} familiar(s) assigned to waves</small>` : ''}
+        ${disabledCount > 0 ? `<br><small>${disabledCount} familiar(s) disabled</small>` : ''}
         ${familiarRoster.length < 3 ? `<br><small>Add more familiars to your roster</small>` : ''}
       </div>
     `;
@@ -1327,6 +1353,25 @@ function deleteBonusItem(index) {
 // CONDITIONAL BONUSES
 // ============================================
 
+// Helper to detect conditionals that are bugged in-game
+function isBuggedConditional(cond) {
+  if (!cond) return false;
+  const name = (cond.name || '').toLowerCase();
+  const condition = (cond.condition || '').toLowerCase();
+
+  // Bug 1: Non-elemental/None element conditionals don't work in-game
+  if (name.includes('non-elemental') || condition.includes("element === 'none'")) {
+    return 'Non-elemental conditionals are bugged in-game';
+  }
+
+  // Bug 2: "Dice add up to" conditionals don't work in-game
+  if (name.includes('dice add up to') || /dice\[\d\]\s*\+\s*dice\[\d\]/.test(condition)) {
+    return 'Dice add-up conditionals are bugged in-game';
+  }
+
+  return false;
+}
+
 function renderConditionalBonuses() {
   const container = document.getElementById('conditionalList');
 
@@ -1345,10 +1390,17 @@ function renderConditionalBonuses() {
       : '';
     const separator = flatStr && multStr ? ', ' : '';
 
+    const buggedReason = isBuggedConditional(cond);
+    const buggedClass = buggedReason ? ' bugged' : '';
+    const buggedBadge = buggedReason
+      ? `<span class="bugged-badge" title="${escapeHtml(buggedReason)}">BUGGED</span>`
+      : '';
+
     return `
-      <div class="conditional-item" id="cond${index}">
+      <div class="conditional-item${buggedClass}" id="cond${index}">
         <div style="flex: 1; min-width: 0;">
           <span class="cond-name">${escapeHtml(cond.name)}</span>
+          ${buggedBadge}
         </div>
         <span class="cond-stats">${flatStr}${separator}${multStr}</span>
         <button class="delete-btn" onclick="deleteConditionalBonus(${index})">Delete</button>
@@ -2942,7 +2994,8 @@ const ImageScanner = {
       opt.value = JSON.stringify(results.conditional.matched);
       const bonusStr = this.formatBonusValues(results.conditional.matched);
       const rarity = results.conditional.matched.rarity || '';
-      opt.textContent = `[${rarity}] [${bonusStr}] ${results.conditional.matched.name} (${results.conditional.matched.matchScore}%)`;
+      const buggedTag = isBuggedConditional(results.conditional.matched) ? '[BUGGED] ' : '';
+      opt.textContent = `${buggedTag}[${rarity}] [${bonusStr}] ${results.conditional.matched.name} (${results.conditional.matched.matchScore}%)`;
       opt.selected = true;
       matchSelect.appendChild(opt);
       this.setConfidence('conditionalConfidence', results.conditional.matched.matchScore);
@@ -2973,7 +3026,8 @@ const ImageScanner = {
           opt.value = JSON.stringify(match);
           const bonusStr = this.formatBonusValues(match);
           const rarity = match.rarity || '';
-          opt.textContent = `[${rarity}] [${bonusStr}] ${match.name} (${match.matchScore}%)`;
+          const buggedTag = isBuggedConditional(match) ? '[BUGGED] ' : '';
+          opt.textContent = `${buggedTag}[${rarity}] [${bonusStr}] ${match.name} (${match.matchScore}%)`;
           matchSelect.appendChild(opt);
         }
       }

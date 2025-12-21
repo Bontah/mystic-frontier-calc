@@ -2175,7 +2175,6 @@ select:focus, input:focus, textarea:focus {
 }
 
 .lineup-card:hover {
-  transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
@@ -2209,7 +2208,8 @@ select:focus, input:focus, textarea:focus {
 }
 
 /* Strategy Help Button */
-.strategy-help-btn {
+.strategy-help-btn,
+.section-help-btn {
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -2226,7 +2226,18 @@ select:focus, input:focus, textarea:focus {
   flex-shrink: 0;
 }
 
-.strategy-help-btn:hover {
+.section-header-with-help {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-header-with-help h2 {
+  margin: 0;
+}
+
+.strategy-help-btn:hover,
+.section-help-btn:hover {
   background: rgba(255, 255, 255, 0.15);
   color: #fff;
   border-color: rgba(255, 255, 255, 0.4);

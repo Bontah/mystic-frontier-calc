@@ -1174,6 +1174,67 @@ function showStrategyModal(strategy: string): void {
 }
 
 /**
+ * Show scanner help modal
+ */
+function showScannerHelpModal(): void {
+  // Remove existing modal if any
+  const existingModal = document.getElementById('scannerHelpModal');
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  const modalHtml = `
+    <div id="scannerHelpModal" class="strategy-modal-overlay">
+      <div class="strategy-modal">
+        <div class="strategy-modal-header">
+          <h3>Scan Familiar Card</h3>
+          <button class="strategy-modal-close">&times;</button>
+        </div>
+        <div class="strategy-modal-content">
+          <p>The scanner automatically extracts familiar details from a screenshot of a familiar card.</p>
+
+          <h4>How to Use</h4>
+          <ul>
+            <li><strong>Click</strong> the upload area to select an image file</li>
+            <li><strong>Drag & drop</strong> an image onto the upload area</li>
+            <li><strong>Paste (Ctrl+V)</strong> a screenshot from your clipboard while on this tab</li>
+          </ul>
+
+          <h4>What Gets Extracted</h4>
+          <ul>
+            <li><strong>Rank</strong> - Detected from the card border color</li>
+            <li><strong>Element</strong> - Detected from the element icon</li>
+            <li><strong>Type</strong> - Detected from the type icon</li>
+            <li><strong>Name</strong> - Extracted using OCR (may need manual correction)</li>
+            <li><strong>Conditional</strong> - Matched from extracted text</li>
+          </ul>
+
+          <h4>Tips</h4>
+          <ul>
+            <li>Use clear, uncropped screenshots for best results</li>
+            <li>The conditional matcher prioritizes bonuses matching the detected rank</li>
+            <li>Review and correct any fields before adding to your collection</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  // Close on overlay click or close button
+  const modal = document.getElementById('scannerHelpModal');
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('strategy-modal-overlay') || target.classList.contains('strategy-modal-close')) {
+        modal.remove();
+      }
+    });
+  }
+}
+
+/**
  * Setup optimizer event handlers
  */
 function setupOptimizerEvents(): void {
@@ -1186,6 +1247,14 @@ function setupOptimizerEvents(): void {
       const strategy = target.getAttribute('data-strategy');
       if (strategy) {
         showStrategyModal(strategy);
+      }
+    }
+
+    // Section help buttons
+    if (target.classList.contains('section-help-btn')) {
+      const helpType = target.getAttribute('data-help');
+      if (helpType === 'scanner') {
+        showScannerHelpModal();
       }
     }
 
@@ -1432,6 +1501,15 @@ function getOrGenerateCombinations(): CalcFamiliar[][] | null {
       });
     });
   }
+
+  // Filter out combinations with duplicate conditional names
+  combinations = combinations.filter((combo) => {
+    const conditionalNames = combo
+      .map((fam) => fam.conditional?.name)
+      .filter((name): name is string => !!name);
+    // Check for duplicates: if set size equals array length, no duplicates
+    return new Set(conditionalNames).size === conditionalNames.length;
+  });
 
   cachedCombinations = combinations;
   cachedRosterHash = currentHash;
@@ -1951,37 +2029,49 @@ function showExtractionModal(result: ScanResult): void {
     nameInput.value = result.name || '';
   }
 
-  // Set rank (confidence is already 0-100)
+  // Set rank
   const rankSelect = document.getElementById('extractedRank') as HTMLSelectElement;
   const rankConfidence = document.getElementById('rankConfidence');
   if (rankSelect) {
     rankSelect.value = result.rank.rank;
   }
   if (rankConfidence) {
-    rankConfidence.textContent = `${Math.round(result.rank.confidence)}%`;
-    rankConfidence.className = `confidence ${getConfidenceClass(result.rank.confidence / 100)}`;
+    if (isDebugEnabled()) {
+      rankConfidence.textContent = `${Math.round(result.rank.confidence)}%`;
+      rankConfidence.className = `confidence ${getConfidenceClass(result.rank.confidence / 100)}`;
+    } else {
+      rankConfidence.style.display = 'none';
+    }
   }
 
-  // Set element (confidence is already 0-100)
+  // Set element
   const elementSelect = document.getElementById('extractedElement') as HTMLSelectElement;
   const elementConfidence = document.getElementById('elementConfidence');
   if (elementSelect) {
     elementSelect.value = result.element.element;
   }
   if (elementConfidence) {
-    elementConfidence.textContent = `${Math.round(result.element.confidence)}%`;
-    elementConfidence.className = `confidence ${getConfidenceClass(result.element.confidence / 100)}`;
+    if (isDebugEnabled()) {
+      elementConfidence.textContent = `${Math.round(result.element.confidence)}%`;
+      elementConfidence.className = `confidence ${getConfidenceClass(result.element.confidence / 100)}`;
+    } else {
+      elementConfidence.style.display = 'none';
+    }
   }
 
-  // Set type (confidence is already 0-100)
+  // Set type
   const typeSelect = document.getElementById('extractedType') as HTMLSelectElement;
   const typeConfidence = document.getElementById('typeConfidence');
   if (typeSelect) {
     typeSelect.value = result.type.type;
   }
   if (typeConfidence) {
-    typeConfidence.textContent = `${Math.round(result.type.confidence)}%`;
-    typeConfidence.className = `confidence ${getConfidenceClass(result.type.confidence / 100)}`;
+    if (isDebugEnabled()) {
+      typeConfidence.textContent = `${Math.round(result.type.confidence)}%`;
+      typeConfidence.className = `confidence ${getConfidenceClass(result.type.confidence / 100)}`;
+    } else {
+      typeConfidence.style.display = 'none';
+    }
   }
 
   // Set conditional text (raw OCR result)
@@ -1999,28 +2089,55 @@ function showExtractionModal(result: ScanResult): void {
 
     // Get top matches for the raw text
     const topMatches = findTopMatches(result.conditional.rawText, 10);
+    const detectedRank = result.rank.rank;
 
-    for (const match of topMatches) {
+    // Sort matches: prioritize same rank as detected familiar
+    const sortedMatches = [...topMatches].sort((a, b) => {
+      const aRank = a.rarity || a.rank;
+      const bRank = b.rarity || b.rank;
+      const aMatchesRank = aRank === detectedRank ? 1 : 0;
+      const bMatchesRank = bRank === detectedRank ? 1 : 0;
+      // If same rank priority, keep original order (by match score)
+      if (aMatchesRank === bMatchesRank) return 0;
+      return bMatchesRank - aMatchesRank;
+    });
+
+    for (const match of sortedMatches) {
       if (!match.id) continue; // Skip matches without ID
       const option = document.createElement('option');
       option.value = match.id;
       const bonusText = formatBonusValues(match);
-      option.textContent = `${match.name} [${bonusText}] (${match.matchScore}%)`;
+      const rank = match.rarity || match.rank;
+      const rankText = rank ? `[${rank}] ` : '';
+      const confidenceText = isDebugEnabled() ? ` (${match.matchScore}%)` : '';
+      option.textContent = `${rankText}${match.name} [${bonusText}]${confidenceText}`;
+      // Apply rank color
+      if (rank) {
+        option.style.color = getRankColor(rank);
+      }
       conditionalSelect.appendChild(option);
     }
 
-    // Select the best match if confidence is good enough
-    if (result.conditional.matched?.id && result.conditional.confidence > 35) {
-      conditionalSelect.value = result.conditional.matched.id;
+    // Select the best match - prefer one with matching rank
+    if (result.conditional.confidence > 35) {
+      // First try to find a match with the same rank
+      const matchWithSameRank = sortedMatches.find(m =>
+        m.id && (m.rarity || m.rank) === detectedRank
+      );
+      if (matchWithSameRank?.id) {
+        conditionalSelect.value = matchWithSameRank.id;
+      } else if (result.conditional.matched?.id) {
+        conditionalSelect.value = result.conditional.matched.id;
+      }
     }
   }
 
   if (conditionalConfidence) {
-    if (result.conditional.matched) {
+    if (isDebugEnabled() && result.conditional.matched) {
       conditionalConfidence.textContent = `${Math.round(result.conditional.confidence)}%`;
       conditionalConfidence.className = `confidence ${getConfidenceClass(result.conditional.confidence / 100)}`;
     } else {
-      conditionalConfidence.textContent = '';
+      conditionalConfidence.style.display = 'none';
     }
   }
 
@@ -2069,6 +2186,20 @@ function getConfidenceClass(confidence: number): string {
   if (confidence >= 0.8) return 'high';
   if (confidence >= 0.5) return 'medium';
   return 'low';
+}
+
+/**
+ * Get color for a rank
+ */
+function getRankColor(rank: string): string {
+  switch (rank.toLowerCase()) {
+    case 'common': return '#9d9d9d';
+    case 'rare': return '#0070dd';
+    case 'epic': return '#a335ee';
+    case 'unique': return '#ff8000';
+    case 'legendary': return '#1eff00';
+    default: return '#ffffff';
+  }
 }
 
 /**

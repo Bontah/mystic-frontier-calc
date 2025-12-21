@@ -1591,14 +1591,14 @@ select:focus, input:focus, textarea:focus {
 
 .roster-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: var(--spacing-sm);
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-md);
   margin-bottom: var(--spacing-sm);
 }
 
 .roster-item {
   background: rgba(26, 26, 46, 0.5);
-  padding: var(--spacing-sm);
+  padding: var(--spacing-md);
   border-radius: var(--radius-md);
   border-left: 3px solid #666;
   display: flex;
@@ -2996,7 +2996,7 @@ select:focus, input:focus, textarea:focus {
   }
 
   .roster-list {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .lineup-familiars {
@@ -3118,7 +3118,7 @@ select:focus, input:focus, textarea:focus {
 
   /* Stack roster items */
   .roster-list {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   /* Optimizer cards */

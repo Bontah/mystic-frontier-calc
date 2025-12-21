@@ -1592,25 +1592,26 @@ select:focus, input:focus, textarea:focus {
 /* Roster Filter Bar */
 .roster-filter-bar {
   display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .roster-search {
   flex: 1;
-  min-width: 200px;
+  min-width: 150px;
+  max-width: 200px;
 }
 
 .roster-search input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 6px 10px;
   background: #1a1a2e;
   border: 1px solid #333;
-  border-radius: 6px;
+  border-radius: 4px;
   color: #fff;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .roster-search input:focus {
@@ -1624,17 +1625,17 @@ select:focus, input:focus, textarea:focus {
 
 .roster-filters {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
 }
 
 .roster-filters select {
-  padding: 8px 12px;
+  padding: 6px 8px;
   background: #1a1a2e;
   border: 1px solid #333;
-  border-radius: 6px;
-  color: #ccc;
-  font-size: 13px;
+  border-radius: 4px;
+  color: #aaa;
+  font-size: 11px;
   cursor: pointer;
 }
 

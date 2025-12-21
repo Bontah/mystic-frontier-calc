@@ -1505,27 +1505,32 @@ function renderLineupCard(strategy, title, subtitle, lineup) {
     const familiarsHtml = lineup.familiars.map((f) => {
         const rankClass = `rank-${f.rank.toLowerCase()}`;
         const elementClass = `element-${f.element.toLowerCase()}`;
+        const dataConditionalId = f.conditional?.id !== undefined ? `data-conditional-id="${f.conditional.id}"` : '';
+        let bonusValues = '';
+        if (f.conditional) {
+            const parts = [];
+            if (f.conditional.flatBonus !== 0) {
+                parts.push(f.conditional.flatBonus >= 0 ? `+${f.conditional.flatBonus}` : `${f.conditional.flatBonus}`);
+            }
+            if (f.conditional.multiplierBonus !== 0 && f.conditional.multiplierBonus !== 1) {
+                parts.push(`x${f.conditional.multiplierBonus}`);
+            }
+            if (parts.length > 0) {
+                bonusValues = `[${parts.join(', ')}]`;
+            }
+        }
         return `
-      <div class="lineup-familiar ${rankClass} ${elementClass}">
+      <div class="lineup-familiar ${rankClass} ${elementClass}" ${dataConditionalId}>
         <div class="lineup-familiar-name">${escapeHtml(f.name)}</div>
         <div class="lineup-familiar-meta">
           <span class="rank-text ${rankClass}">${f.rank}</span>
           <span class="element-text ${elementClass}">${f.element}</span>
           <span class="type-text">${f.type}</span>
         </div>
-        ${f.conditional ? `<div class="lineup-familiar-bonus">${escapeHtml(f.conditional.name)}</div>` : ''}
+        ${f.conditional ? `<div class="lineup-familiar-bonus">${escapeHtml(f.conditional.name)}</div>${bonusValues ? `<div class="bonus-values">${bonusValues}</div>` : ''}` : ''}
       </div>
     `;
     }).join('');
-    // Collect active bonuses
-    const activeBonuses = lineup.activeBonusNames && lineup.activeBonusNames.length > 0
-        ? lineup.activeBonusNames
-        : lineup.familiars.filter(f => f.conditional).map(f => f.conditional.name);
-    const bonusesHtml = activeBonuses.length > 0
-        ? `<div class="lineup-active-bonuses">
-        ${activeBonuses.map(b => `<span class="bonus-tag">${escapeHtml(b)}</span>`).join('')}
-      </div>`
-        : '';
     return `
     <div class="lineup-card">
       <div class="lineup-card-header">
@@ -1547,7 +1552,6 @@ function renderLineupCard(strategy, title, subtitle, lineup) {
       <div class="lineup-familiars-grid">
         ${familiarsHtml}
       </div>
-      ${bonusesHtml}
       <div class="lineup-card-actions">
         <div class="lineup-wave-buttons">
           <span class="wave-label">Assign:</span>
@@ -1569,27 +1573,32 @@ function renderLineupCardBalanced(lineup) {
     const familiarsHtml = lineup.familiars.map((f) => {
         const rankClass = `rank-${f.rank.toLowerCase()}`;
         const elementClass = `element-${f.element.toLowerCase()}`;
+        const dataConditionalId = f.conditional?.id !== undefined ? `data-conditional-id="${f.conditional.id}"` : '';
+        let bonusValues = '';
+        if (f.conditional) {
+            const parts = [];
+            if (f.conditional.flatBonus !== 0) {
+                parts.push(f.conditional.flatBonus >= 0 ? `+${f.conditional.flatBonus}` : `${f.conditional.flatBonus}`);
+            }
+            if (f.conditional.multiplierBonus !== 0 && f.conditional.multiplierBonus !== 1) {
+                parts.push(`x${f.conditional.multiplierBonus}`);
+            }
+            if (parts.length > 0) {
+                bonusValues = `[${parts.join(', ')}]`;
+            }
+        }
         return `
-      <div class="lineup-familiar ${rankClass} ${elementClass}">
+      <div class="lineup-familiar ${rankClass} ${elementClass}" ${dataConditionalId}>
         <div class="lineup-familiar-name">${escapeHtml(f.name)}</div>
         <div class="lineup-familiar-meta">
           <span class="rank-text ${rankClass}">${f.rank}</span>
           <span class="element-text ${elementClass}">${f.element}</span>
           <span class="type-text">${f.type}</span>
         </div>
-        ${f.conditional ? `<div class="lineup-familiar-bonus">${escapeHtml(f.conditional.name)}</div>` : ''}
+        ${f.conditional ? `<div class="lineup-familiar-bonus">${escapeHtml(f.conditional.name)}</div>${bonusValues ? `<div class="bonus-values">${bonusValues}</div>` : ''}` : ''}
       </div>
     `;
     }).join('');
-    // Collect active bonuses
-    const activeBonuses = lineup.activeBonusNames && lineup.activeBonusNames.length > 0
-        ? lineup.activeBonusNames
-        : lineup.familiars.filter((f) => f.conditional).map((f) => f.conditional.name);
-    const bonusesHtml = activeBonuses.length > 0
-        ? `<div class="lineup-active-bonuses">
-        ${activeBonuses.map((b) => `<span class="bonus-tag">${escapeHtml(b)}</span>`).join('')}
-      </div>`
-        : '';
     // Breakdown of component scores
     const components = lineup.balancedComponents;
     const breakdownHtml = components
@@ -1630,7 +1639,6 @@ function renderLineupCardBalanced(lineup) {
       <div class="lineup-familiars-grid">
         ${familiarsHtml}
       </div>
-      ${bonusesHtml}
       <div class="lineup-card-actions">
         <div class="lineup-wave-buttons">
           <span class="wave-label">Assign:</span>

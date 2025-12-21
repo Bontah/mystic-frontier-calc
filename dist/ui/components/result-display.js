@@ -58,7 +58,7 @@ function formatBonusValues(flat, mult) {
     if (flat !== 0) {
         parts.push(`<span class="cond-flat">${flat >= 0 ? '+' : ''}${flat}</span>`);
     }
-    if (mult !== 0) {
+    if (mult !== 0 && mult !== 1) {
         parts.push(`<span class="cond-mult">×${mult.toFixed(2)}</span>`);
     }
     return parts.length > 0 ? parts.join(' ') : '';

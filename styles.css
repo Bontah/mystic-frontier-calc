@@ -2512,6 +2512,13 @@ select:focus, input:focus, textarea:focus {
   color: #888;
 }
 
+.lineup-familiar .bonus-values {
+  color: var(--color-accent-secondary);
+  font-weight: 600;
+  font-size: 9px;
+  text-align: center;
+}
+
 .lineup-familiar-bonus {
   font-size: 10px;
   color: #88cc88;

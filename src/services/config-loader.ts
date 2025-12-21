@@ -4,11 +4,13 @@
  */
 
 import type { BonusItemsConfig, ConditionalBonusesConfig } from '../types/bonus.js';
+import type { OptimizerConfig } from '../types/index.js';
 import { store } from '../state/store.js';
 
 const CONFIG_PATHS = {
   BONUS_ITEMS: 'config/bonus-items.json',
   CONDITIONAL_BONUSES: 'config/conditional-bonuses.json',
+  OPTIMIZER: 'config/optimizer-config.json',
 } as const;
 
 /**
@@ -87,17 +89,47 @@ export async function loadConditionalBonusesConfig(): Promise<ConditionalBonuses
 }
 
 /**
+ * Default optimizer config (used if file not found or invalid)
+ */
+const DEFAULT_OPTIMIZER_CONFIG: OptimizerConfig = {
+  version: '1.0',
+  strategies: {
+    overall: { enabled: true, ignoredConditionalIds: [] },
+    lowRolls: { enabled: true, ignoredConditionalIds: [] },
+    highRolls: { enabled: true, ignoredConditionalIds: [] },
+    median: { enabled: true, ignoredConditionalIds: [] },
+    floorGuarantee: { enabled: true, ignoredConditionalIds: [] },
+    balanced: { enabled: true, ignoredConditionalIds: [] },
+  },
+};
+
+/**
+ * Load optimizer configuration
+ */
+export async function loadOptimizerConfig(): Promise<OptimizerConfig> {
+  try {
+    const config = await loadJson<OptimizerConfig>(CONFIG_PATHS.OPTIMIZER);
+    return config;
+  } catch (error) {
+    console.error('Failed to load optimizer config:', error);
+    return DEFAULT_OPTIMIZER_CONFIG;
+  }
+}
+
+/**
  * Load all configurations and update store
  */
 export async function loadAllConfigs(): Promise<void> {
-  const [bonusItems, conditionalBonuses] = await Promise.all([
+  const [bonusItems, conditionalBonuses, optimizer] = await Promise.all([
     loadBonusItemsConfig(),
     loadConditionalBonusesConfig(),
+    loadOptimizerConfig(),
   ]);
 
   store.setState({
     configBonusItems: bonusItems,
     configConditionalBonuses: conditionalBonuses,
+    configOptimizer: optimizer,
   });
 }
 

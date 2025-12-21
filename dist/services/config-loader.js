@@ -6,6 +6,7 @@ import { store } from '../state/store.js';
 const CONFIG_PATHS = {
     BONUS_ITEMS: 'config/bonus-items.json',
     CONDITIONAL_BONUSES: 'config/conditional-bonuses.json',
+    OPTIMIZER: 'config/optimizer-config.json',
 };
 /**
  * Load a JSON file
@@ -56,16 +57,45 @@ export async function loadConditionalBonusesConfig() {
     }
 }
 /**
+ * Default optimizer config (used if file not found or invalid)
+ */
+const DEFAULT_OPTIMIZER_CONFIG = {
+    version: '1.0',
+    strategies: {
+        overall: { enabled: true, ignoredConditionalIds: [] },
+        lowRolls: { enabled: true, ignoredConditionalIds: [] },
+        highRolls: { enabled: true, ignoredConditionalIds: [] },
+        median: { enabled: true, ignoredConditionalIds: [] },
+        floorGuarantee: { enabled: true, ignoredConditionalIds: [] },
+        balanced: { enabled: true, ignoredConditionalIds: [] },
+    },
+};
+/**
+ * Load optimizer configuration
+ */
+export async function loadOptimizerConfig() {
+    try {
+        const config = await loadJson(CONFIG_PATHS.OPTIMIZER);
+        return config;
+    }
+    catch (error) {
+        console.error('Failed to load optimizer config:', error);
+        return DEFAULT_OPTIMIZER_CONFIG;
+    }
+}
+/**
  * Load all configurations and update store
  */
 export async function loadAllConfigs() {
-    const [bonusItems, conditionalBonuses] = await Promise.all([
+    const [bonusItems, conditionalBonuses, optimizer] = await Promise.all([
         loadBonusItemsConfig(),
         loadConditionalBonusesConfig(),
+        loadOptimizerConfig(),
     ]);
     store.setState({
         configBonusItems: bonusItems,
         configConditionalBonuses: conditionalBonuses,
+        configOptimizer: optimizer,
     });
 }
 /**

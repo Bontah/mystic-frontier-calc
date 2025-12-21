@@ -27,11 +27,14 @@ export type {
   FamiliarBreakdown,
   LineupEvaluation,
   OptimizedLineup,
+  ExtendedOptimizedLineup,
   PassingValue,
   RerollSuggestion,
   ScoringStrategy,
   ProgressCallback,
   PassingCombination,
+  StrategyConfig,
+  OptimizerConfig,
 } from './calculation.js';
 
 export type { Character } from './character.js';

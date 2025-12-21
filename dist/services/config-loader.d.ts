@@ -3,6 +3,7 @@
  * Loads JSON configuration files for bonus items and conditionals
  */
 import type { BonusItemsConfig, ConditionalBonusesConfig } from '../types/bonus.js';
+import type { OptimizerConfig } from '../types/index.js';
 import { store } from '../state/store.js';
 /**
  * Load bonus items configuration
@@ -13,6 +14,10 @@ export declare function loadBonusItemsConfig(): Promise<BonusItemsConfig>;
  * Flattens the categorized structure into a single bonuses array
  */
 export declare function loadConditionalBonusesConfig(): Promise<ConditionalBonusesConfig>;
+/**
+ * Load optimizer configuration
+ */
+export declare function loadOptimizerConfig(): Promise<OptimizerConfig>;
 /**
  * Load all configurations and update store
  */

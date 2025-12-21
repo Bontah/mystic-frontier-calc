@@ -70,6 +70,26 @@ export interface OptimizedLineup extends LineupEvaluation {
 }
 
 /**
+ * Extended optimizer result with statistical metrics
+ */
+export interface ExtendedOptimizedLineup extends OptimizedLineup {
+  /** Standard deviation of scores (for minVariance strategy) */
+  standardDeviation?: number;
+  /** Percentage of outcomes above floor (for floorGuarantee strategy) */
+  floorPercentage?: number;
+  /** The floor threshold used */
+  floorThreshold?: number;
+  /** Median score value (for median strategy) */
+  medianScore?: number;
+  /** Component scores for balanced strategy */
+  balancedComponents?: {
+    lowRollScore: number;
+    avgScore: number;
+    highRollScore: number;
+  };
+}
+
+/**
  * Passing value for reroll analysis
  */
 export interface PassingValue {
@@ -98,7 +118,14 @@ export interface RerollSuggestion {
 /**
  * Scoring strategy for optimizer
  */
-export type ScoringStrategy = 'overall' | 'lowRolls' | 'highRolls';
+export type ScoringStrategy =
+  | 'overall'
+  | 'lowRolls'
+  | 'highRolls'
+  | 'median'
+  | 'minVariance'
+  | 'floorGuarantee'
+  | 'balanced';
 
 /**
  * Optimizer progress callback
@@ -114,4 +141,29 @@ export interface PassingCombination {
   finalScore: number;
   probability: number;
   activeConditionals: string[];
+}
+
+/**
+ * Strategy-specific configuration
+ */
+export interface StrategyConfig {
+  /** Whether this strategy is enabled */
+  enabled: boolean;
+  /** Conditional bonus IDs to ignore for this strategy */
+  ignoredConditionalIds: string[];
+}
+
+/**
+ * Optimizer configuration
+ */
+export interface OptimizerConfig {
+  version: string;
+  strategies: {
+    overall: StrategyConfig;
+    lowRolls: StrategyConfig;
+    highRolls: StrategyConfig;
+    median: StrategyConfig;
+    floorGuarantee: StrategyConfig;
+    balanced: StrategyConfig;
+  };
 }

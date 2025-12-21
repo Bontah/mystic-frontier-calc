@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "strategies": {
+    "overall": {
+      "enabled": true,
+      "ignoredConditionalIds": []
+    },
+    "lowRolls": {
+      "enabled": true,
+      "ignoredConditionalIds": []
+    },
+    "highRolls": {
+      "enabled": true,
+      "ignoredConditionalIds": []
+    },
+    "median": {
+      "enabled": false,
+      "ignoredConditionalIds": []
+    },
+    "floorGuarantee": {
+      "enabled": false,
+      "ignoredConditionalIds": []
+    },
+    "balanced": {
+      "enabled": false,
+      "ignoredConditionalIds": []
+    }
+  }
+}

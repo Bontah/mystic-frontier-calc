@@ -2,7 +2,7 @@
  * Centralized state store
  * Replaces all global variables with a single reactive store
  */
-import type { CalcFamiliar, ConditionalBonus, Character, Wave } from '../types/index.js';
+import type { CalcFamiliar, ConditionalBonus, Character, Wave, OptimizerConfig } from '../types/index.js';
 import type { BonusItem, BonusItemsConfig, ConditionalBonusesConfig } from '../types/bonus.js';
 /**
  * Saved wave lineup type
@@ -30,6 +30,7 @@ export interface AppState {
     rosterTriggerVariants: ConditionalBonus[];
     configBonusItems: BonusItemsConfig;
     configConditionalBonuses: ConditionalBonusesConfig;
+    configOptimizer: OptimizerConfig;
     optimizerRunning: boolean;
     optimizerProgress: number;
 }

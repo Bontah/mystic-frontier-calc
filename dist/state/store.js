@@ -27,6 +27,17 @@ function createInitialState() {
         rosterTriggerVariants: [],
         configBonusItems: { version: '1.0', description: '', items: [] },
         configConditionalBonuses: { bonuses: [] },
+        configOptimizer: {
+            version: '1.0',
+            strategies: {
+                overall: { enabled: true, ignoredConditionalIds: [] },
+                lowRolls: { enabled: true, ignoredConditionalIds: [] },
+                highRolls: { enabled: true, ignoredConditionalIds: [] },
+                median: { enabled: true, ignoredConditionalIds: [] },
+                floorGuarantee: { enabled: true, ignoredConditionalIds: [] },
+                balanced: { enabled: true, ignoredConditionalIds: [] },
+            },
+        },
         optimizerRunning: false,
         optimizerProgress: 0,
     };
@@ -81,6 +92,7 @@ class Store {
         const config = {
             configBonusItems: this.state.configBonusItems,
             configConditionalBonuses: this.state.configConditionalBonuses,
+            configOptimizer: this.state.configOptimizer,
         };
         this.state = { ...createInitialState(), ...config };
         this.notify();

@@ -872,6 +872,151 @@ function deleteAllRoster() {
     showToast('Deleted all familiars');
 }
 /**
+ * Get strategy explanation content for modal
+ */
+function getStrategyExplanation(strategy) {
+    switch (strategy) {
+        case 'overall':
+            return {
+                title: 'Best Overall (Expected Value)',
+                content: `
+          <p>This strategy finds the lineup with the <strong>highest average score</strong> across all possible dice combinations.</p>
+          <h4>How it works:</h4>
+          <ul>
+            <li>For each lineup, we evaluate the score using the average dice values based on familiar ranks</li>
+            <li>Common = d3 (avg 2), Rare = d4 (avg 2.5), Epic = d5 (avg 3), Unique/Legendary = d6 (avg 3.5)</li>
+          </ul>
+          <h4>Example:</h4>
+          <p>A lineup with 3 Legendary familiars would be evaluated with dice [3.5, 3.5, 3.5], giving an expected dice sum of 10.5.</p>
+          <h4>Best for:</h4>
+          <p>General use - gives the most reliable performance estimate over many runs.</p>
+        `
+            };
+        case 'low':
+            return {
+                title: 'Best for Low Rolls',
+                content: `
+          <p>This strategy finds the lineup that performs <strong>best in the worst-case scenario</strong> - when all dice roll 1.</p>
+          <h4>How it works:</h4>
+          <ul>
+            <li>Every lineup is evaluated with dice values [1, 1, 1]</li>
+            <li>The lineup with the highest score under these conditions wins</li>
+          </ul>
+          <h4>Example:</h4>
+          <p>With dice [1, 1, 1], dice sum = 3. A lineup with strong flat bonuses (+10 flat) would score: (3 + 10) = 13.</p>
+          <h4>Best for:</h4>
+          <p>Risk-averse players who want to minimize bad outcomes. Prioritizes lineups with unconditional bonuses or bonuses that trigger on low rolls.</p>
+        `
+            };
+        case 'high':
+            return {
+                title: 'Best for High Rolls',
+                content: `
+          <p>This strategy finds the lineup that performs <strong>best when you roll maximum</strong> on all dice.</p>
+          <h4>How it works:</h4>
+          <ul>
+            <li>Each familiar's max dice is based on rank: Common=3, Rare=4, Epic=5, Unique/Legendary=6</li>
+            <li>The lineup is evaluated with these maximum values</li>
+          </ul>
+          <h4>Example:</h4>
+          <p>3 Legendary familiars would be evaluated with [6, 6, 6], giving dice sum = 18. With a 1.5x multiplier, score = 18 × 1.5 = 27.</p>
+          <h4>Best for:</h4>
+          <p>Maximizing peak potential. Good for lineups with multiplier bonuses that scale with high dice values.</p>
+        `
+            };
+        case 'median':
+            return {
+                title: 'Median Score',
+                content: `
+          <p>This strategy finds the lineup with the <strong>highest 50th percentile score</strong> - the score you'll exceed half the time.</p>
+          <h4>How it works:</h4>
+          <ul>
+            <li>For each lineup, we calculate scores for ALL possible dice combinations</li>
+            <li>We sort all scores and pick the middle value (median)</li>
+            <li>The lineup with the highest median wins</li>
+          </ul>
+          <h4>Example:</h4>
+          <p>If a lineup has 216 possible outcomes (6×6×6), the median is the average of the 108th and 109th highest scores.</p>
+          <h4>Best for:</h4>
+          <p>Understanding "typical" performance. More representative than average when there are extreme outliers.</p>
+        `
+            };
+        case 'floorGuarantee':
+            return {
+                title: 'Floor Guarantee',
+                content: `
+          <p>This strategy finds the lineup where <strong>80% or more of outcomes meet a minimum threshold</strong>.</p>
+          <h4>How it works:</h4>
+          <ul>
+            <li>For each lineup, calculate all possible scores</li>
+            <li>The floor is set at 80% of the average score</li>
+            <li>Count what percentage of outcomes meet or exceed this floor</li>
+            <li>Among lineups where 80%+ meet the floor, pick the one with the highest floor value</li>
+          </ul>
+          <h4>Example:</h4>
+          <p>If average score is 50, the floor is 40. If 85% of dice combinations score ≥40, this lineup qualifies. The display shows "85% above 40".</p>
+          <h4>Best for:</h4>
+          <p>Consistency-focused players who want predictable minimum performance.</p>
+        `
+            };
+        case 'balanced':
+            return {
+                title: 'Balanced (Weighted Average)',
+                content: `
+          <p>This strategy uses a <strong>weighted combination</strong> of low, average, and high roll scores.</p>
+          <h4>How it works:</h4>
+          <ul>
+            <li>Calculate score with low rolls [1,1,1] → weight 25%</li>
+            <li>Calculate score with average dice → weight 50%</li>
+            <li>Calculate score with max dice → weight 25%</li>
+            <li>Final score = (0.25 × low) + (0.50 × avg) + (0.25 × high)</li>
+          </ul>
+          <h4>Example:</h4>
+          <p>Low=10, Avg=25, High=40 → Balanced = (0.25×10) + (0.50×25) + (0.25×40) = 2.5 + 12.5 + 10 = 25</p>
+          <h4>Best for:</h4>
+          <p>All-around performance. Balances worst-case protection with upside potential.</p>
+        `
+            };
+        default:
+            return { title: 'Strategy', content: '<p>No information available.</p>' };
+    }
+}
+/**
+ * Show strategy explanation modal
+ */
+function showStrategyModal(strategy) {
+    const { title, content } = getStrategyExplanation(strategy);
+    // Remove existing modal if any
+    const existingModal = document.getElementById('strategyHelpModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    const modalHtml = `
+    <div id="strategyHelpModal" class="strategy-modal-overlay">
+      <div class="strategy-modal">
+        <div class="strategy-modal-header">
+          <h3>${title}</h3>
+          <button class="strategy-modal-close">&times;</button>
+        </div>
+        <div class="strategy-modal-content">
+          ${content}
+        </div>
+      </div>
+    </div>
+  `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    // Close on overlay click or close button
+    const modal = document.getElementById('strategyHelpModal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.classList.contains('strategy-modal-overlay') || target.classList.contains('strategy-modal-close')) {
+                modal.remove();
+            }
+        });
+    }
+}
+/**
  * Setup optimizer event handlers
  */
 function setupOptimizerEvents() {
@@ -879,16 +1024,16 @@ function setupOptimizerEvents() {
     if (runBtn) {
         runBtn.addEventListener('click', runOptimizer);
     }
-    // Toggle help
-    const helpToggle = document.querySelector('[data-action="toggle-optimizer-help"]');
-    if (helpToggle) {
-        helpToggle.addEventListener('click', () => {
-            const content = document.getElementById('optimizerHelpContent');
-            if (content) {
-                content.style.display = content.style.display === 'none' ? 'block' : 'none';
+    // Event delegation for strategy help buttons (they're dynamically created)
+    document.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.classList.contains('strategy-help-btn')) {
+            const strategy = target.getAttribute('data-strategy');
+            if (strategy) {
+                showStrategyModal(strategy);
             }
-        });
-    }
+        }
+    });
 }
 /**
  * Run the lineup optimizer
@@ -928,10 +1073,12 @@ function runOptimizer() {
             }));
             // Generate all 3-familiar combinations
             const combinations = generateCombinations(calcFamiliars, 3);
+            // Get optimizer config
+            const optimizerConfig = store.getState().configOptimizer;
             // Run all strategies (no additional bonuses - familiars already have their conditionals)
-            const results = runAllStrategiesFast(combinations, []);
+            const results = runAllStrategiesFast(combinations, [], optimizerConfig);
             // Render results
-            resultsContainer.innerHTML = renderOptimizerResults(results);
+            resultsContainer.innerHTML = renderOptimizerResults(results, optimizerConfig);
         }
         catch (error) {
             console.error('Optimizer error:', error);
@@ -949,47 +1096,185 @@ function runOptimizer() {
 /**
  * Render optimizer results
  */
-function renderOptimizerResults(results) {
-    const { bestOverall, bestLow, bestHigh } = results;
-    if (!bestOverall && !bestLow && !bestHigh) {
+function renderOptimizerResults(results, _config) {
+    const { bestOverall, bestLow, bestHigh, bestMedian, bestMinVariance, bestFloorGuarantee, bestBalanced } = results;
+    const hasAny = bestOverall || bestLow || bestHigh || bestMedian || bestMinVariance || bestFloorGuarantee || bestBalanced;
+    if (!hasAny) {
         return '<div class="optimizer-empty">No valid lineups found.</div>';
     }
     let html = '<div class="optimizer-results-grid">';
+    // Basic strategies
     if (bestOverall) {
-        html += renderLineupCard('Best Overall', bestOverall);
+        html += renderLineupCard('overall', 'Best Overall', 'Expected average across all dice outcomes', bestOverall);
     }
     if (bestLow) {
-        html += renderLineupCard('Best for Low Rolls', bestLow);
+        html += renderLineupCard('low', 'Best for Low Rolls', 'Optimal when dice roll minimum values', bestLow);
     }
     if (bestHigh) {
-        html += renderLineupCard('Best for High Rolls', bestHigh);
+        html += renderLineupCard('high', 'Best for High Rolls', 'Optimal when dice roll maximum values', bestHigh);
+    }
+    // Advanced strategies
+    if (bestMedian) {
+        html += renderLineupCard('median', 'Median Score', '50th percentile of all outcomes', bestMedian);
+    }
+    if (bestFloorGuarantee) {
+        html += renderLineupCard('floorGuarantee', 'Floor Guarantee', '80%+ of rolls meet minimum', bestFloorGuarantee);
+    }
+    if (bestBalanced) {
+        html += renderLineupCardBalanced(bestBalanced);
     }
     html += '</div>';
     return html;
 }
 /**
+ * Get strategy icon SVG
+ */
+function getStrategyIcon(strategy) {
+    switch (strategy) {
+        case 'overall':
+            return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>';
+        case 'low':
+            return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
+        case 'high':
+            return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16c0 3.87 3.13 7 7 7s7-3.13 7-7v-4H5v4zM16.12 4.37l2.1-2.1-.82-.83-2.3 2.31C14.16 3.28 13.12 3 12 3s-2.16.28-3.09.75L6.6 1.44l-.82.83 2.1 2.1C6.14 5.64 5 7.68 5 10v1h14v-1c0-2.32-1.14-4.36-2.88-5.63zM9 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm6 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>';
+        case 'median':
+            // Bar chart icon
+            return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v8H3v-8zm4-6h2v14H7V7zm4-4h2v18h-2V3zm4 4h2v14h-2V7zm4 6h2v8h-2v-8z"/></svg>';
+        case 'minVariance':
+            // Shield icon
+            return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>';
+        case 'floorGuarantee':
+            // Floor/foundation icon
+            return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 12h-2v3h-3v2h5v-5zM7 9h3V7H5v5h2V9zm14-6H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.99h18v14.02z"/></svg>';
+        case 'balanced':
+            // Balance scale icon
+            return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-1.27 0-2.4.8-2.82 2H3v2h1.95L2 14c-.47 2 1 3 3.5 3s4.06-1 3.5-3L6.05 7h3.12c.33.85.98 1.5 1.83 1.83V20H7v2h10v-2h-4V8.82c.85-.32 1.5-.97 1.83-1.82h3.12L15 14c-.47 2 1 3 3.5 3s4.06-1 3.5-3L19.05 7H21V5h-6.18C14.4 3.8 13.27 3 12 3zm0 2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM5.5 11l1.5 3h-3l1.5-3zm13 0l1.5 3h-3l1.5-3z"/></svg>';
+        default:
+            return '';
+    }
+}
+/**
  * Render a single lineup card
  */
-function renderLineupCard(title, lineup) {
-    const familiarsHtml = lineup.familiars.map((f) => `
-    <div class="lineup-familiar">
-      <span class="familiar-name">${escapeHtml(f.name)}</span>
-      <span class="familiar-details">${f.rank} · ${f.element !== 'None' ? f.element + ' · ' : ''}${f.type}</span>
-      ${f.conditional ? `<span class="familiar-conditional">${escapeHtml(f.conditional.name)}</span>` : ''}
-    </div>
-  `).join('');
+function renderLineupCard(strategy, title, subtitle, lineup) {
+    const familiarsHtml = lineup.familiars.map((f) => {
+        const rankClass = `rank-${f.rank.toLowerCase()}`;
+        const elementClass = `element-${f.element.toLowerCase()}`;
+        return `
+      <div class="lineup-familiar ${rankClass} ${elementClass}">
+        <div class="lineup-familiar-name">${escapeHtml(f.name)}</div>
+        <div class="lineup-familiar-meta">
+          <span class="rank-text ${rankClass}">${f.rank}</span>
+          <span class="element-text ${elementClass}">${f.element}</span>
+          <span class="type-text">${f.type}</span>
+        </div>
+        ${f.conditional ? `<div class="lineup-familiar-bonus">${escapeHtml(f.conditional.name)}</div>` : ''}
+      </div>
+    `;
+    }).join('');
+    // Collect active bonuses
+    const activeBonuses = lineup.activeBonusNames && lineup.activeBonusNames.length > 0
+        ? lineup.activeBonusNames
+        : lineup.familiars.filter(f => f.conditional).map(f => f.conditional.name);
+    const bonusesHtml = activeBonuses.length > 0
+        ? `<div class="lineup-active-bonuses">
+        ${activeBonuses.map(b => `<span class="bonus-tag">${escapeHtml(b)}</span>`).join('')}
+      </div>`
+        : '';
     return `
     <div class="lineup-card">
-      <div class="lineup-header">
-        <h3>${title}</h3>
+      <div class="lineup-card-header">
+        <div class="lineup-card-titles">
+          <h3 class="lineup-card-title">${title}</h3>
+          <span class="lineup-card-subtitle">${subtitle}</span>
+        </div>
+        <button class="strategy-help-btn" data-strategy="${strategy}" title="How is this calculated?">?</button>
       </div>
-      <div class="lineup-score">
-        <span class="score-value">${lineup.score}</span>
-        <span class="score-label">${lineup.scoreLabel}</span>
+      <div class="lineup-score-display">
+        <div class="score-main">
+          <span class="score-number">${lineup.score.toLocaleString()}</span>
+          <span class="score-label-text">Score</span>
+        </div>
+        <div class="score-details">
+          <span class="score-dice">${lineup.scoreLabel}</span>
+        </div>
       </div>
-      <div class="lineup-familiars">
+      <div class="lineup-familiars-grid">
         ${familiarsHtml}
       </div>
+      ${bonusesHtml}
+    </div>
+  `;
+}
+/**
+ * Render balanced strategy card with component breakdown
+ */
+function renderLineupCardBalanced(lineup) {
+    const familiarsHtml = lineup.familiars.map((f) => {
+        const rankClass = `rank-${f.rank.toLowerCase()}`;
+        const elementClass = `element-${f.element.toLowerCase()}`;
+        return `
+      <div class="lineup-familiar ${rankClass} ${elementClass}">
+        <div class="lineup-familiar-name">${escapeHtml(f.name)}</div>
+        <div class="lineup-familiar-meta">
+          <span class="rank-text ${rankClass}">${f.rank}</span>
+          <span class="element-text ${elementClass}">${f.element}</span>
+          <span class="type-text">${f.type}</span>
+        </div>
+        ${f.conditional ? `<div class="lineup-familiar-bonus">${escapeHtml(f.conditional.name)}</div>` : ''}
+      </div>
+    `;
+    }).join('');
+    // Collect active bonuses
+    const activeBonuses = lineup.activeBonusNames && lineup.activeBonusNames.length > 0
+        ? lineup.activeBonusNames
+        : lineup.familiars.filter((f) => f.conditional).map((f) => f.conditional.name);
+    const bonusesHtml = activeBonuses.length > 0
+        ? `<div class="lineup-active-bonuses">
+        ${activeBonuses.map((b) => `<span class="bonus-tag">${escapeHtml(b)}</span>`).join('')}
+      </div>`
+        : '';
+    // Breakdown of component scores
+    const components = lineup.balancedComponents;
+    const breakdownHtml = components
+        ? `<div class="balanced-breakdown">
+        <div class="breakdown-item">
+          <span class="breakdown-label">Low (25%)</span>
+          <span class="breakdown-value">${components.lowRollScore}</span>
+        </div>
+        <div class="breakdown-item">
+          <span class="breakdown-label">Avg (50%)</span>
+          <span class="breakdown-value">${components.avgScore}</span>
+        </div>
+        <div class="breakdown-item">
+          <span class="breakdown-label">High (25%)</span>
+          <span class="breakdown-value">${components.highRollScore}</span>
+        </div>
+      </div>`
+        : '';
+    return `
+    <div class="lineup-card">
+      <div class="lineup-card-header">
+        <div class="lineup-card-titles">
+          <h3 class="lineup-card-title">Balanced</h3>
+          <span class="lineup-card-subtitle">Weighted 25% low + 50% avg + 25% high</span>
+        </div>
+        <button class="strategy-help-btn" data-strategy="balanced" title="How is this calculated?">?</button>
+      </div>
+      <div class="lineup-score-display">
+        <div class="score-main">
+          <span class="score-number">${lineup.score.toLocaleString()}</span>
+          <span class="score-label-text">Score</span>
+        </div>
+        <div class="score-details">
+          <span class="score-dice">${lineup.scoreLabel}</span>
+        </div>
+      </div>
+      ${breakdownHtml}
+      <div class="lineup-familiars-grid">
+        ${familiarsHtml}
+      </div>
+      ${bonusesHtml}
     </div>
   `;
 }

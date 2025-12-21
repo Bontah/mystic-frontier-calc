@@ -5,5 +5,5 @@ export { getMaxDiceForRank, getMaxDiceForFamiliars, getAverageDiceForRank, getAv
 export { evaluateCondition, evaluateConditionalBonus, evaluateConditionalBonuses, clearConditionCache, } from './conditional-evaluator.js';
 export { calculateScore, evaluateLineup, calculateExpectedScore, } from './calculator.js';
 export { generateCombinations, findBestLineup, findBestLineupAsync, runAllStrategies, filterRosterForOptimization, } from './optimizer.js';
-export { calculateRerollSuggestions, getBestRerollOption, canPassWithSingleReroll, getRerollSummary, } from './reroll-analyzer.js';
+export { calculateRerollSuggestions, getBestRerollOption, canPassWithSingleReroll, getRerollSummary, findTopPassingCombinations, } from './reroll-analyzer.js';
 //# sourceMappingURL=index.d.ts.map

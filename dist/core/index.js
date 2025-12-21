@@ -10,5 +10,5 @@ export { calculateScore, evaluateLineup, calculateExpectedScore, } from './calcu
 // Optimizer
 export { generateCombinations, findBestLineup, findBestLineupAsync, runAllStrategies, filterRosterForOptimization, } from './optimizer.js';
 // Reroll analysis
-export { calculateRerollSuggestions, getBestRerollOption, canPassWithSingleReroll, getRerollSummary, } from './reroll-analyzer.js';
+export { calculateRerollSuggestions, getBestRerollOption, canPassWithSingleReroll, getRerollSummary, findTopPassingCombinations, } from './reroll-analyzer.js';
 //# sourceMappingURL=index.js.map

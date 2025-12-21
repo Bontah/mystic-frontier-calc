@@ -68,4 +68,8 @@ export declare function searchBonusItems(query: string): void;
  * Apply a bonus item from search results
  */
 export declare function applyBonusItemFromSearch(itemIndex: number, query: string): void;
+/**
+ * Calculate and display passing dice combinations
+ */
+export declare function calculatePassingCombinations(): void;
 //# sourceMappingURL=actions.d.ts.map

@@ -54,4 +54,49 @@ export function hideRerollSection() {
         section.style.display = 'none';
     }
 }
+/**
+ * Render passing combinations result
+ */
+export function renderPassingCombinations(combinations) {
+    const container = getElementById('passingCombosResult');
+    if (!container)
+        return;
+    if (combinations.length === 0) {
+        container.innerHTML = `
+      <div class="passing-combos-empty">
+        Cannot pass with current lineup
+      </div>
+    `;
+        container.style.display = 'block';
+        return;
+    }
+    const combosHtml = combinations.map((combo, index) => {
+        const diceStr = combo.dice.map((d, i) => `<span class="combo-die">D${i + 1}: ${d}</span>`).join('');
+        const probStr = combo.probability.toFixed(1);
+        return `
+      <div class="passing-combo">
+        <div class="combo-rank">#${index + 1}</div>
+        <div class="combo-dice">${diceStr}</div>
+        <div class="combo-score">Score: ${combo.finalScore}</div>
+        <div class="combo-probability">${probStr}%</div>
+      </div>
+    `;
+    }).join('');
+    container.innerHTML = `
+    <div class="passing-combos-header">Top Passing Combinations</div>
+    <div class="passing-combos-list">
+      ${combosHtml}
+    </div>
+  `;
+    container.style.display = 'block';
+}
+/**
+ * Hide passing combinations result
+ */
+export function hidePassingCombinations() {
+    const container = getElementById('passingCombosResult');
+    if (container) {
+        container.style.display = 'none';
+    }
+}
 //# sourceMappingURL=reroll-display.js.map

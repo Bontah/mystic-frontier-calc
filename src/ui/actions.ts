@@ -5,11 +5,11 @@
 
 import { store, selectors } from '../state/store.js';
 import { saveState } from '../state/persistence.js';
-import { calculateScore, calculateRerollSuggestions, evaluateConditionalBonus, getGlobalDiceCap, getEffectiveDiceCap } from '../core/index.js';
+import { calculateScore, calculateRerollSuggestions, evaluateConditionalBonus, getGlobalDiceCap, getEffectiveDiceCap, findTopPassingCombinations } from '../core/index.js';
 import type { CalcFamiliar, Wave, Familiar, ConditionalBonus } from '../types/index.js';
 import type { BonusItem } from '../types/bonus.js';
 import { renderResultDisplay, updateActiveConditionals, type ConditionalDisplayData } from './components/result-display.js';
-import { renderRerollSuggestions } from './components/reroll-display.js';
+import { renderRerollSuggestions, renderPassingCombinations, hidePassingCombinations } from './components/reroll-display.js';
 import { updateFamiliarsGrid } from './components/familiar-card.js';
 import { updateRosterList } from './components/roster-item.js';
 import { escapeHtml } from '../utils/html.js';
@@ -532,4 +532,31 @@ export function applyBonusItemFromSearch(itemIndex: number, query: string): void
     searchInput.value = '';
   }
   searchBonusItems('');
+}
+
+/**
+ * Calculate and display passing dice combinations
+ */
+export function calculatePassingCombinations(): void {
+  const state = store.getState();
+  const familiars = state.calcFamiliars;
+  const difficulty = getDifficulty();
+
+  // Collect all conditionals (from familiars + user-added)
+  const activeFamiliars = familiars.filter((f): f is CalcFamiliar => f !== null && f.rank !== undefined);
+  const allConditionals: ConditionalBonus[] = [
+    ...activeFamiliars.filter((f) => f.conditional).map((f) => f.conditional!),
+    ...state.conditionalBonuses,
+  ];
+
+  // Find top passing combinations
+  const combinations = findTopPassingCombinations(
+    familiars,
+    state.bonusItems,
+    allConditionals,
+    difficulty,
+    5
+  );
+
+  renderPassingCombinations(combinations);
 }

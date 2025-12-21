@@ -4,7 +4,7 @@
  */
 import { store, selectors } from '../state/store.js';
 import { setupNavigation } from './navigation.js';
-import { calculate, setCalcFamiliar, deleteCalcFamiliar, resetAllFamiliars, loadWave, saveToWave, addFamiliarToRoster, deleteFamiliarFromRoster, toggleFamiliarDisabled, switchCharacter, deleteBonusItem, searchBonusItems, applyBonusItemFromSearch, renderBonusItemsList, } from './actions.js';
+import { calculate, setCalcFamiliar, deleteCalcFamiliar, resetAllFamiliars, loadWave, saveToWave, addFamiliarToRoster, deleteFamiliarFromRoster, toggleFamiliarDisabled, switchCharacter, deleteBonusItem, searchBonusItems, applyBonusItemFromSearch, renderBonusItemsList, calculatePassingCombinations, } from './actions.js';
 import { updateRosterList } from './components/roster-item.js';
 import { createIconDropdown, RANK_OPTIONS, ELEMENT_OPTIONS, TYPE_OPTIONS } from './components/icon-dropdown.js';
 import { saveState } from '../state/persistence.js';
@@ -35,6 +35,7 @@ export function setupEventHandlers() {
     setupFamiliarModalSave();
     setupRosterFormEvents();
     setupBonusItemEvents();
+    setupPassingCombosButton();
     // Initial render of bonus items list
     renderBonusItemsList();
 }
@@ -670,5 +671,26 @@ export function getModalConditionalSelector() {
  */
 export function getRosterConditionalSelector() {
     return rosterConditionalSelector;
+}
+/**
+ * Setup passing combinations button
+ */
+function setupPassingCombosButton() {
+    const btn = document.querySelector('[data-action="calculate-passing-combos"]');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            calculatePassingCombinations();
+        });
+    }
+    // Setup reroll help toggle
+    const helpIcon = document.querySelector('[data-action="toggle-reroll-help"]');
+    if (helpIcon) {
+        helpIcon.addEventListener('click', () => {
+            const content = document.getElementById('rerollHelpContent');
+            if (content) {
+                content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    }
 }
 //# sourceMappingURL=event-handlers.js.map

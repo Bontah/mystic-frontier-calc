@@ -2,8 +2,9 @@
  * Reroll analysis
  * Calculates which dice rerolls can help pass a difficulty check
  */
-import type { ConditionalBonus, FamiliarContext, RerollSuggestion } from '../types/index.js';
+import type { ConditionalBonus, FamiliarContext, RerollSuggestion, PassingCombination } from '../types/index.js';
 import type { BonusItem } from '../types/bonus.js';
+import type { CalcFamiliar } from '../types/index.js';
 /**
  * Calculate reroll suggestions for each die
  */
@@ -27,4 +28,9 @@ export declare function getRerollSummary(suggestions: RerollSuggestion[]): {
     bestOdds: number | null;
     impossibleCount: number;
 };
+/**
+ * Find the top passing dice combinations sorted by probability
+ * Returns combinations that pass the difficulty, sorted by highest probability first
+ */
+export declare function findTopPassingCombinations(familiars: (CalcFamiliar | null)[], bonusItems: BonusItem[], conditionalBonuses: ConditionalBonus[], difficulty: number, limit?: number): PassingCombination[];
 //# sourceMappingURL=reroll-analyzer.d.ts.map

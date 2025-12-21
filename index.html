@@ -155,7 +155,26 @@
 
       <!-- Reroll Suggestions -->
       <div id="rerollSection" class="reroll-section" style="display: none;">
-        <div class="reroll-title">Reroll Suggestions</div>
+        <div class="reroll-header">
+          <div class="reroll-title-row">
+            <div class="reroll-title">Reroll Suggestions</div>
+            <span class="reroll-help-icon" data-action="toggle-reroll-help">?</span>
+          </div>
+          <button class="passing-combos-btn" data-action="calculate-passing-combos">
+            Show Passing Combos
+          </button>
+        </div>
+        <div id="rerollHelpContent" class="reroll-help-content" style="display: none;">
+          <div class="help-item">
+            <strong>Reroll Suggestions</strong>
+            <p>Shows which dice values you need to roll to pass the difficulty. Each die shows what values would result in a passing score, along with the odds of rolling one of those values.</p>
+          </div>
+          <div class="help-item">
+            <strong>Show Passing Combos</strong>
+            <p>Calculates the top 5 easiest dice combinations that would pass, sorted by probability. Each combination shows the exact dice values needed and your chance of rolling them.</p>
+          </div>
+        </div>
+        <div id="passingCombosResult" style="display: none;"></div>
         <div id="rerollSuggestions" class="reroll-suggestions">
           <!-- Populated by JavaScript -->
         </div>

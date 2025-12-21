@@ -97,4 +97,14 @@ export type ScoringStrategy = 'overall' | 'lowRolls' | 'highRolls';
  * Optimizer progress callback
  */
 export type ProgressCallback = (percent: number) => void;
+/**
+ * A passing dice combination with probability
+ */
+export interface PassingCombination {
+    dice: number[];
+    diceSum: number;
+    finalScore: number;
+    probability: number;
+    activeConditionals: string[];
+}
 //# sourceMappingURL=calculation.d.ts.map

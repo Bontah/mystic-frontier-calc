@@ -31,6 +31,7 @@ export type {
   RerollSuggestion,
   ScoringStrategy,
   ProgressCallback,
+  PassingCombination,
 } from './calculation.js';
 
 export type { Character } from './character.js';

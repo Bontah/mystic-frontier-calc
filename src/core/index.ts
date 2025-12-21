@@ -45,4 +45,5 @@ export {
   getBestRerollOption,
   canPassWithSingleReroll,
   getRerollSummary,
+  findTopPassingCombinations,
 } from './reroll-analyzer.js';

@@ -8,10 +8,12 @@ import type {
   FamiliarContext,
   RerollSuggestion,
   PassingValue,
+  PassingCombination,
 } from '../types/index.js';
 import type { BonusItem } from '../types/bonus.js';
 import { calculateScore } from './calculator.js';
-import { getMaxDiceForRank } from './dice.js';
+import { getMaxDiceForRank, getEffectiveDiceCap, getGlobalDiceCap } from './dice.js';
+import type { CalcFamiliar } from '../types/index.js';
 
 /**
  * Simulate result with specific dice values
@@ -149,4 +151,107 @@ export function getRerollSummary(suggestions: RerollSuggestion[]): {
         : null,
     impossibleCount: impossible.length,
   };
+}
+
+/**
+ * Find the top passing dice combinations sorted by probability
+ * Returns combinations that pass the difficulty, sorted by highest probability first
+ */
+export function findTopPassingCombinations(
+  familiars: (CalcFamiliar | null)[],
+  bonusItems: BonusItem[],
+  conditionalBonuses: ConditionalBonus[],
+  difficulty: number,
+  limit: number = 5
+): PassingCombination[] {
+  // Filter to actual familiars and get their contexts
+  const activeFamiliars = familiars.filter((f): f is CalcFamiliar => f !== null && f.rank !== undefined);
+
+  if (activeFamiliars.length === 0) {
+    return [];
+  }
+
+  const familiarContexts: FamiliarContext[] = activeFamiliars.map(f => ({
+    type: f.type,
+    element: f.element,
+    rank: f.rank,
+  }));
+
+  // Get global dice cap from conditionals (e.g., "prevents rolling over 3")
+  const globalCap = getGlobalDiceCap(familiars);
+
+  // Get max dice for each familiar (considering rank and caps)
+  const maxDice: number[] = activeFamiliars.map(f => getEffectiveDiceCap(f, globalCap));
+
+  // Generate all passing combinations
+  const passingCombos: PassingCombination[] = [];
+
+  // Handle 1, 2, or 3 familiars
+  const numDice = activeFamiliars.length;
+
+  if (numDice === 1) {
+    for (let d1 = 1; d1 <= maxDice[0]; d1++) {
+      const dice = [d1];
+      const result = simulateResult(dice, familiarContexts, bonusItems, conditionalBonuses);
+      if (result.finalResult >= difficulty) {
+        // Probability of rolling exactly d1 or higher
+        const prob = ((maxDice[0] - d1 + 1) / maxDice[0]) * 100;
+        passingCombos.push({
+          dice: [...dice],
+          diceSum: d1,
+          finalScore: result.finalResult,
+          probability: prob,
+          activeConditionals: result.activeConditionals,
+        });
+      }
+    }
+  } else if (numDice === 2) {
+    for (let d1 = 1; d1 <= maxDice[0]; d1++) {
+      for (let d2 = 1; d2 <= maxDice[1]; d2++) {
+        const dice = [d1, d2];
+        const result = simulateResult(dice, familiarContexts, bonusItems, conditionalBonuses);
+        if (result.finalResult >= difficulty) {
+          // Probability of rolling at least these values
+          const prob1 = (maxDice[0] - d1 + 1) / maxDice[0];
+          const prob2 = (maxDice[1] - d2 + 1) / maxDice[1];
+          const prob = prob1 * prob2 * 100;
+          passingCombos.push({
+            dice: [...dice],
+            diceSum: d1 + d2,
+            finalScore: result.finalResult,
+            probability: prob,
+            activeConditionals: result.activeConditionals,
+          });
+        }
+      }
+    }
+  } else {
+    // 3 familiars
+    for (let d1 = 1; d1 <= maxDice[0]; d1++) {
+      for (let d2 = 1; d2 <= maxDice[1]; d2++) {
+        for (let d3 = 1; d3 <= maxDice[2]; d3++) {
+          const dice = [d1, d2, d3];
+          const result = simulateResult(dice, familiarContexts, bonusItems, conditionalBonuses);
+          if (result.finalResult >= difficulty) {
+            // Probability of rolling at least these values
+            const prob1 = (maxDice[0] - d1 + 1) / maxDice[0];
+            const prob2 = (maxDice[1] - d2 + 1) / maxDice[1];
+            const prob3 = (maxDice[2] - d3 + 1) / maxDice[2];
+            const prob = prob1 * prob2 * prob3 * 100;
+            passingCombos.push({
+              dice: [...dice],
+              diceSum: d1 + d2 + d3,
+              finalScore: result.finalResult,
+              probability: prob,
+              activeConditionals: result.activeConditionals,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  // Sort by probability descending and take top N
+  passingCombos.sort((a, b) => b.probability - a.probability);
+  return passingCombos.slice(0, limit);
 }

@@ -1882,6 +1882,21 @@ select:focus, input:focus, textarea:focus {
   color: #1a1a2e;
 }
 
+.delete-all-btn {
+  background: transparent;
+  border: 1px solid #ff4444;
+  color: #ff4444;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.delete-all-btn:hover {
+  background: #ff4444;
+  color: #fff;
+}
+
 /* Optimizer Styles */
 .optimizer-controls {
   display: flex;

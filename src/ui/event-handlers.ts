@@ -247,6 +247,12 @@ function setupRosterEvents(): void {
   if (freeAllBtn) {
     freeAllBtn.addEventListener('click', freeAllWaves);
   }
+
+  // Delete all roster button
+  const deleteAllBtn = document.querySelector('[data-action="delete-all-roster"]');
+  if (deleteAllBtn) {
+    deleteAllBtn.addEventListener('click', deleteAllRoster);
+  }
 }
 
 /**
@@ -929,4 +935,31 @@ function freeAllWaves(): void {
 
   updateRosterList(roster);
   showToast('Freed all wave assignments');
+}
+
+/**
+ * Delete all familiars from roster
+ */
+function deleteAllRoster(): void {
+  const roster = selectors.getCurrentRoster(store.getState());
+  if (roster.length === 0) {
+    showToast('No familiars to delete');
+    return;
+  }
+
+  if (!confirm(`Delete all ${roster.length} familiars? This cannot be undone.`)) {
+    return;
+  }
+
+  const state = store.getState();
+  const charIdx = state.characters.findIndex((c) => c.id === state.currentCharacterId);
+  if (charIdx < 0) return;
+
+  const characters = [...state.characters];
+  characters[charIdx] = { ...characters[charIdx], roster: [] };
+  store.setState({ characters });
+  saveState();
+
+  updateRosterList([]);
+  showToast('Deleted all familiars');
 }

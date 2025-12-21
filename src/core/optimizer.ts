@@ -23,13 +23,14 @@ import { getMaxDiceForFamiliars, getAverageDiceForFamiliars, generateDiceCombina
 function filterIgnoredConditionals(
   familiars: CalcFamiliar[],
   bonuses: ConditionalBonus[],
-  ignoredIds: string[]
+  ignoredIds: (string | number)[]
 ): { familiars: CalcFamiliar[]; bonuses: ConditionalBonus[] } {
   if (ignoredIds.length === 0) {
     return { familiars, bonuses };
   }
 
-  const ignoredSet = new Set(ignoredIds);
+  // Convert all IDs to strings for consistent comparison
+  const ignoredSet = new Set(ignoredIds.map(id => String(id)));
 
   // Create new familiars with ignored conditionals nulled
   const filteredFamiliars = familiars.map((fam) => {
@@ -53,13 +54,14 @@ function filterIgnoredConditionals(
 function filterCombinationsForStrategy(
   combinations: CalcFamiliar[][],
   bonuses: ConditionalBonus[],
-  ignoredIds: string[]
+  ignoredIds: (string | number)[]
 ): { combinations: CalcFamiliar[][]; bonuses: ConditionalBonus[] } {
   if (ignoredIds.length === 0) {
     return { combinations, bonuses };
   }
 
-  const ignoredSet = new Set(ignoredIds);
+  // Convert all IDs to strings for consistent comparison
+  const ignoredSet = new Set(ignoredIds.map(id => String(id)));
 
   // Filter each combination's familiars
   const filteredCombinations = combinations.map((combo) =>

@@ -149,8 +149,8 @@ export interface PassingCombination {
 export interface StrategyConfig {
   /** Whether this strategy is enabled */
   enabled: boolean;
-  /** Conditional bonus IDs to ignore for this strategy */
-  ignoredConditionalIds: string[];
+  /** Conditional bonus IDs to ignore for this strategy (can be string or number from JSON) */
+  ignoredConditionalIds: (string | number)[];
 }
 
 /**

@@ -1880,11 +1880,12 @@ function calculateStrategy(strategyKey: string): void {
  */
 function filterCombinationsForIgnored(
   combinations: CalcFamiliar[][],
-  ignoredIds: string[]
+  ignoredIds: (string | number)[]
 ): CalcFamiliar[][] {
   if (ignoredIds.length === 0) return combinations;
 
-  const ignoredSet = new Set(ignoredIds);
+  // Convert all IDs to strings for consistent comparison
+  const ignoredSet = new Set(ignoredIds.map(id => String(id)));
 
   return combinations.map((combo) =>
     combo.map((fam) => {

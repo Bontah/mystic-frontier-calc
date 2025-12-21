@@ -26,7 +26,9 @@ import { createIconDropdown, RANK_OPTIONS, ELEMENT_OPTIONS, TYPE_OPTIONS } from 
 import { saveState } from '../state/persistence.js';
 import { createConditionalSelector } from './conditional-selector/index.js';
 import { showToast } from './toast.js';
-import type { Wave, Rank, CalcFamiliar, Familiar } from '../types/index.js';
+import { generateCombinations, runAllStrategies } from '../core/optimizer.js';
+import { escapeHtml } from '../utils/html.js';
+import type { Wave, Rank, CalcFamiliar, Familiar, OptimizedLineup } from '../types/index.js';
 
 // Module-level conditional selector instances
 let modalConditionalSelector: ReturnType<typeof createConditionalSelector> | null = null;
@@ -57,6 +59,7 @@ export function setupEventHandlers(): void {
   setupRosterFormEvents();
   setupBonusItemEvents();
   setupPassingCombosButton();
+  setupOptimizerEvents();
 
   // Initial render of bonus items list
   renderBonusItemsList();
@@ -989,4 +992,156 @@ function deleteAllRoster(): void {
 
   updateRosterList([]);
   showToast('Deleted all familiars');
+}
+
+/**
+ * Setup optimizer event handlers
+ */
+function setupOptimizerEvents(): void {
+  const runBtn = document.querySelector('[data-action="run-optimizer"]');
+  if (runBtn) {
+    runBtn.addEventListener('click', runOptimizer);
+  }
+
+  // Toggle help
+  const helpToggle = document.querySelector('[data-action="toggle-optimizer-help"]');
+  if (helpToggle) {
+    helpToggle.addEventListener('click', () => {
+      const content = document.getElementById('optimizerHelpContent');
+      if (content) {
+        content.style.display = content.style.display === 'none' ? 'block' : 'none';
+      }
+    });
+  }
+}
+
+/**
+ * Run the lineup optimizer
+ */
+async function runOptimizer(): Promise<void> {
+  const state = store.getState();
+  const roster = selectors.getCurrentRoster(state);
+
+  // Filter out disabled familiars
+  const availableFamiliars = roster.filter((f) => !f.disabled);
+
+  if (availableFamiliars.length < 3) {
+    showToast('Need at least 3 enabled familiars to optimize');
+    return;
+  }
+
+  const resultsContainer = document.getElementById('optimizerResults');
+  const runBtn = document.querySelector('[data-action="run-optimizer"]') as HTMLButtonElement;
+
+  if (!resultsContainer) return;
+
+  // Disable button and show loading
+  if (runBtn) {
+    runBtn.disabled = true;
+    runBtn.textContent = 'Finding best lineups...';
+  }
+
+  resultsContainer.innerHTML = '<div class="optimizer-loading">Analyzing combinations... <span id="optimizerProgress">0%</span></div>';
+
+  try {
+    // Convert roster familiars to CalcFamiliars
+    const calcFamiliars: CalcFamiliar[] = availableFamiliars.map((f) => ({
+      name: f.name,
+      rank: f.rank,
+      element: f.element,
+      type: f.type,
+      conditional: f.conditional,
+    }));
+
+    // Get bonus items
+    const bonusItems = state.bonusItems;
+    const bonuses = calcFamiliars
+      .map((f) => f.conditional)
+      .filter((c): c is NonNullable<typeof c> => c !== null);
+
+    // Generate all 3-familiar combinations
+    const combinations = generateCombinations(calcFamiliars, 3);
+
+    // Progress callback
+    const onProgress = (percent: number) => {
+      const progressEl = document.getElementById('optimizerProgress');
+      if (progressEl) {
+        progressEl.textContent = `${percent}%`;
+      }
+    };
+
+    // Run all strategies
+    const results = await runAllStrategies(combinations, bonuses, onProgress);
+
+    // Render results
+    resultsContainer.innerHTML = renderOptimizerResults(results);
+  } catch (error) {
+    console.error('Optimizer error:', error);
+    resultsContainer.innerHTML = '<div class="optimizer-error">An error occurred during optimization.</div>';
+  } finally {
+    // Re-enable button
+    if (runBtn) {
+      runBtn.disabled = false;
+      runBtn.textContent = 'Find Best Lineups';
+    }
+  }
+}
+
+/**
+ * Render optimizer results
+ */
+function renderOptimizerResults(results: {
+  bestOverall: OptimizedLineup | null;
+  bestLow: OptimizedLineup | null;
+  bestHigh: OptimizedLineup | null;
+}): string {
+  const { bestOverall, bestLow, bestHigh } = results;
+
+  if (!bestOverall && !bestLow && !bestHigh) {
+    return '<div class="optimizer-empty">No valid lineups found.</div>';
+  }
+
+  let html = '<div class="optimizer-results-grid">';
+
+  if (bestOverall) {
+    html += renderLineupCard('Best Overall', 'Expected score across all dice rolls', bestOverall);
+  }
+  if (bestLow) {
+    html += renderLineupCard('Best for Low Rolls', 'Best performance with 1-1-1 dice', bestLow);
+  }
+  if (bestHigh) {
+    html += renderLineupCard('Best for High Rolls', 'Best performance with max dice', bestHigh);
+  }
+
+  html += '</div>';
+  return html;
+}
+
+/**
+ * Render a single lineup card
+ */
+function renderLineupCard(title: string, description: string, lineup: OptimizedLineup): string {
+  const familiarsHtml = lineup.familiars.map((f) => `
+    <div class="lineup-familiar">
+      <span class="familiar-name">${escapeHtml(f.name)}</span>
+      <span class="familiar-details">${f.rank} · ${f.element !== 'None' ? f.element + ' · ' : ''}${f.type}</span>
+      ${f.conditional ? `<span class="familiar-conditional">${escapeHtml(f.conditional.name)}</span>` : ''}
+    </div>
+  `).join('');
+
+  return `
+    <div class="lineup-card">
+      <div class="lineup-header">
+        <h3>${title}</h3>
+        <p>${description}</p>
+      </div>
+      <div class="lineup-score">
+        <span class="score-value">${lineup.score}</span>
+        <span class="score-label">${lineup.scoreLabel}</span>
+      </div>
+      <div class="lineup-familiars">
+        ${familiarsHtml}
+      </div>
+    </div>
+  `;
 }

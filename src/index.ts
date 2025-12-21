@@ -12,6 +12,7 @@ import {
   setupModalCloseButtons,
   calculate,
   updateDiceDropdowns,
+  switchCharacter,
 } from './ui/index.js';
 import { updateFamiliarsGrid } from './ui/components/familiar-card.js';
 import { updateRosterList } from './ui/components/roster-item.js';
@@ -111,6 +112,17 @@ function setupCharacterButtons(): void {
   document.querySelector('[data-action="add-character"]')?.addEventListener('click', addCharacter);
   document.querySelector('[data-action="rename-character"]')?.addEventListener('click', renameCharacter);
   document.querySelector('[data-action="delete-character"]')?.addEventListener('click', deleteCharacter);
+
+  // Character selector change event
+  const charSelect = document.getElementById('characterSelect');
+  if (charSelect) {
+    charSelect.addEventListener('change', (e) => {
+      const id = parseInt((e.target as HTMLSelectElement).value);
+      if (!isNaN(id)) {
+        switchCharacter(id);
+      }
+    });
+  }
 }
 
 /**

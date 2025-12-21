@@ -15,7 +15,6 @@ import {
   addFamiliarToRoster,
   deleteFamiliarFromRoster,
   toggleFamiliarDisabled,
-  switchCharacter,
   deleteBonusItem,
   searchBonusItems,
   applyBonusItemFromSearch,
@@ -202,17 +201,6 @@ function setupRosterEvents(): void {
         case 'toggle':
           toggleFamiliarDisabled(id);
           break;
-      }
-    });
-  }
-
-  // Character selector
-  const charSelect = document.getElementById('characterSelect');
-  if (charSelect) {
-    charSelect.addEventListener('change', (e) => {
-      const id = parseInt((e.target as HTMLSelectElement).value);
-      if (!isNaN(id)) {
-        switchCharacter(id);
       }
     });
   }

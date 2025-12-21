@@ -6,7 +6,7 @@ import { store, selectors } from './state/store.js';
 import { initializePersistence, enableAutoSave } from './state/persistence.js';
 import { loadAllConfigs } from './services/config-loader.js';
 import { initScanner } from './scanner/index.js';
-import { setupEventHandlers, setupModalCloseButtons, calculate, updateDiceDropdowns, } from './ui/index.js';
+import { setupEventHandlers, setupModalCloseButtons, calculate, updateDiceDropdowns, switchCharacter, } from './ui/index.js';
 import { updateFamiliarsGrid } from './ui/components/familiar-card.js';
 import { updateRosterList } from './ui/components/roster-item.js';
 /**
@@ -84,6 +84,16 @@ function setupCharacterButtons() {
     document.querySelector('[data-action="add-character"]')?.addEventListener('click', addCharacter);
     document.querySelector('[data-action="rename-character"]')?.addEventListener('click', renameCharacter);
     document.querySelector('[data-action="delete-character"]')?.addEventListener('click', deleteCharacter);
+    // Character selector change event
+    const charSelect = document.getElementById('characterSelect');
+    if (charSelect) {
+        charSelect.addEventListener('change', (e) => {
+            const id = parseInt(e.target.value);
+            if (!isNaN(id)) {
+                switchCharacter(id);
+            }
+        });
+    }
 }
 /**
  * Add a new character

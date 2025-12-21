@@ -4,7 +4,7 @@
  */
 import { store, selectors } from '../state/store.js';
 import { setupNavigation } from './navigation.js';
-import { calculate, setCalcFamiliar, deleteCalcFamiliar, resetAllFamiliars, loadWave, saveToWave, addFamiliarToRoster, deleteFamiliarFromRoster, toggleFamiliarDisabled, switchCharacter, deleteBonusItem, searchBonusItems, applyBonusItemFromSearch, renderBonusItemsList, calculatePassingCombinations, } from './actions.js';
+import { calculate, setCalcFamiliar, deleteCalcFamiliar, resetAllFamiliars, loadWave, saveToWave, addFamiliarToRoster, deleteFamiliarFromRoster, toggleFamiliarDisabled, deleteBonusItem, searchBonusItems, applyBonusItemFromSearch, renderBonusItemsList, calculatePassingCombinations, } from './actions.js';
 import { updateRosterList } from './components/roster-item.js';
 import { createIconDropdown, RANK_OPTIONS, ELEMENT_OPTIONS, TYPE_OPTIONS } from './components/icon-dropdown.js';
 import { saveState } from '../state/persistence.js';
@@ -167,16 +167,6 @@ function setupRosterEvents() {
                 case 'toggle':
                     toggleFamiliarDisabled(id);
                     break;
-            }
-        });
-    }
-    // Character selector
-    const charSelect = document.getElementById('characterSelect');
-    if (charSelect) {
-        charSelect.addEventListener('change', (e) => {
-            const id = parseInt(e.target.value);
-            if (!isNaN(id)) {
-                switchCharacter(id);
             }
         });
     }

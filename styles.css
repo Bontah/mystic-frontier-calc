@@ -2281,42 +2281,37 @@ select:focus, input:focus, textarea:focus {
   color: #ff9999;
 }
 
-/* Manually disabled familiar styling */
-.roster-item.disabled-familiar {
-  opacity: 0.5;
+/* Disabled familiar styling */
+.roster-item.disabled {
   position: relative;
+  opacity: 0.6;
+  border-left-color: #555 !important;
+  background: rgba(50, 50, 60, 0.5);
 }
 
-.roster-item.disabled-familiar::before {
+.roster-item.disabled::before {
   content: 'DISABLED';
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) rotate(-15deg);
-  font-size: 18px;
+  transform: translate(-50%, -50%) rotate(-10deg);
+  font-size: 14px;
   font-weight: bold;
-  color: rgba(136, 136, 136, 0.4);
-  letter-spacing: 4px;
+  color: #ff6666;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 4px 12px;
+  border-radius: 4px;
+  letter-spacing: 2px;
   pointer-events: none;
   z-index: 5;
+  border: 1px solid #ff4444;
 }
 
-.roster-item.disabled-familiar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 10px,
-    rgba(136, 136, 136, 0.05) 10px,
-    rgba(136, 136, 136, 0.05) 20px
-  );
-  pointer-events: none;
-  border-radius: 8px;
+.roster-item.disabled .roster-item-name,
+.roster-item.disabled .roster-item-details,
+.roster-item.disabled .roster-item-wave,
+.roster-item.disabled .roster-conditional {
+  opacity: 0.5;
 }
 
 /* Disable/Enable buttons */

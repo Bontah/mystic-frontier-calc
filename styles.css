@@ -1652,41 +1652,48 @@ select:focus, input:focus, textarea:focus {
 
 .roster-item-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #333;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 10px;
 }
 
-.roster-item-edit {
+.roster-btn {
   flex: 1;
-  background: transparent;
-  border: 1px solid #666;
-  color: #888;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 3px;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
-.roster-item-edit:hover {
+.roster-btn.edit {
+  background: #2a2a4a;
+  color: #66ccff;
+}
+
+.roster-btn.edit:hover {
   background: #66ccff;
-  border-color: #66ccff;
   color: #1a1a2e;
 }
 
-.roster-item-delete {
-  flex: 1;
-  background: transparent;
-  border: 1px solid #ff4444;
-  color: #ff6666;
-  cursor: pointer;
-  font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 3px;
+.roster-btn.toggle {
+  background: #2a2a4a;
+  color: #aaa;
 }
 
-.roster-item-delete:hover {
+.roster-btn.toggle:hover {
+  background: #555;
+  color: #fff;
+}
+
+.roster-btn.delete {
+  background: rgba(255, 68, 68, 0.15);
+  color: #ff6666;
+}
+
+.roster-btn.delete:hover {
   background: #ff4444;
   color: #fff;
 }

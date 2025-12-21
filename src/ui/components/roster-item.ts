@@ -84,4 +84,11 @@ export function updateRosterList(roster: Familiar[]): void {
   if (container) {
     container.innerHTML = renderRosterList(roster);
   }
+
+  // Update roster count
+  const countEl = document.getElementById('rosterCount');
+  if (countEl) {
+    const count = roster.length;
+    countEl.textContent = `${count} familiar${count !== 1 ? 's' : ''} in collection`;
+  }
 }

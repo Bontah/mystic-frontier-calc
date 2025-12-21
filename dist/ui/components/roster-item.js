@@ -73,5 +73,11 @@ export function updateRosterList(roster) {
     if (container) {
         container.innerHTML = renderRosterList(roster);
     }
+    // Update roster count
+    const countEl = document.getElementById('rosterCount');
+    if (countEl) {
+        const count = roster.length;
+        countEl.textContent = `${count} familiar${count !== 1 ? 's' : ''} in collection`;
+    }
 }
 //# sourceMappingURL=roster-item.js.map

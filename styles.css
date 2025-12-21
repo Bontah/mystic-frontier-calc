@@ -1567,7 +1567,9 @@ select:focus, input:focus, textarea:focus {
 
 /* Familiar Roster Styles */
 .roster-add-form {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #333;
 }
 
 .roster-inputs {

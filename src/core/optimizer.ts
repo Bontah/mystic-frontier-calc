@@ -62,14 +62,16 @@ function getScoreLabel(
 ): string {
   switch (strategy) {
     case 'lowRolls':
-      return 'With 1-1-1';
+      return 'Score with dice: 1-1-1';
     case 'highRolls': {
       const maxDice = getMaxDiceForFamiliars(familiars);
-      return `With ${maxDice.join('-')}`;
+      return `Score with dice: ${maxDice.join('-')}`;
     }
     case 'overall':
-    default:
-      return 'Expected';
+    default: {
+      const avgDice = getAverageDiceForFamiliars(familiars);
+      return `Avg dice: ${avgDice.map(d => d.toFixed(1)).join('-')}`;
+    }
   }
 }
 

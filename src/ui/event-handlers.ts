@@ -1041,7 +1041,11 @@ function runOptimizer(): void {
     runBtn.textContent = 'Finding best lineups...';
   }
 
-  resultsContainer.innerHTML = '<div class="optimizer-loading">Analyzing combinations...</div>';
+  // Calculate combination count for display
+  const n = availableFamiliars.length;
+  const combinationCount = (n * (n - 1) * (n - 2)) / 6;
+
+  resultsContainer.innerHTML = `<div class="optimizer-loading">Analyzing ${combinationCount.toLocaleString()} combinations...</div>`;
 
   // Use setTimeout to allow UI to update before heavy computation
   setTimeout(() => {
@@ -1098,13 +1102,13 @@ function renderOptimizerResults(results: {
   let html = '<div class="optimizer-results-grid">';
 
   if (bestOverall) {
-    html += renderLineupCard('Best Overall', 'Expected score across all dice rolls', bestOverall);
+    html += renderLineupCard('Best Overall', 'Highest score using average dice values', bestOverall);
   }
   if (bestLow) {
-    html += renderLineupCard('Best for Low Rolls', 'Best performance with 1-1-1 dice', bestLow);
+    html += renderLineupCard('Best for Low Rolls', 'Highest score when all dice roll 1', bestLow);
   }
   if (bestHigh) {
-    html += renderLineupCard('Best for High Rolls', 'Best performance with max dice', bestHigh);
+    html += renderLineupCard('Best for High Rolls', 'Highest score when all dice roll max', bestHigh);
   }
 
   html += '</div>';

@@ -10,22 +10,26 @@ export function renderRosterItem(fam) {
     const rankClass = `rank-${fam.rank.toLowerCase()}`;
     const disabledClass = fam.disabled ? 'disabled' : '';
     let condText = '';
+    let buggedBadge = '';
     if (fam.conditional) {
         const stats = formatBonusValues(fam.conditional);
         const bugWarning = isBuggedConditional(fam.conditional);
-        const warningHtml = bugWarning ? `<span class="bugged-badge" title="${escapeHtml(bugWarning)}">BUGGED</span>` : '';
-        condText = `<div class="roster-conditional">${escapeHtml(fam.conditional.name)} (${stats}) ${warningHtml}</div>`;
+        if (bugWarning) {
+            buggedBadge = `<span class="bugged-badge" title="${escapeHtml(bugWarning)}">BUGGED</span>`;
+        }
+        condText = `<div class="roster-conditional">${escapeHtml(fam.conditional.name)} (${stats})</div>`;
     }
-    const waveText = fam.wave ? `Wave ${fam.wave}` : 'No wave';
+    const waveText = fam.wave ? `<div class="roster-item-wave">Wave ${fam.wave}</div>` : '';
     return `
     <div class="roster-item ${rankClass} ${disabledClass}" data-familiar-id="${fam.id}">
+      ${buggedBadge}
       <div class="roster-item-info">
         <div class="roster-item-name">${escapeHtml(fam.name)}</div>
         <div class="roster-item-details">
           ${fam.rank} · ${fam.element !== 'None' ? fam.element + ' · ' : ''}${fam.type}
         </div>
         ${condText}
-        <div class="roster-item-wave">${waveText}</div>
+        ${waveText}
       </div>
       <div class="roster-item-actions">
         <button class="roster-btn edit" data-action="edit" data-id="${fam.id}">Edit</button>

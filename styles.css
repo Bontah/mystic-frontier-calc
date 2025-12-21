@@ -966,16 +966,17 @@ select:focus, input:focus, textarea:focus {
 }
 
 .bugged-badge {
-  display: inline-block;
+  position: absolute;
+  top: 4px;
+  right: 4px;
   background: #ff6666;
   color: #1a1a2e;
   font-size: 10px;
   font-weight: bold;
   padding: 2px 6px;
   border-radius: 3px;
-  margin-left: 8px;
-  vertical-align: middle;
   cursor: help;
+  z-index: 1;
 }
 
 .difficulty-input {
@@ -1660,6 +1661,7 @@ select:focus, input:focus, textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  position: relative;
 }
 
 .roster-item.rank-common { border-left-color: #9d9d9d; }

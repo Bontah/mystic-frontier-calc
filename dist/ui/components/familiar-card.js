@@ -19,21 +19,24 @@ export function renderEmptySlot(index) {
 export function renderFamiliarCard(fam, index) {
     const rankClass = `rank-${fam.rank.toLowerCase()}`;
     let condText = null;
-    let bugWarning = false;
+    let buggedBadge = '';
     if (fam.conditional) {
         condText = formatConditionalDisplay(fam.conditional);
-        bugWarning = isBuggedConditional(fam.conditional);
+        const bugWarning = isBuggedConditional(fam.conditional);
+        if (bugWarning) {
+            buggedBadge = `<span class="bugged-badge" title="${escapeHtml(bugWarning)}">BUGGED</span>`;
+        }
     }
-    const warningHtml = bugWarning ? `<span class="bugged-badge" title="${escapeHtml(bugWarning)}">BUGGED</span>` : '';
     return `
     <div class="familiar-card ${rankClass}" data-slot="${index}">
+      ${buggedBadge}
       <div class="familiar-card-info">
         <div class="familiar-card-name">${escapeHtml(fam.name || `Familiar ${index + 1}`)}</div>
         <div class="familiar-card-details">
           ${fam.rank} · ${fam.element !== 'None' ? fam.element + ' · ' : ''}${fam.type}
         </div>
         <div class="familiar-card-conditional ${condText ? '' : 'none'}">
-          ${condText ? escapeHtml(condText) : 'No conditional'} ${warningHtml}
+          ${condText ? escapeHtml(condText) : 'No conditional'}
         </div>
       </div>
       <div class="familiar-card-actions">

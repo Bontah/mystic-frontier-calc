@@ -100,6 +100,7 @@ const DEFAULT_OPTIMIZER_CONFIG: OptimizerConfig = {
     median: { enabled: true, ignoredConditionalIds: [] },
     floorGuarantee: { enabled: true, ignoredConditionalIds: [] },
     balanced: { enabled: true, ignoredConditionalIds: [] },
+    diceIndependent: { enabled: true, ignoredConditionalIds: [] },
   },
 };
 

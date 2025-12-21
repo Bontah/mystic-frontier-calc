@@ -68,6 +68,7 @@ const DEFAULT_OPTIMIZER_CONFIG = {
         median: { enabled: true, ignoredConditionalIds: [] },
         floorGuarantee: { enabled: true, ignoredConditionalIds: [] },
         balanced: { enabled: true, ignoredConditionalIds: [] },
+        diceIndependent: { enabled: true, ignoredConditionalIds: [] },
     },
 };
 /**

@@ -33,6 +33,7 @@ import {
   findBestLineupMedian,
   findBestLineupFloorGuarantee,
   findBestLineupBalanced,
+  findBestLineupDiceIndependent,
 } from '../core/optimizer.js';
 import { getMaxDiceForRank } from '../core/dice.js';
 import { evaluateLineup } from '../core/calculator.js';
@@ -1130,6 +1131,28 @@ function getStrategyExplanation(strategy: string): { title: string; content: str
           <p>All-around performance. Balances worst-case protection with upside potential.</p>
         `
       };
+    case 'diceIndependent':
+      return {
+        title: 'No Dice Dependency',
+        content: `
+          <p>This strategy finds lineups where <strong>all bonuses activate regardless of dice rolls</strong>.</p>
+          <h4>How it works:</h4>
+          <ul>
+            <li>Only considers familiars with conditionals that don't depend on dice values</li>
+            <li>Excludes conditions like "if dice sum ≥ X" or "if any die rolls 6"</li>
+            <li>Includes conditions based on lineup composition (element/type matching)</li>
+            <li>Prioritizes lineups with more guaranteed active bonuses</li>
+          </ul>
+          <h4>Valid conditional types:</h4>
+          <ul>
+            <li>"If a Fire familiar is in lineup" - activates based on element</li>
+            <li>"If all familiars have same type" - activates based on composition</li>
+            <li>Always-active bonuses with no conditions</li>
+          </ul>
+          <h4>Best for:</h4>
+          <p>Consistent, reliable lineups where you know exactly what bonuses you'll get every time. No luck required!</p>
+        `
+      };
     default:
       return { title: 'Strategy', content: '<p>No information available.</p>' };
   }
@@ -1599,7 +1622,7 @@ let lineupIdCounter = 0;
  */
 interface StrategyInfo {
   key: string;
-  configKey: 'overall' | 'lowRolls' | 'highRolls' | 'median' | 'floorGuarantee' | 'balanced';
+  configKey: 'overall' | 'lowRolls' | 'highRolls' | 'median' | 'floorGuarantee' | 'balanced' | 'diceIndependent';
   title: string;
   subtitle: string;
   renderType: StrategyType;
@@ -1609,6 +1632,7 @@ const STRATEGIES: StrategyInfo[] = [
   { key: 'overall', configKey: 'overall', title: 'Best Overall', subtitle: 'Expected average across all dice outcomes', renderType: 'overall' },
   { key: 'lowRolls', configKey: 'lowRolls', title: 'Best for Low Rolls', subtitle: 'Optimal when dice roll minimum values', renderType: 'low' },
   { key: 'highRolls', configKey: 'highRolls', title: 'Best for High Rolls', subtitle: 'Optimal when dice roll maximum values', renderType: 'high' },
+  { key: 'diceIndependent', configKey: 'diceIndependent', title: 'No Dice Dependency', subtitle: 'Bonuses activate regardless of dice rolls', renderType: 'diceIndependent' },
   { key: 'median', configKey: 'median', title: 'Median Score', subtitle: '50th percentile of all outcomes', renderType: 'median' },
   { key: 'floorGuarantee', configKey: 'floorGuarantee', title: 'Floor Guarantee', subtitle: '80%+ of rolls meet minimum', renderType: 'floorGuarantee' },
   { key: 'balanced', configKey: 'balanced', title: 'Balanced', subtitle: 'Weighted 25% low + 50% avg + 25% high', renderType: 'balanced' },
@@ -1810,6 +1834,9 @@ function calculateStrategy(strategyKey: string): void {
         case 'highRolls':
           result = findBestLineupFast(combinations, [], 'highRolls');
           break;
+        case 'diceIndependent':
+          result = findBestLineupDiceIndependent(combinations, []);
+          break;
         case 'median':
           result = findBestLineupMedian(combinations, []);
           break;
@@ -1872,7 +1899,7 @@ function filterCombinationsForIgnored(
 /**
  * Strategy type for rendering
  */
-type StrategyType = 'overall' | 'low' | 'high' | 'median' | 'minVariance' | 'floorGuarantee' | 'balanced';
+type StrategyType = 'overall' | 'low' | 'high' | 'median' | 'minVariance' | 'floorGuarantee' | 'balanced' | 'diceIndependent';
 
 /**
  * Get strategy icon SVG
@@ -1897,6 +1924,9 @@ function getStrategyIcon(strategy: StrategyType): string {
     case 'balanced':
       // Balance scale icon
       return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-1.27 0-2.4.8-2.82 2H3v2h1.95L2 14c-.47 2 1 3 3.5 3s4.06-1 3.5-3L6.05 7h3.12c.33.85.98 1.5 1.83 1.83V20H7v2h10v-2h-4V8.82c.85-.32 1.5-.97 1.83-1.82h3.12L15 14c-.47 2 1 3 3.5 3s4.06-1 3.5-3L19.05 7H21V5h-6.18C14.4 3.8 13.27 3 12 3zm0 2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM5.5 11l1.5 3h-3l1.5-3zm13 0l1.5 3h-3l1.5-3z"/></svg>';
+    case 'diceIndependent':
+      // Lock/guarantee icon
+      return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
     default:
       return '';
   }

@@ -147,6 +147,7 @@ export interface OptimizerConfig {
         median: StrategyConfig;
         floorGuarantee: StrategyConfig;
         balanced: StrategyConfig;
+        diceIndependent: StrategyConfig;
     };
 }
 //# sourceMappingURL=calculation.d.ts.map

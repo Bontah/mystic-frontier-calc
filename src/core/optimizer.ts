@@ -102,6 +102,47 @@ export function generateCombinations<T>(arr: T[], size: number): T[][] {
 }
 
 /**
+ * Check if a conditional bonus is dice-independent
+ * (doesn't require specific dice rolls to activate)
+ */
+export function isDiceIndependent(conditional: ConditionalBonus | null | undefined): boolean {
+  if (!conditional) return true; // No conditional = always active
+  if (!conditional.condition) return true; // No condition = always active
+  if (conditional.condition === 'true') return true; // Explicit always-active
+
+  // Check if the condition references 'dice' variable
+  return !conditional.condition.includes('dice');
+}
+
+/**
+ * Check if lineup-composition conditionals will activate for a given lineup
+ */
+function willConditionalActivate(
+  conditional: ConditionalBonus,
+  familiars: CalcFamiliar[]
+): boolean {
+  if (!conditional.condition || conditional.condition === 'true') {
+    return true;
+  }
+
+  // Build familiar context for evaluation
+  const familiarContext = familiars.map(f => ({
+    type: f.type,
+    element: f.element,
+    rank: f.rank,
+  }));
+
+  try {
+    // Safely evaluate the condition with familiars context only
+    const conditionFn = new Function('familiars', `return ${conditional.condition}`);
+    return conditionFn(familiarContext);
+  } catch {
+    // If evaluation fails, assume it won't activate
+    return false;
+  }
+}
+
+/**
  * Get dice values based on scoring strategy
  */
 function getDiceForStrategy(
@@ -368,6 +409,59 @@ export function findBestLineupBalanced(
       };
     }
   }
+  return best;
+}
+
+/**
+ * Find the best lineup with dice-independent conditionals
+ * Only considers familiars whose conditionals don't depend on dice rolls
+ */
+export function findBestLineupDiceIndependent(
+  combinations: CalcFamiliar[][],
+  bonuses: ConditionalBonus[]
+): ExtendedOptimizedLineup | null {
+  let best: ExtendedOptimizedLineup | null = null;
+  let bestScore = -Infinity;
+  let bestActiveCount = 0;
+
+  for (const combo of combinations) {
+    // Check that all familiars have dice-independent conditionals
+    const allDiceIndependent = combo.every(f => isDiceIndependent(f.conditional));
+    if (!allDiceIndependent) continue;
+
+    // Count how many conditionals will actually activate for this lineup
+    let activeCount = 0;
+    let guaranteedFlat = 0;
+    let guaranteedMult = 1;
+
+    for (const f of combo) {
+      if (f.conditional) {
+        if (willConditionalActivate(f.conditional, combo)) {
+          activeCount++;
+          guaranteedFlat += f.conditional.flatBonus || 0;
+          guaranteedMult *= f.conditional.multiplierBonus || 1;
+        }
+      }
+    }
+
+    // Calculate score with average dice (since bonuses are guaranteed)
+    const avgDice = getAverageDiceForFamiliars(combo);
+    const result = evaluateLineup(combo, bonuses, avgDice);
+
+    // Prefer lineups with more active conditionals, then higher scores
+    if (activeCount > bestActiveCount || (activeCount === bestActiveCount && result.score > bestScore)) {
+      bestActiveCount = activeCount;
+      bestScore = result.score;
+      best = {
+        ...result,
+        familiars: combo,
+        score: result.score,
+        scoreLabel: `${activeCount} guaranteed bonus${activeCount !== 1 ? 'es' : ''}`,
+        testDice: avgDice,
+      };
+    }
+  }
+
   return best;
 }
 

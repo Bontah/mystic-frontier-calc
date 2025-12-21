@@ -8,6 +8,11 @@ import type { CalcFamiliar, ConditionalBonus, OptimizedLineup, ExtendedOptimized
  */
 export declare function generateCombinations<T>(arr: T[], size: number): T[][];
 /**
+ * Check if a conditional bonus is dice-independent
+ * (doesn't require specific dice rolls to activate)
+ */
+export declare function isDiceIndependent(conditional: ConditionalBonus | null | undefined): boolean;
+/**
  * Find best lineup using median strategy
  */
 export declare function findBestLineupMedian(combinations: CalcFamiliar[][], bonuses: ConditionalBonus[]): ExtendedOptimizedLineup | null;
@@ -23,6 +28,11 @@ export declare function findBestLineupFloorGuarantee(combinations: CalcFamiliar[
  * Find best lineup using balanced weighted scoring (25% low + 50% avg + 25% high)
  */
 export declare function findBestLineupBalanced(combinations: CalcFamiliar[][], bonuses: ConditionalBonus[]): ExtendedOptimizedLineup | null;
+/**
+ * Find the best lineup with dice-independent conditionals
+ * Only considers familiars whose conditionals don't depend on dice rolls
+ */
+export declare function findBestLineupDiceIndependent(combinations: CalcFamiliar[][], bonuses: ConditionalBonus[]): ExtendedOptimizedLineup | null;
 /**
  * Find the best lineup using a specific strategy
  */

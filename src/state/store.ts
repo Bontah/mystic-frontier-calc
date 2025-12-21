@@ -100,6 +100,7 @@ function createInitialState(): AppState {
         median: { enabled: true, ignoredConditionalIds: [] },
         floorGuarantee: { enabled: true, ignoredConditionalIds: [] },
         balanced: { enabled: true, ignoredConditionalIds: [] },
+        diceIndependent: { enabled: true, ignoredConditionalIds: [] },
       },
     },
     optimizerRunning: false,

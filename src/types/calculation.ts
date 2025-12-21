@@ -165,5 +165,6 @@ export interface OptimizerConfig {
     median: StrategyConfig;
     floorGuarantee: StrategyConfig;
     balanced: StrategyConfig;
+    diceIndependent: StrategyConfig;
   };
 }

@@ -16,7 +16,7 @@
           "id": "110004",
           "name": "If a Fire elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Fire')"
         },
         {
@@ -30,7 +30,7 @@
           "id": "110104",
           "name": "If an Ice elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Ice')"
         },
         {
@@ -44,7 +44,7 @@
           "id": "110204",
           "name": "If an Lightning elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Lightning')"
         },
         {
@@ -58,7 +58,7 @@
           "id": "110304",
           "name": "If a Poison elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Poison')"
         },
         {
@@ -72,7 +72,7 @@
           "id": "110404",
           "name": "If a Dark elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Dark')"
         },
         {
@@ -86,7 +86,7 @@
           "id": "110504",
           "name": "If a Holy elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Holy')"
         },
         {
@@ -100,7 +100,7 @@
           "id": "110604",
           "name": "If a non-elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'None')"
         },
         {
@@ -114,7 +114,7 @@
           "id": "110704",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -128,35 +128,35 @@
           "id": "110710",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "110713",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "110716",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": 1,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "110719",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "110722",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 1,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -218,7 +218,7 @@
           "id": "111004",
           "name": "If a Human type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Human')"
         },
         {
@@ -232,7 +232,7 @@
           "id": "111104",
           "name": "If a Beast type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Beast')"
         },
         {
@@ -246,7 +246,7 @@
           "id": "111204",
           "name": "If a Plant type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Plant')"
         },
         {
@@ -260,7 +260,7 @@
           "id": "111304",
           "name": "If an Aquatic type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Aquatic')"
         },
         {
@@ -274,7 +274,7 @@
           "id": "111404",
           "name": "If a Reptile type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Reptile')"
         },
         {
@@ -288,7 +288,7 @@
           "id": "111504",
           "name": "If a Fairy type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Fairy')"
         },
         {
@@ -302,7 +302,7 @@
           "id": "111604",
           "name": "If a Devil type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Devil')"
         },
         {
@@ -316,7 +316,7 @@
           "id": "111704",
           "name": "If an Undead type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Undead')"
         },
         {
@@ -330,7 +330,7 @@
           "id": "111804",
           "name": "If a Mechanical type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Machine')"
         },
         {
@@ -344,7 +344,7 @@
           "id": "111904",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
@@ -358,35 +358,35 @@
           "id": "111910",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "111913",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "111916",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 1,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "111919",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "111922",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 1,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
@@ -462,42 +462,42 @@
           "id": "112010",
           "name": "If the first die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "112013",
           "name": "If the second die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "112016",
           "name": "If the third die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "112019",
           "name": "If the first die rolls an odd number",
           "flatBonus": 1,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "112022",
           "name": "If the second die rolls an odd number",
           "flatBonus": 1,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "112025",
           "name": "If the third die rolls an odd number",
           "flatBonus": 1,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[2] % 2 === 1"
         },
         {
@@ -525,42 +525,42 @@
           "id": "112110",
           "name": "If the first die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "112113",
           "name": "If the second die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "112116",
           "name": "If the third die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "112119",
           "name": "If the first die rolls an even number",
           "flatBonus": 1,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "112122",
           "name": "If the second die rolls an even number",
           "flatBonus": 1,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "112125",
           "name": "If the third die rolls an even number",
           "flatBonus": 1,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[2] % 2 === 0"
         },
         {
@@ -574,14 +574,14 @@
           "id": "112204",
           "name": "If the three dice roll consecutive numbers",
           "flatBonus": -1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "[...dice].sort((a,b)=>a-b).every((d,i,a)=>i===0||d===a[i-1]+1)"
         },
         {
           "id": "112207",
           "name": "If the three dice roll consecutive numbers",
           "flatBonus": 1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "[...dice].sort((a,b)=>a-b).every((d,i,a)=>i===0||d===a[i-1]+1)"
         },
         {
@@ -651,63 +651,63 @@
           "id": "112310",
           "name": "If the first and second dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[0] + dice[1] >= 2"
         },
         {
           "id": "112311",
           "name": "If the first and second dice add up to 4 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] + dice[1] >= 4"
         },
         {
           "id": "112312",
           "name": "If the first and second dice add up to 6 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] + dice[1] >= 6"
         },
         {
           "id": "112313",
           "name": "If the first and third dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[0] + dice[2] >= 2"
         },
         {
           "id": "112314",
           "name": "If the first and third dice add up to 4 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] + dice[2] >= 4"
         },
         {
           "id": "112315",
           "name": "If the first and third dice add up to 6 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] + dice[2] >= 6"
         },
         {
           "id": "112316",
           "name": "If the second and third dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[1] + dice[2] >= 2"
         },
         {
           "id": "112317",
           "name": "If the second and third dice add up to 4 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] + dice[2] >= 4"
         },
         {
           "id": "112318",
           "name": "If the second and third dice add up to 6 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] + dice[2] >= 6"
         },
         {
@@ -735,21 +735,21 @@
           "id": "112328",
           "name": "If the first and second dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] === dice[1]"
         },
         {
           "id": "112331",
           "name": "If the first and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] === dice[2]"
         },
         {
           "id": "112334",
           "name": "If the second and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] === dice[2]"
         },
         {
@@ -798,42 +798,42 @@
           "id": "113019",
           "name": "If a die rolls a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 1)"
         },
         {
           "id": "113022",
           "name": "If a die rolls a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 2)"
         },
         {
           "id": "113025",
           "name": "If a die rolls a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 3)"
         },
         {
           "id": "113028",
           "name": "If a die rolls a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 4)"
         },
         {
           "id": "113031",
           "name": "If a die rolls a 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 5)"
         },
         {
           "id": "113034",
           "name": "If a die rolls a 6",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 6)"
         },
         {
@@ -868,14 +868,14 @@
           "id": "113120",
           "name": "If all three dice roll a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice.every(d => d === 1)"
         },
         {
           "id": "113121",
           "name": "If all three dice roll a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice.every(d => d === 1)"
         },
         {
@@ -889,14 +889,14 @@
           "id": "113123",
           "name": "If all three dice roll a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice.every(d => d === 2)"
         },
         {
           "id": "113124",
           "name": "If all three dice roll a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice.every(d => d === 2)"
         },
         {
@@ -910,14 +910,14 @@
           "id": "113126",
           "name": "If all three dice roll a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice.every(d => d === 3)"
         },
         {
           "id": "113127",
           "name": "If all three dice roll a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice.every(d => d === 3)"
         },
         {
@@ -966,21 +966,21 @@
           "id": "113204",
           "name": "If all three dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[0] + dice[1] + dice[2] >= 2"
         },
         {
           "id": "113205",
           "name": "If all three dice add up to 3 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] + dice[1] + dice[2] >= 3"
         },
         {
           "id": "113301",
           "name": "Prevents dice from rolling over 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "true",
           "manualOnly": true
         },
@@ -988,7 +988,7 @@
           "id": "113302",
           "name": "Prevents dice from rolling over 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "true",
           "manualOnly": true
         },
@@ -996,7 +996,7 @@
           "id": "113303",
           "name": "Prevents dice from rolling over 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "true",
           "manualOnly": true
         }
@@ -1023,14 +1023,14 @@
           "id": "120004",
           "name": "If a Fire elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Fire')"
         },
         {
           "id": "120005",
           "name": "If a Fire elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Fire')"
         },
         {
@@ -1051,14 +1051,14 @@
           "id": "120104",
           "name": "If an Ice elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Ice')"
         },
         {
           "id": "120105",
           "name": "If an Ice elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Ice')"
         },
         {
@@ -1079,14 +1079,14 @@
           "id": "120204",
           "name": "If an Lightning elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Lightning')"
         },
         {
           "id": "120205",
           "name": "If an Lightning elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Lightning')"
         },
         {
@@ -1107,14 +1107,14 @@
           "id": "120304",
           "name": "If a Poison elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Poison')"
         },
         {
           "id": "120305",
           "name": "If a Poison elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Poison')"
         },
         {
@@ -1135,14 +1135,14 @@
           "id": "120404",
           "name": "If a Dark elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Dark')"
         },
         {
           "id": "120405",
           "name": "If a Dark elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Dark')"
         },
         {
@@ -1163,14 +1163,14 @@
           "id": "120504",
           "name": "If a Holy elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Holy')"
         },
         {
           "id": "120505",
           "name": "If a Holy elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Holy')"
         },
         {
@@ -1191,14 +1191,14 @@
           "id": "120604",
           "name": "If a non-elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'None')"
         },
         {
           "id": "120605",
           "name": "If a non-elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'None')"
         },
         {
@@ -1219,14 +1219,14 @@
           "id": "120704",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120705",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -1247,70 +1247,70 @@
           "id": "120710",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120711",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120713",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "120714",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "120716",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": 1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "120717",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": 2,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "120719",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120720",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120722",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "120723",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 2,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -1379,14 +1379,14 @@
           "id": "121004",
           "name": "If a Human type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Human')"
         },
         {
           "id": "121005",
           "name": "If a Human type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Human')"
         },
         {
@@ -1407,14 +1407,14 @@
           "id": "121104",
           "name": "If a Beast type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Beast')"
         },
         {
           "id": "121105",
           "name": "If a Beast type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Beast')"
         },
         {
@@ -1435,14 +1435,14 @@
           "id": "121204",
           "name": "If a Plant type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Plant')"
         },
         {
           "id": "121205",
           "name": "If a Plant type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Plant')"
         },
         {
@@ -1463,14 +1463,14 @@
           "id": "121304",
           "name": "If an Aquatic type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Aquatic')"
         },
         {
           "id": "121305",
           "name": "If an Aquatic type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Aquatic')"
         },
         {
@@ -1491,14 +1491,14 @@
           "id": "121404",
           "name": "If a Reptile type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Reptile')"
         },
         {
           "id": "121405",
           "name": "If a Reptile type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Reptile')"
         },
         {
@@ -1519,14 +1519,14 @@
           "id": "121504",
           "name": "If a Fairy type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Fairy')"
         },
         {
           "id": "121505",
           "name": "If a Fairy type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Fairy')"
         },
         {
@@ -1547,14 +1547,14 @@
           "id": "121604",
           "name": "If a Devil type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Devil')"
         },
         {
           "id": "121605",
           "name": "If a Devil type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Devil')"
         },
         {
@@ -1575,14 +1575,14 @@
           "id": "121704",
           "name": "If an Undead type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Undead')"
         },
         {
           "id": "121705",
           "name": "If an Undead type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Undead')"
         },
         {
@@ -1603,14 +1603,14 @@
           "id": "121804",
           "name": "If a Mechanical type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Machine')"
         },
         {
           "id": "121805",
           "name": "If a Mechanical type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Machine')"
         },
         {
@@ -1631,14 +1631,14 @@
           "id": "121904",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "121905",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
@@ -1659,70 +1659,70 @@
           "id": "121910",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "121911",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "121913",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "121914",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "121916",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "121917",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 2,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "121919",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "121920",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "121922",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "121923",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 2,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
@@ -1819,84 +1819,84 @@
           "id": "122010",
           "name": "If the first die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "122011",
           "name": "If the first die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "122013",
           "name": "If the second die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "122014",
           "name": "If the second die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "122016",
           "name": "If the third die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "122017",
           "name": "If the third die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "122019",
           "name": "If the first die rolls an odd number",
           "flatBonus": 1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "122020",
           "name": "If the first die rolls an odd number",
           "flatBonus": 2,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "122022",
           "name": "If the second die rolls an odd number",
           "flatBonus": 1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "122023",
           "name": "If the second die rolls an odd number",
           "flatBonus": 2,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "122025",
           "name": "If the third die rolls an odd number",
           "flatBonus": 1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "122026",
           "name": "If the third die rolls an odd number",
           "flatBonus": 2,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[2] % 2 === 1"
         },
         {
@@ -1945,84 +1945,84 @@
           "id": "122110",
           "name": "If the first die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "122111",
           "name": "If the first die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "122113",
           "name": "If the second die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "122114",
           "name": "If the second die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "122116",
           "name": "If the third die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "122117",
           "name": "If the third die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "122119",
           "name": "If the first die rolls an even number",
           "flatBonus": 1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "122120",
           "name": "If the first die rolls an even number",
           "flatBonus": 2,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "122122",
           "name": "If the second die rolls an even number",
           "flatBonus": 1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "122123",
           "name": "If the second die rolls an even number",
           "flatBonus": 2,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "122125",
           "name": "If the third die rolls an even number",
           "flatBonus": 1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "122126",
           "name": "If the third die rolls an even number",
           "flatBonus": 2,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[2] % 2 === 0"
         },
         {
@@ -2050,21 +2050,21 @@
           "id": "122205",
           "name": "If the three dice roll consecutive numbers",
           "flatBonus": -1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "[...dice].sort((a,b)=>a-b).every((d,i,a)=>i===0||d===a[i-1]+1)"
         },
         {
           "id": "122207",
           "name": "If the three dice roll consecutive numbers",
           "flatBonus": 1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "[...dice].sort((a,b)=>a-b).every((d,i,a)=>i===0||d===a[i-1]+1)"
         },
         {
           "id": "122208",
           "name": "If the three dice roll consecutive numbers",
           "flatBonus": 2,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "[...dice].sort((a,b)=>a-b).every((d,i,a)=>i===0||d===a[i-1]+1)"
         },
         {
@@ -2134,63 +2134,63 @@
           "id": "122310",
           "name": "If the first and second dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] + dice[1] >= 2"
         },
         {
           "id": "122311",
           "name": "If the first and second dice add up to 4 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] + dice[1] >= 4"
         },
         {
           "id": "122312",
           "name": "If the first and second dice add up to 6 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] + dice[1] >= 6"
         },
         {
           "id": "122313",
           "name": "If the first and third dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] + dice[2] >= 2"
         },
         {
           "id": "122314",
           "name": "If the first and third dice add up to 4 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] + dice[2] >= 4"
         },
         {
           "id": "122315",
           "name": "If the first and third dice add up to 6 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] + dice[2] >= 6"
         },
         {
           "id": "122316",
           "name": "If the second and third dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] + dice[2] >= 2"
         },
         {
           "id": "122317",
           "name": "If the second and third dice add up to 4 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] + dice[2] >= 4"
         },
         {
           "id": "122318",
           "name": "If the second and third dice add up to 6 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] + dice[2] >= 6"
         },
         {
@@ -2239,42 +2239,42 @@
           "id": "122328",
           "name": "If the first and second dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] === dice[1]"
         },
         {
           "id": "122329",
           "name": "If the first and second dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] === dice[1]"
         },
         {
           "id": "122331",
           "name": "If the first and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] === dice[2]"
         },
         {
           "id": "122332",
           "name": "If the first and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] === dice[2]"
         },
         {
           "id": "122334",
           "name": "If the second and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] === dice[2]"
         },
         {
           "id": "122335",
           "name": "If the second and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] === dice[2]"
         },
         {
@@ -2365,84 +2365,84 @@
           "id": "123019",
           "name": "If a die rolls a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 1)"
         },
         {
           "id": "123020",
           "name": "If a die rolls a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 1)"
         },
         {
           "id": "123022",
           "name": "If a die rolls a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 2)"
         },
         {
           "id": "123023",
           "name": "If a die rolls a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 2)"
         },
         {
           "id": "123025",
           "name": "If a die rolls a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 3)"
         },
         {
           "id": "123026",
           "name": "If a die rolls a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 3)"
         },
         {
           "id": "123028",
           "name": "If a die rolls a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 4)"
         },
         {
           "id": "123029",
           "name": "If a die rolls a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 4)"
         },
         {
           "id": "123031",
           "name": "If a die rolls a 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 5)"
         },
         {
           "id": "123032",
           "name": "If a die rolls a 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 5)"
         },
         {
           "id": "123034",
           "name": "If a die rolls a 6",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 6)"
         },
         {
           "id": "123035",
           "name": "If a die rolls a 6",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 6)"
         },
         {
@@ -2519,7 +2519,7 @@
           "id": "123121",
           "name": "If all three dice roll a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice.every(d => d === 1)"
         },
         {
@@ -2540,7 +2540,7 @@
           "id": "123124",
           "name": "If all three dice roll a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice.every(d => d === 2)"
         },
         {
@@ -2561,7 +2561,7 @@
           "id": "123127",
           "name": "If all three dice roll a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice.every(d => d === 3)"
         },
         {
@@ -2582,7 +2582,7 @@
           "id": "123130",
           "name": "If all three dice roll a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice.every(d => d === 4)"
         },
         {
@@ -2687,21 +2687,21 @@
           "id": "123204",
           "name": "If all three dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] + dice[1] + dice[2] >= 2"
         },
         {
           "id": "123205",
           "name": "If all three dice add up to 3 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] + dice[1] + dice[2] >= 3"
         },
         {
           "id": "123301",
           "name": "Prevents dice from rolling over 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "true",
           "manualOnly": true
         },
@@ -2709,7 +2709,7 @@
           "id": "123302",
           "name": "Prevents dice from rolling over 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "true",
           "manualOnly": true
         },
@@ -2717,7 +2717,7 @@
           "id": "123303",
           "name": "Prevents dice from rolling over 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "true",
           "manualOnly": true
         }
@@ -2751,21 +2751,21 @@
           "id": "130004",
           "name": "If a Fire elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Fire')"
         },
         {
           "id": "130005",
           "name": "If a Fire elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Fire')"
         },
         {
           "id": "130006",
           "name": "If a Fire elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Fire')"
         },
         {
@@ -2793,21 +2793,21 @@
           "id": "130104",
           "name": "If an Ice elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Ice')"
         },
         {
           "id": "130105",
           "name": "If an Ice elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Ice')"
         },
         {
           "id": "130106",
           "name": "If an Ice elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Ice')"
         },
         {
@@ -2835,21 +2835,21 @@
           "id": "130204",
           "name": "If an Lightning elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Lightning')"
         },
         {
           "id": "130205",
           "name": "If an Lightning elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Lightning')"
         },
         {
           "id": "130206",
           "name": "If an Lightning elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Lightning')"
         },
         {
@@ -2877,21 +2877,21 @@
           "id": "130304",
           "name": "If a Poison elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Poison')"
         },
         {
           "id": "130305",
           "name": "If a Poison elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Poison')"
         },
         {
           "id": "130306",
           "name": "If a Poison elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Poison')"
         },
         {
@@ -2919,21 +2919,21 @@
           "id": "130404",
           "name": "If a Dark elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Dark')"
         },
         {
           "id": "130405",
           "name": "If a Dark elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Dark')"
         },
         {
           "id": "130406",
           "name": "If a Dark elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Dark')"
         },
         {
@@ -2961,21 +2961,21 @@
           "id": "130504",
           "name": "If a Holy elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Holy')"
         },
         {
           "id": "130505",
           "name": "If a Holy elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Holy')"
         },
         {
           "id": "130506",
           "name": "If a Holy elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'Holy')"
         },
         {
@@ -3003,21 +3003,21 @@
           "id": "130604",
           "name": "If a non-elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'None')"
         },
         {
           "id": "130605",
           "name": "If a non-elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'None')"
         },
         {
           "id": "130606",
           "name": "If a non-elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.element === 'None')"
         },
         {
@@ -3045,21 +3045,21 @@
           "id": "130704",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130705",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130706",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -3087,105 +3087,105 @@
           "id": "130710",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130711",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130712",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130713",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "130714",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "130715",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "130716",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": 1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "130717",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": 2,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "130718",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": 3,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "130719",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130720",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130721",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130722",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130723",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 2,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "130724",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 3,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -3261,21 +3261,21 @@
           "id": "131004",
           "name": "If a Human type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Human')"
         },
         {
           "id": "131005",
           "name": "If a Human type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Human')"
         },
         {
           "id": "131006",
           "name": "If a Human type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Human')"
         },
         {
@@ -3303,21 +3303,21 @@
           "id": "131104",
           "name": "If a Beast type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Beast')"
         },
         {
           "id": "131105",
           "name": "If a Beast type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Beast')"
         },
         {
           "id": "131106",
           "name": "If a Beast type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Beast')"
         },
         {
@@ -3345,21 +3345,21 @@
           "id": "131204",
           "name": "If a Plant type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Plant')"
         },
         {
           "id": "131205",
           "name": "If a Plant type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Plant')"
         },
         {
           "id": "131206",
           "name": "If a Plant type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Plant')"
         },
         {
@@ -3387,21 +3387,21 @@
           "id": "131304",
           "name": "If an Aquatic type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Aquatic')"
         },
         {
           "id": "131305",
           "name": "If an Aquatic type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Aquatic')"
         },
         {
           "id": "131306",
           "name": "If an Aquatic type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Aquatic')"
         },
         {
@@ -3429,21 +3429,21 @@
           "id": "131404",
           "name": "If a Reptile type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Reptile')"
         },
         {
           "id": "131405",
           "name": "If a Reptile type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Reptile')"
         },
         {
           "id": "131406",
           "name": "If a Reptile type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Reptile')"
         },
         {
@@ -3471,21 +3471,21 @@
           "id": "131504",
           "name": "If a Fairy type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Fairy')"
         },
         {
           "id": "131505",
           "name": "If a Fairy type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Fairy')"
         },
         {
           "id": "131506",
           "name": "If a Fairy type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Fairy')"
         },
         {
@@ -3513,21 +3513,21 @@
           "id": "131604",
           "name": "If a Devil type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Devil')"
         },
         {
           "id": "131605",
           "name": "If a Devil type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Devil')"
         },
         {
           "id": "131606",
           "name": "If a Devil type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Devil')"
         },
         {
@@ -3555,21 +3555,21 @@
           "id": "131704",
           "name": "If an Undead type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Undead')"
         },
         {
           "id": "131705",
           "name": "If an Undead type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Undead')"
         },
         {
           "id": "131706",
           "name": "If an Undead type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Undead')"
         },
         {
@@ -3597,21 +3597,21 @@
           "id": "131804",
           "name": "If a Mechanical type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Machine')"
         },
         {
           "id": "131805",
           "name": "If a Mechanical type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Machine')"
         },
         {
           "id": "131806",
           "name": "If a Mechanical type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars.some(m => m.type === 'Machine')"
         },
         {
@@ -3639,21 +3639,21 @@
           "id": "131904",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "131905",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "131906",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
@@ -3681,105 +3681,105 @@
           "id": "131910",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "131911",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "131912",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "131913",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "131914",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "131915",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "131916",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "131917",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 2,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "131918",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 3,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "131919",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "131920",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "131921",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "131922",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "131923",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 2,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "131924",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 3,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
@@ -3897,126 +3897,126 @@
           "id": "132010",
           "name": "If the first die rolls an odd number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "132011",
           "name": "If the first die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "132012",
           "name": "If the first die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "132013",
           "name": "If the second die rolls an odd number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "132014",
           "name": "If the second die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "132015",
           "name": "If the second die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "132016",
           "name": "If the third die rolls an odd number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "132017",
           "name": "If the third die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "132018",
           "name": "If the third die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "132019",
           "name": "If the first die rolls an odd number",
           "flatBonus": 1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "132020",
           "name": "If the first die rolls an odd number",
           "flatBonus": 2,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "132021",
           "name": "If the first die rolls an odd number",
           "flatBonus": 3,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "132022",
           "name": "If the second die rolls an odd number",
           "flatBonus": 1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "132023",
           "name": "If the second die rolls an odd number",
           "flatBonus": 2,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "132024",
           "name": "If the second die rolls an odd number",
           "flatBonus": 3,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "132025",
           "name": "If the third die rolls an odd number",
           "flatBonus": 1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "132026",
           "name": "If the third die rolls an odd number",
           "flatBonus": 2,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "132027",
           "name": "If the third die rolls an odd number",
           "flatBonus": 3,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[2] % 2 === 1"
         },
         {
@@ -4086,126 +4086,126 @@
           "id": "132110",
           "name": "If the first die rolls an even number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "132111",
           "name": "If the first die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "132112",
           "name": "If the first die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "132113",
           "name": "If the second die rolls an even number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "132114",
           "name": "If the second die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "132115",
           "name": "If the second die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "132116",
           "name": "If the third die rolls an even number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "132117",
           "name": "If the third die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "132118",
           "name": "If the third die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "132119",
           "name": "If the first die rolls an even number",
           "flatBonus": 1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "132120",
           "name": "If the first die rolls an even number",
           "flatBonus": 2,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "132121",
           "name": "If the first die rolls an even number",
           "flatBonus": 3,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "132122",
           "name": "If the second die rolls an even number",
           "flatBonus": 1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "132123",
           "name": "If the second die rolls an even number",
           "flatBonus": 2,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "132124",
           "name": "If the second die rolls an even number",
           "flatBonus": 3,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "132125",
           "name": "If the third die rolls an even number",
           "flatBonus": 1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "132126",
           "name": "If the third die rolls an even number",
           "flatBonus": 2,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "132127",
           "name": "If the third die rolls an even number",
           "flatBonus": 3,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice[2] % 2 === 0"
         },
         {
@@ -4247,7 +4247,7 @@
           "id": "132206",
           "name": "If the three dice roll consecutive numbers",
           "flatBonus": -1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "[...dice].sort((a,b)=>a-b).every((d,i,a)=>i===0||d===a[i-1]+1)"
         },
         {
@@ -4261,14 +4261,14 @@
           "id": "132208",
           "name": "If the three dice roll consecutive numbers",
           "flatBonus": 2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "[...dice].sort((a,b)=>a-b).every((d,i,a)=>i===0||d===a[i-1]+1)"
         },
         {
           "id": "132209",
           "name": "If the three dice roll consecutive numbers",
           "flatBonus": 3,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "[...dice].sort((a,b)=>a-b).every((d,i,a)=>i===0||d===a[i-1]+1)"
         },
         {
@@ -4338,14 +4338,14 @@
           "id": "132310",
           "name": "If the first and second dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] + dice[1] >= 2"
         },
         {
           "id": "132311",
           "name": "If the first and second dice add up to 4 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] + dice[1] >= 4"
         },
         {
@@ -4359,14 +4359,14 @@
           "id": "132313",
           "name": "If the first and third dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] + dice[2] >= 2"
         },
         {
           "id": "132314",
           "name": "If the first and third dice add up to 4 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] + dice[2] >= 4"
         },
         {
@@ -4380,14 +4380,14 @@
           "id": "132316",
           "name": "If the second and third dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] + dice[2] >= 2"
         },
         {
           "id": "132317",
           "name": "If the second and third dice add up to 4 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] + dice[2] >= 4"
         },
         {
@@ -4464,63 +4464,63 @@
           "id": "132328",
           "name": "If the first and second dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] === dice[1]"
         },
         {
           "id": "132329",
           "name": "If the first and second dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] === dice[1]"
         },
         {
           "id": "132330",
           "name": "If the first and second dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] === dice[1]"
         },
         {
           "id": "132331",
           "name": "If the first and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] === dice[2]"
         },
         {
           "id": "132332",
           "name": "If the first and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] === dice[2]"
         },
         {
           "id": "132333",
           "name": "If the first and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] === dice[2]"
         },
         {
           "id": "132334",
           "name": "If the second and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] === dice[2]"
         },
         {
           "id": "132335",
           "name": "If the second and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] === dice[2]"
         },
         {
           "id": "132336",
           "name": "If the second and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] === dice[2]"
         },
         {
@@ -4653,126 +4653,126 @@
           "id": "133019",
           "name": "If a die rolls a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 1)"
         },
         {
           "id": "133020",
           "name": "If a die rolls a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 1)"
         },
         {
           "id": "133021",
           "name": "If a die rolls a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 1)"
         },
         {
           "id": "133022",
           "name": "If a die rolls a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 2)"
         },
         {
           "id": "133023",
           "name": "If a die rolls a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 2)"
         },
         {
           "id": "133024",
           "name": "If a die rolls a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 2)"
         },
         {
           "id": "133025",
           "name": "If a die rolls a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 3)"
         },
         {
           "id": "133026",
           "name": "If a die rolls a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 3)"
         },
         {
           "id": "133027",
           "name": "If a die rolls a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 3)"
         },
         {
           "id": "133028",
           "name": "If a die rolls a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 4)"
         },
         {
           "id": "133029",
           "name": "If a die rolls a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 4)"
         },
         {
           "id": "133030",
           "name": "If a die rolls a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 4)"
         },
         {
           "id": "133031",
           "name": "If a die rolls a 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 5)"
         },
         {
           "id": "133032",
           "name": "If a die rolls a 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 5)"
         },
         {
           "id": "133033",
           "name": "If a die rolls a 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 5)"
         },
         {
           "id": "133034",
           "name": "If a die rolls a 6",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 6)"
         },
         {
           "id": "133035",
           "name": "If a die rolls a 6",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 6)"
         },
         {
           "id": "133036",
           "name": "If a die rolls a 6",
           "flatBonus": 0,
-          "multiplierBonus": 0.1,
+          "multiplierBonus": 1.1,
           "condition": "dice.some(d => d === 6)"
         },
         {
@@ -5178,14 +5178,14 @@
           "id": "133204",
           "name": "If all three dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] + dice[1] + dice[2] >= 2"
         },
         {
           "id": "133205",
           "name": "If all three dice add up to 3 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] + dice[1] + dice[2] >= 3"
         },
         {
@@ -5207,7 +5207,7 @@
           "id": "133302",
           "name": "Prevents dice from rolling over 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "true",
           "manualOnly": true
         },
@@ -5215,7 +5215,7 @@
           "id": "133303",
           "name": "Prevents dice from rolling over 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "true",
           "manualOnly": true
         }
@@ -5249,21 +5249,21 @@
           "id": "140004",
           "name": "If a Fire elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'Fire')"
         },
         {
           "id": "140005",
           "name": "If a Fire elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Fire')"
         },
         {
           "id": "140006",
           "name": "If a Fire elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Fire')"
         },
         {
@@ -5291,21 +5291,21 @@
           "id": "140104",
           "name": "If an Ice elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'Ice')"
         },
         {
           "id": "140105",
           "name": "If an Ice elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Ice')"
         },
         {
           "id": "140106",
           "name": "If an Ice elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Ice')"
         },
         {
@@ -5333,21 +5333,21 @@
           "id": "140204",
           "name": "If an Lightning elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'Lightning')"
         },
         {
           "id": "140205",
           "name": "If an Lightning elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Lightning')"
         },
         {
           "id": "140206",
           "name": "If an Lightning elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Lightning')"
         },
         {
@@ -5375,21 +5375,21 @@
           "id": "140304",
           "name": "If a Poison elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'Poison')"
         },
         {
           "id": "140305",
           "name": "If a Poison elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Poison')"
         },
         {
           "id": "140306",
           "name": "If a Poison elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Poison')"
         },
         {
@@ -5417,21 +5417,21 @@
           "id": "140404",
           "name": "If a Dark elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'Dark')"
         },
         {
           "id": "140405",
           "name": "If a Dark elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Dark')"
         },
         {
           "id": "140406",
           "name": "If a Dark elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Dark')"
         },
         {
@@ -5459,21 +5459,21 @@
           "id": "140504",
           "name": "If a Holy elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'Holy')"
         },
         {
           "id": "140505",
           "name": "If a Holy elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Holy')"
         },
         {
           "id": "140506",
           "name": "If a Holy elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'Holy')"
         },
         {
@@ -5501,21 +5501,21 @@
           "id": "140604",
           "name": "If a non-elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'None')"
         },
         {
           "id": "140605",
           "name": "If a non-elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'None')"
         },
         {
           "id": "140606",
           "name": "If a non-elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.element === 'None')"
         },
         {
@@ -5543,21 +5543,21 @@
           "id": "140704",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140705",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140706",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -5585,21 +5585,21 @@
           "id": "140710",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140711",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140712",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -5613,35 +5613,35 @@
           "id": "140714",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "140715",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "140716",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": 1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "140717",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": 2,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "140718",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": 3,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
@@ -5655,35 +5655,35 @@
           "id": "140720",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140721",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140722",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140723",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 2,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "140724",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 3,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -5759,21 +5759,21 @@
           "id": "141004",
           "name": "If a Human type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Human')"
         },
         {
           "id": "141005",
           "name": "If a Human type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Human')"
         },
         {
           "id": "141006",
           "name": "If a Human type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Human')"
         },
         {
@@ -5801,21 +5801,21 @@
           "id": "141104",
           "name": "If a Beast type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Beast')"
         },
         {
           "id": "141105",
           "name": "If a Beast type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Beast')"
         },
         {
           "id": "141106",
           "name": "If a Beast type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Beast')"
         },
         {
@@ -5843,21 +5843,21 @@
           "id": "141204",
           "name": "If a Plant type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Plant')"
         },
         {
           "id": "141205",
           "name": "If a Plant type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Plant')"
         },
         {
           "id": "141206",
           "name": "If a Plant type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Plant')"
         },
         {
@@ -5885,21 +5885,21 @@
           "id": "141304",
           "name": "If an Aquatic type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Aquatic')"
         },
         {
           "id": "141305",
           "name": "If an Aquatic type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Aquatic')"
         },
         {
           "id": "141306",
           "name": "If an Aquatic type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Aquatic')"
         },
         {
@@ -5927,21 +5927,21 @@
           "id": "141404",
           "name": "If a Reptile type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Reptile')"
         },
         {
           "id": "141405",
           "name": "If a Reptile type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Reptile')"
         },
         {
           "id": "141406",
           "name": "If a Reptile type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Reptile')"
         },
         {
@@ -5969,21 +5969,21 @@
           "id": "141504",
           "name": "If a Fairy type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Fairy')"
         },
         {
           "id": "141505",
           "name": "If a Fairy type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Fairy')"
         },
         {
           "id": "141506",
           "name": "If a Fairy type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Fairy')"
         },
         {
@@ -6011,21 +6011,21 @@
           "id": "141604",
           "name": "If a Devil type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Devil')"
         },
         {
           "id": "141605",
           "name": "If a Devil type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Devil')"
         },
         {
           "id": "141606",
           "name": "If a Devil type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Devil')"
         },
         {
@@ -6053,21 +6053,21 @@
           "id": "141704",
           "name": "If an Undead type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Undead')"
         },
         {
           "id": "141705",
           "name": "If an Undead type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Undead')"
         },
         {
           "id": "141706",
           "name": "If an Undead type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Undead')"
         },
         {
@@ -6095,21 +6095,21 @@
           "id": "141804",
           "name": "If a Mechanical type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Machine')"
         },
         {
           "id": "141805",
           "name": "If a Mechanical type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Machine')"
         },
         {
           "id": "141806",
           "name": "If a Mechanical type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars.some(m => m.type === 'Machine')"
         },
         {
@@ -6137,21 +6137,21 @@
           "id": "141904",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "141905",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "141906",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
@@ -6179,21 +6179,21 @@
           "id": "141910",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "141911",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "141912",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
@@ -6207,35 +6207,35 @@
           "id": "141914",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "141915",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "141916",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "141917",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 2,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "141918",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 3,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
@@ -6249,35 +6249,35 @@
           "id": "141920",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "141921",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "141922",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "141923",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 2,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "141924",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 3,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
@@ -6402,14 +6402,14 @@
           "id": "142011",
           "name": "If the first die rolls an odd number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "142012",
           "name": "If the first die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] % 2 === 1"
         },
         {
@@ -6423,14 +6423,14 @@
           "id": "142014",
           "name": "If the second die rolls an odd number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "142015",
           "name": "If the second die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] % 2 === 1"
         },
         {
@@ -6444,77 +6444,77 @@
           "id": "142017",
           "name": "If the third die rolls an odd number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "142018",
           "name": "If the third die rolls an odd number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "142019",
           "name": "If the first die rolls an odd number",
           "flatBonus": 1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "142020",
           "name": "If the first die rolls an odd number",
           "flatBonus": 2,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "142021",
           "name": "If the first die rolls an odd number",
           "flatBonus": 3,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "142022",
           "name": "If the second die rolls an odd number",
           "flatBonus": 1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "142023",
           "name": "If the second die rolls an odd number",
           "flatBonus": 2,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "142024",
           "name": "If the second die rolls an odd number",
           "flatBonus": 3,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "142025",
           "name": "If the third die rolls an odd number",
           "flatBonus": 1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "142026",
           "name": "If the third die rolls an odd number",
           "flatBonus": 2,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "142027",
           "name": "If the third die rolls an odd number",
           "flatBonus": 3,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[2] % 2 === 1"
         },
         {
@@ -6591,14 +6591,14 @@
           "id": "142111",
           "name": "If the first die rolls an even number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "142112",
           "name": "If the first die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] % 2 === 0"
         },
         {
@@ -6612,14 +6612,14 @@
           "id": "142114",
           "name": "If the second die rolls an even number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "142115",
           "name": "If the second die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] % 2 === 0"
         },
         {
@@ -6633,77 +6633,77 @@
           "id": "142117",
           "name": "If the third die rolls an even number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "142118",
           "name": "If the third die rolls an even number",
           "flatBonus": -1,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "142119",
           "name": "If the first die rolls an even number",
           "flatBonus": 1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "142120",
           "name": "If the first die rolls an even number",
           "flatBonus": 2,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "142121",
           "name": "If the first die rolls an even number",
           "flatBonus": 3,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "142122",
           "name": "If the second die rolls an even number",
           "flatBonus": 1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "142123",
           "name": "If the second die rolls an even number",
           "flatBonus": 2,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "142124",
           "name": "If the second die rolls an even number",
           "flatBonus": 3,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "142125",
           "name": "If the third die rolls an even number",
           "flatBonus": 1,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "142126",
           "name": "If the third die rolls an even number",
           "flatBonus": 2,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "142127",
           "name": "If the third die rolls an even number",
           "flatBonus": 3,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice[2] % 2 === 0"
         },
         {
@@ -6766,7 +6766,7 @@
           "id": "142209",
           "name": "If the three dice roll consecutive numbers",
           "flatBonus": 3,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "[...dice].sort((a,b)=>a-b).every((d,i,a)=>i===0||d===a[i-1]+1)"
         },
         {
@@ -6836,7 +6836,7 @@
           "id": "142310",
           "name": "If the first and second dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] + dice[1] >= 2"
         },
         {
@@ -6857,7 +6857,7 @@
           "id": "142313",
           "name": "If the first and third dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] + dice[2] >= 2"
         },
         {
@@ -6878,7 +6878,7 @@
           "id": "142316",
           "name": "If the second and third dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] + dice[2] >= 2"
         },
         {
@@ -6969,14 +6969,14 @@
           "id": "142329",
           "name": "If the first and second dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] === dice[1]"
         },
         {
           "id": "142330",
           "name": "If the first and second dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] === dice[1]"
         },
         {
@@ -6990,14 +6990,14 @@
           "id": "142332",
           "name": "If the first and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] === dice[2]"
         },
         {
           "id": "142333",
           "name": "If the first and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] === dice[2]"
         },
         {
@@ -7011,14 +7011,14 @@
           "id": "142335",
           "name": "If the second and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] === dice[2]"
         },
         {
           "id": "142336",
           "name": "If the second and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] === dice[2]"
         },
         {
@@ -7151,126 +7151,126 @@
           "id": "143019",
           "name": "If a die rolls a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice.some(d => d === 1)"
         },
         {
           "id": "143020",
           "name": "If a die rolls a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 1)"
         },
         {
           "id": "143021",
           "name": "If a die rolls a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 1)"
         },
         {
           "id": "143022",
           "name": "If a die rolls a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice.some(d => d === 2)"
         },
         {
           "id": "143023",
           "name": "If a die rolls a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 2)"
         },
         {
           "id": "143024",
           "name": "If a die rolls a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 2)"
         },
         {
           "id": "143025",
           "name": "If a die rolls a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice.some(d => d === 3)"
         },
         {
           "id": "143026",
           "name": "If a die rolls a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 3)"
         },
         {
           "id": "143027",
           "name": "If a die rolls a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 3)"
         },
         {
           "id": "143028",
           "name": "If a die rolls a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice.some(d => d === 4)"
         },
         {
           "id": "143029",
           "name": "If a die rolls a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 4)"
         },
         {
           "id": "143030",
           "name": "If a die rolls a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 4)"
         },
         {
           "id": "143031",
           "name": "If a die rolls a 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice.some(d => d === 5)"
         },
         {
           "id": "143032",
           "name": "If a die rolls a 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 5)"
         },
         {
           "id": "143033",
           "name": "If a die rolls a 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 5)"
         },
         {
           "id": "143034",
           "name": "If a die rolls a 6",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice.some(d => d === 6)"
         },
         {
           "id": "143035",
           "name": "If a die rolls a 6",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 6)"
         },
         {
           "id": "143036",
           "name": "If a die rolls a 6",
           "flatBonus": 0,
-          "multiplierBonus": 0.2,
+          "multiplierBonus": 1.2,
           "condition": "dice.some(d => d === 6)"
         },
         {
@@ -7760,7 +7760,7 @@
           "id": "143204",
           "name": "If all three dice add up to 2 or more",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] + dice[1] + dice[2] >= 2"
         },
         {
@@ -7797,7 +7797,7 @@
           "id": "143303",
           "name": "Prevents dice from rolling over 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "true",
           "manualOnly": true
         }
@@ -7838,14 +7838,14 @@
           "id": "150005",
           "name": "If a Fire elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'Fire')"
         },
         {
           "id": "150006",
           "name": "If a Fire elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Fire')"
         },
         {
@@ -7880,14 +7880,14 @@
           "id": "150105",
           "name": "If an Ice elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'Ice')"
         },
         {
           "id": "150106",
           "name": "If an Ice elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Ice')"
         },
         {
@@ -7922,14 +7922,14 @@
           "id": "150205",
           "name": "If an Lightning elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'Lightning')"
         },
         {
           "id": "150206",
           "name": "If an Lightning elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Lightning')"
         },
         {
@@ -7964,14 +7964,14 @@
           "id": "150305",
           "name": "If a Poison elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'Poison')"
         },
         {
           "id": "150306",
           "name": "If a Poison elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Poison')"
         },
         {
@@ -8006,14 +8006,14 @@
           "id": "150405",
           "name": "If a Dark elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'Dark')"
         },
         {
           "id": "150406",
           "name": "If a Dark elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Dark')"
         },
         {
@@ -8048,14 +8048,14 @@
           "id": "150505",
           "name": "If a Holy elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'Holy')"
         },
         {
           "id": "150506",
           "name": "If a Holy elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'Holy')"
         },
         {
@@ -8090,14 +8090,14 @@
           "id": "150605",
           "name": "If a non-elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.element === 'None')"
         },
         {
           "id": "150606",
           "name": "If a non-elemental Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.element === 'None')"
         },
         {
@@ -8132,14 +8132,14 @@
           "id": "150705",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150706",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -8174,14 +8174,14 @@
           "id": "150711",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150712",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -8202,7 +8202,7 @@
           "id": "150715",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
@@ -8216,14 +8216,14 @@
           "id": "150717",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": 2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
           "id": "150718",
           "name": "If all Familiars on your active lineup have the same element",
           "flatBonus": 3,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element === familiars[1].element && familiars[1].element === familiars[2].element && familiars[0].element !== 'None'"
         },
         {
@@ -8244,7 +8244,7 @@
           "id": "150721",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -8258,14 +8258,14 @@
           "id": "150723",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
           "id": "150724",
           "name": "If all Familiars on your active lineup have a different element",
           "flatBonus": 3,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].element !== familiars[1].element && familiars[1].element !== familiars[2].element && familiars[0].element !== familiars[2].element"
         },
         {
@@ -8348,14 +8348,14 @@
           "id": "151005",
           "name": "If a Human type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Human')"
         },
         {
           "id": "151006",
           "name": "If a Human type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Human')"
         },
         {
@@ -8390,14 +8390,14 @@
           "id": "151105",
           "name": "If a Beast type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Beast')"
         },
         {
           "id": "151106",
           "name": "If a Beast type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Beast')"
         },
         {
@@ -8432,14 +8432,14 @@
           "id": "151205",
           "name": "If a Plant type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Plant')"
         },
         {
           "id": "151206",
           "name": "If a Plant type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Plant')"
         },
         {
@@ -8474,14 +8474,14 @@
           "id": "151305",
           "name": "If an Aquatic type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Aquatic')"
         },
         {
           "id": "151306",
           "name": "If an Aquatic type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Aquatic')"
         },
         {
@@ -8516,14 +8516,14 @@
           "id": "151405",
           "name": "If a Reptile type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Reptile')"
         },
         {
           "id": "151406",
           "name": "If a Reptile type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Reptile')"
         },
         {
@@ -8558,14 +8558,14 @@
           "id": "151505",
           "name": "If a Fairy type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Fairy')"
         },
         {
           "id": "151506",
           "name": "If a Fairy type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Fairy')"
         },
         {
@@ -8600,14 +8600,14 @@
           "id": "151605",
           "name": "If a Devil type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Devil')"
         },
         {
           "id": "151606",
           "name": "If a Devil type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Devil')"
         },
         {
@@ -8642,14 +8642,14 @@
           "id": "151705",
           "name": "If an Undead type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Undead')"
         },
         {
           "id": "151706",
           "name": "If an Undead type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Undead')"
         },
         {
@@ -8684,14 +8684,14 @@
           "id": "151805",
           "name": "If a Mechanical type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars.some(m => m.type === 'Machine')"
         },
         {
           "id": "151806",
           "name": "If a Mechanical type Familiar is on your active lineup",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars.some(m => m.type === 'Machine')"
         },
         {
@@ -8726,14 +8726,14 @@
           "id": "151905",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "151906",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
@@ -8768,14 +8768,14 @@
           "id": "151911",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "151912",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 0,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
@@ -8796,7 +8796,7 @@
           "id": "151915",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
@@ -8810,14 +8810,14 @@
           "id": "151917",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
           "id": "151918",
           "name": "If all Familiars on your active lineup have the same type",
           "flatBonus": 3,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type === familiars[1].type && familiars[1].type === familiars[2].type"
         },
         {
@@ -8838,7 +8838,7 @@
           "id": "151921",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
@@ -8852,14 +8852,14 @@
           "id": "151923",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
           "id": "151924",
           "name": "If all Familiars on your active lineup have a different type",
           "flatBonus": 3,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "familiars[0].type !== familiars[1].type && familiars[1].type !== familiars[2].type && familiars[0].type !== familiars[2].type"
         },
         {
@@ -8991,7 +8991,7 @@
           "id": "152012",
           "name": "If the first die rolls an odd number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] % 2 === 1"
         },
         {
@@ -9012,7 +9012,7 @@
           "id": "152015",
           "name": "If the second die rolls an odd number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] % 2 === 1"
         },
         {
@@ -9033,7 +9033,7 @@
           "id": "152018",
           "name": "If the third die rolls an odd number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[2] % 2 === 1"
         },
         {
@@ -9047,14 +9047,14 @@
           "id": "152020",
           "name": "If the first die rolls an odd number",
           "flatBonus": 2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] % 2 === 1"
         },
         {
           "id": "152021",
           "name": "If the first die rolls an odd number",
           "flatBonus": 3,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] % 2 === 1"
         },
         {
@@ -9068,14 +9068,14 @@
           "id": "152023",
           "name": "If the second die rolls an odd number",
           "flatBonus": 2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] % 2 === 1"
         },
         {
           "id": "152024",
           "name": "If the second die rolls an odd number",
           "flatBonus": 3,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] % 2 === 1"
         },
         {
@@ -9089,14 +9089,14 @@
           "id": "152026",
           "name": "If the third die rolls an odd number",
           "flatBonus": 2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[2] % 2 === 1"
         },
         {
           "id": "152027",
           "name": "If the third die rolls an odd number",
           "flatBonus": 3,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[2] % 2 === 1"
         },
         {
@@ -9180,7 +9180,7 @@
           "id": "152112",
           "name": "If the first die rolls an even number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] % 2 === 0"
         },
         {
@@ -9201,7 +9201,7 @@
           "id": "152115",
           "name": "If the second die rolls an even number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] % 2 === 0"
         },
         {
@@ -9222,7 +9222,7 @@
           "id": "152118",
           "name": "If the third die rolls an even number",
           "flatBonus": -2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[2] % 2 === 0"
         },
         {
@@ -9236,14 +9236,14 @@
           "id": "152120",
           "name": "If the first die rolls an even number",
           "flatBonus": 2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] % 2 === 0"
         },
         {
           "id": "152121",
           "name": "If the first die rolls an even number",
           "flatBonus": 3,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[0] % 2 === 0"
         },
         {
@@ -9257,14 +9257,14 @@
           "id": "152123",
           "name": "If the second die rolls an even number",
           "flatBonus": 2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] % 2 === 0"
         },
         {
           "id": "152124",
           "name": "If the second die rolls an even number",
           "flatBonus": 3,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[1] % 2 === 0"
         },
         {
@@ -9278,14 +9278,14 @@
           "id": "152126",
           "name": "If the third die rolls an even number",
           "flatBonus": 2,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[2] % 2 === 0"
         },
         {
           "id": "152127",
           "name": "If the third die rolls an even number",
           "flatBonus": 3,
-          "multiplierBonus": 0.6,
+          "multiplierBonus": 1.6,
           "condition": "dice[2] % 2 === 0"
         },
         {
@@ -9558,7 +9558,7 @@
           "id": "152330",
           "name": "If the first and second dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] === dice[1]"
         },
         {
@@ -9579,7 +9579,7 @@
           "id": "152333",
           "name": "If the first and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[0] === dice[2]"
         },
         {
@@ -9600,7 +9600,7 @@
           "id": "152336",
           "name": "If the second and third dice match",
           "flatBonus": 0,
-          "multiplierBonus": 0.8,
+          "multiplierBonus": 1.8,
           "condition": "dice[1] === dice[2]"
         },
         {
@@ -9733,126 +9733,126 @@
           "id": "153019",
           "name": "If a die rolls a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.5,
+          "multiplierBonus": 1.5,
           "condition": "dice.some(d => d === 1)"
         },
         {
           "id": "153020",
           "name": "If a die rolls a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice.some(d => d === 1)"
         },
         {
           "id": "153021",
           "name": "If a die rolls a 1",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 1)"
         },
         {
           "id": "153022",
           "name": "If a die rolls a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.5,
+          "multiplierBonus": 1.5,
           "condition": "dice.some(d => d === 2)"
         },
         {
           "id": "153023",
           "name": "If a die rolls a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice.some(d => d === 2)"
         },
         {
           "id": "153024",
           "name": "If a die rolls a 2",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 2)"
         },
         {
           "id": "153025",
           "name": "If a die rolls a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.5,
+          "multiplierBonus": 1.5,
           "condition": "dice.some(d => d === 3)"
         },
         {
           "id": "153026",
           "name": "If a die rolls a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice.some(d => d === 3)"
         },
         {
           "id": "153027",
           "name": "If a die rolls a 3",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 3)"
         },
         {
           "id": "153028",
           "name": "If a die rolls a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.5,
+          "multiplierBonus": 1.5,
           "condition": "dice.some(d => d === 4)"
         },
         {
           "id": "153029",
           "name": "If a die rolls a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice.some(d => d === 4)"
         },
         {
           "id": "153030",
           "name": "If a die rolls a 4",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 4)"
         },
         {
           "id": "153031",
           "name": "If a die rolls a 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.5,
+          "multiplierBonus": 1.5,
           "condition": "dice.some(d => d === 5)"
         },
         {
           "id": "153032",
           "name": "If a die rolls a 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice.some(d => d === 5)"
         },
         {
           "id": "153033",
           "name": "If a die rolls a 5",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 5)"
         },
         {
           "id": "153034",
           "name": "If a die rolls a 6",
           "flatBonus": 0,
-          "multiplierBonus": 0.5,
+          "multiplierBonus": 1.5,
           "condition": "dice.some(d => d === 6)"
         },
         {
           "id": "153035",
           "name": "If a die rolls a 6",
           "flatBonus": 0,
-          "multiplierBonus": 0.4,
+          "multiplierBonus": 1.4,
           "condition": "dice.some(d => d === 6)"
         },
         {
           "id": "153036",
           "name": "If a die rolls a 6",
           "flatBonus": 0,
-          "multiplierBonus": 0.3,
+          "multiplierBonus": 1.3,
           "condition": "dice.some(d => d === 6)"
         },
         {

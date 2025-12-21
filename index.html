@@ -569,16 +569,21 @@
           <label>Extracted Text</label>
           <div id="extractedConditionalText" class="extracted-text"></div>
         </div>
-        <div class="extraction-row">
-          <label>Match</label>
-          <select id="extractedConditionalMatch">
-            <option value="">-- No match found --</option>
-          </select>
+        <div class="extraction-row extraction-row-conditional">
+          <label>Conditional</label>
+          <div class="extraction-conditional-search">
+            <input type="text" id="extractedCondSearch" placeholder="Search conditionals...">
+            <div id="extractedCondResults" class="config-results" style="display: none;"></div>
+            <div id="extractedBonusVariantSection" class="bonus-variant-section" style="display: none;">
+              <div class="bonus-variant-header">
+                <span class="variant-trigger-name" id="extractedSelectedTriggerName"></span>
+                <button class="change-trigger-btn" data-action="clear-extracted-trigger">Change</button>
+              </div>
+              <div class="bonus-variant-pills" id="extractedBonusVariantPills"></div>
+            </div>
+            <div id="extractedSelectedCondDisplay" class="selected-conditional" style="display: none;"></div>
+          </div>
           <span class="confidence" id="conditionalConfidence"></span>
-        </div>
-        <div class="extraction-row">
-          <label>Bonus</label>
-          <span id="extractedBonusValues" class="bonus-values"></span>
         </div>
       </div>
 

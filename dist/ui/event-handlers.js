@@ -14,11 +14,12 @@ import { generateCombinations, findBestLineupFast, findBestLineupMedian, findBes
 import { getMaxDiceForRank } from '../core/dice.js';
 import { evaluateLineup } from '../core/calculator.js';
 import { escapeHtml } from '../utils/html.js';
-import { isBuggedConditional, formatBonusValues } from '../utils/format.js';
+import { isBuggedConditional } from '../utils/format.js';
 import { processImage, findTopMatches, getReferenceImages, isDebugEnabled, recalculateTypeWithTuning, getLastTypeDetails, getLastTypeIconData, generateMaskPreviews, } from '../scanner/index.js';
 // Module-level conditional selector instances
 let modalConditionalSelector = null;
 let rosterConditionalSelector = null;
+let extractionConditionalSelector = null;
 // Module-level icon dropdown instances
 let modalRankDropdown = null;
 let modalElementDropdown = null;
@@ -2010,92 +2011,37 @@ function showExtractionModal(result) {
     if (conditionalText) {
         conditionalText.textContent = result.conditional.rawText || '(No text detected)';
     }
-    // Populate conditional match dropdown with top matches
-    const conditionalSelect = document.getElementById('extractedConditionalMatch');
-    const conditionalConfidence = document.getElementById('conditionalConfidence');
-    if (conditionalSelect) {
-        // Clear existing options
-        conditionalSelect.innerHTML = '<option value="">-- No conditional --</option>';
-        // Get top matches for the raw text
-        const topMatches = findTopMatches(result.conditional.rawText, 10);
-        const detectedRank = result.rank.rank;
-        // Sort matches: prioritize same rank as detected familiar
-        const sortedMatches = [...topMatches].sort((a, b) => {
-            const aRank = a.rarity || a.rank;
-            const bRank = b.rarity || b.rank;
-            const aMatchesRank = aRank === detectedRank ? 1 : 0;
-            const bMatchesRank = bRank === detectedRank ? 1 : 0;
-            // If same rank priority, keep original order (by match score)
-            if (aMatchesRank === bMatchesRank)
-                return 0;
-            return bMatchesRank - aMatchesRank;
-        });
-        for (const match of sortedMatches) {
-            if (!match.id)
-                continue; // Skip matches without ID
-            const option = document.createElement('option');
-            option.value = match.id;
-            const bonusText = formatBonusValues(match);
-            const rank = match.rarity || match.rank;
-            const rankText = rank ? `[${rank}] ` : '';
-            const confidenceText = isDebugEnabled() ? ` (${match.matchScore}%)` : '';
-            option.textContent = `${rankText}${match.name} [${bonusText}]${confidenceText}`;
-            // Apply rank color
-            if (rank) {
-                option.style.color = getRankColor(rank);
-            }
-            conditionalSelect.appendChild(option);
-        }
-        // Select the best match - prefer one with matching rank
-        if (result.conditional.confidence > 35) {
-            // First try to find a match with the same rank
-            const matchWithSameRank = sortedMatches.find(m => m.id && (m.rarity || m.rank) === detectedRank);
-            if (matchWithSameRank?.id) {
-                conditionalSelect.value = matchWithSameRank.id;
-            }
-            else if (result.conditional.matched?.id) {
-                conditionalSelect.value = result.conditional.matched.id;
+    // Clear and set up the extraction conditional selector
+    if (extractionConditionalSelector) {
+        extractionConditionalSelector.clear();
+        // If OCR detected a good match, pre-select it
+        if (result.conditional.confidence > 35 && result.conditional.matched) {
+            const detectedRank = result.rank.rank;
+            const topMatches = findTopMatches(result.conditional.rawText, 10);
+            // Find best match - prefer one with matching rank
+            const matchWithSameRank = topMatches.find(m => m.id && (m.rarity || m.rank) === detectedRank);
+            const bestMatch = matchWithSameRank || result.conditional.matched;
+            if (bestMatch) {
+                extractionConditionalSelector.setSelected(bestMatch);
             }
         }
     }
+    // Show confidence indicator in debug mode
+    const conditionalConfidence = document.getElementById('conditionalConfidence');
     if (conditionalConfidence) {
         if (isDebugEnabled() && result.conditional.matched) {
             conditionalConfidence.textContent = `${Math.round(result.conditional.confidence)}%`;
             conditionalConfidence.className = `confidence ${getConfidenceClass(result.conditional.confidence / 100)}`;
+            conditionalConfidence.style.display = '';
         }
         else {
             conditionalConfidence.style.display = 'none';
         }
     }
-    // Update bonus values display
-    updateBonusValuesDisplay();
     // Populate debug section
     populateDebugSection(result);
     // Show modal
     modal.style.display = 'flex';
-}
-/**
- * Update bonus values display based on selected conditional
- */
-function updateBonusValuesDisplay() {
-    const conditionalSelect = document.getElementById('extractedConditionalMatch');
-    const bonusValuesSpan = document.getElementById('extractedBonusValues');
-    if (!conditionalSelect || !bonusValuesSpan)
-        return;
-    const selectedId = conditionalSelect.value;
-    if (!selectedId) {
-        bonusValuesSpan.textContent = '--';
-        return;
-    }
-    // Find the selected conditional in config
-    const state = store.getState();
-    const conditional = state.configConditionalBonuses.bonuses.find((b) => b.id === selectedId);
-    if (conditional) {
-        bonusValuesSpan.textContent = formatBonusValues(conditional);
-    }
-    else {
-        bonusValuesSpan.textContent = '--';
-    }
 }
 /**
  * Get confidence class for styling
@@ -2108,26 +2054,69 @@ function getConfidenceClass(confidence) {
     return 'low';
 }
 /**
- * Get color for a rank
- */
-function getRankColor(rank) {
-    switch (rank.toLowerCase()) {
-        case 'common': return '#9d9d9d';
-        case 'rare': return '#0070dd';
-        case 'epic': return '#a335ee';
-        case 'unique': return '#ff8000';
-        case 'legendary': return '#1eff00';
-        default: return '#ffffff';
-    }
-}
-/**
  * Setup extraction modal action buttons
  */
 function setupExtractionModalActions() {
-    // Update bonus values when conditional selection changes
-    const conditionalSelect = document.getElementById('extractedConditionalMatch');
-    if (conditionalSelect) {
-        conditionalSelect.addEventListener('change', updateBonusValuesDisplay);
+    // Setup extraction conditional selector
+    extractionConditionalSelector = createConditionalSelector({
+        searchInputId: 'extractedCondSearch',
+        resultsContainerId: 'extractedCondResults',
+        variantSectionId: 'extractedBonusVariantSection',
+        variantPillsId: 'extractedBonusVariantPills',
+        triggerNameId: 'extractedSelectedTriggerName',
+        displayId: 'extractedSelectedCondDisplay',
+        getRank: () => {
+            const rankSelect = document.getElementById('extractedRank');
+            return rankSelect?.value || null;
+        },
+    });
+    // Search input event
+    const searchInput = document.getElementById('extractedCondSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            extractionConditionalSelector?.search();
+        });
+    }
+    // Results container click delegation
+    const resultsContainer = document.getElementById('extractedCondResults');
+    if (resultsContainer) {
+        resultsContainer.addEventListener('click', (e) => {
+            const target = e.target;
+            const triggerItem = target.closest('.trigger-result-item');
+            if (triggerItem) {
+                const index = parseInt(triggerItem.getAttribute('data-trigger-index') || '0', 10);
+                extractionConditionalSelector?.selectTrigger(index);
+            }
+        });
+    }
+    // Variant pills click delegation
+    const variantPills = document.getElementById('extractedBonusVariantPills');
+    if (variantPills) {
+        variantPills.addEventListener('click', (e) => {
+            const target = e.target;
+            const pill = target.closest('.bonus-pill');
+            if (pill) {
+                const index = parseInt(pill.getAttribute('data-variant-index') || '0', 10);
+                extractionConditionalSelector?.selectVariant(index);
+            }
+        });
+    }
+    // Clear trigger button
+    const clearTriggerBtn = document.querySelector('[data-action="clear-extracted-trigger"]');
+    if (clearTriggerBtn) {
+        clearTriggerBtn.addEventListener('click', () => {
+            extractionConditionalSelector?.clear();
+        });
+    }
+    // Remove conditional button (in selected display)
+    const selectedDisplay = document.getElementById('extractedSelectedCondDisplay');
+    if (selectedDisplay) {
+        selectedDisplay.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.getAttribute('data-action') === 'remove-conditional') {
+                extractionConditionalSelector?.clear();
+            }
+        });
     }
     // Add to Collection button
     const addBtn = document.querySelector('[data-action="add-from-scan"]');
@@ -2148,18 +2137,13 @@ function addFamiliarFromScan() {
     const rankSelect = document.getElementById('extractedRank');
     const elementSelect = document.getElementById('extractedElement');
     const typeSelect = document.getElementById('extractedType');
-    const conditionalSelect = document.getElementById('extractedConditionalMatch');
     const name = nameInput?.value?.trim();
     if (!name) {
         showToast('Please enter a familiar name');
         return;
     }
-    // Get conditional if selected
-    let conditional = null;
-    if (conditionalSelect?.value) {
-        const state = store.getState();
-        conditional = state.configConditionalBonuses.bonuses.find((b) => b.id === conditionalSelect.value) || null;
-    }
+    // Get conditional from selector
+    const conditional = extractionConditionalSelector?.getSelected() || null;
     // Add to roster
     addFamiliarToRoster({
         name,
@@ -2191,7 +2175,6 @@ function fillFormFromScan() {
     const rankSelect = document.getElementById('extractedRank');
     const elementSelect = document.getElementById('extractedElement');
     const typeSelect = document.getElementById('extractedType');
-    const conditionalSelect = document.getElementById('extractedConditionalMatch');
     // Fill roster form
     const rosterNameInput = document.getElementById('rosterName');
     if (rosterNameInput && nameInput) {
@@ -2210,12 +2193,9 @@ function fillFormFromScan() {
         rosterTypeDropdown.setValue(typeSelect.value);
     }
     // Set conditional if selected
-    if (conditionalSelect?.value && rosterConditionalSelector) {
-        const state = store.getState();
-        const conditional = state.configConditionalBonuses.bonuses.find((b) => b.id === conditionalSelect.value);
-        if (conditional) {
-            rosterConditionalSelector.setSelected(conditional);
-        }
+    const selectedConditional = extractionConditionalSelector?.getSelected();
+    if (selectedConditional && rosterConditionalSelector) {
+        rosterConditionalSelector.setSelected(selectedConditional);
     }
     // Close modal
     const modal = document.getElementById('extractionModal');

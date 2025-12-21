@@ -55,6 +55,7 @@ import type { Wave, Rank, CalcFamiliar, Familiar, OptimizedLineup, ExtendedOptim
 // Module-level conditional selector instances
 let modalConditionalSelector: ReturnType<typeof createConditionalSelector> | null = null;
 let rosterConditionalSelector: ReturnType<typeof createConditionalSelector> | null = null;
+let extractionConditionalSelector: ReturnType<typeof createConditionalSelector> | null = null;
 
 // Module-level icon dropdown instances
 let modalRankDropdown: ReturnType<typeof createIconDropdown> | null = null;
@@ -2306,103 +2307,44 @@ function showExtractionModal(result: ScanResult): void {
     conditionalText.textContent = result.conditional.rawText || '(No text detected)';
   }
 
-  // Populate conditional match dropdown with top matches
-  const conditionalSelect = document.getElementById('extractedConditionalMatch') as HTMLSelectElement;
-  const conditionalConfidence = document.getElementById('conditionalConfidence');
-  if (conditionalSelect) {
-    // Clear existing options
-    conditionalSelect.innerHTML = '<option value="">-- No conditional --</option>';
+  // Clear and set up the extraction conditional selector
+  if (extractionConditionalSelector) {
+    extractionConditionalSelector.clear();
 
-    // Get top matches for the raw text
-    const topMatches = findTopMatches(result.conditional.rawText, 10);
-    const detectedRank = result.rank.rank;
+    // If OCR detected a good match, pre-select it
+    if (result.conditional.confidence > 35 && result.conditional.matched) {
+      const detectedRank = result.rank.rank;
+      const topMatches = findTopMatches(result.conditional.rawText, 10);
 
-    // Sort matches: prioritize same rank as detected familiar
-    const sortedMatches = [...topMatches].sort((a, b) => {
-      const aRank = a.rarity || a.rank;
-      const bRank = b.rarity || b.rank;
-      const aMatchesRank = aRank === detectedRank ? 1 : 0;
-      const bMatchesRank = bRank === detectedRank ? 1 : 0;
-      // If same rank priority, keep original order (by match score)
-      if (aMatchesRank === bMatchesRank) return 0;
-      return bMatchesRank - aMatchesRank;
-    });
-
-    for (const match of sortedMatches) {
-      if (!match.id) continue; // Skip matches without ID
-      const option = document.createElement('option');
-      option.value = match.id;
-      const bonusText = formatBonusValues(match);
-      const rank = match.rarity || match.rank;
-      const rankText = rank ? `[${rank}] ` : '';
-      const confidenceText = isDebugEnabled() ? ` (${match.matchScore}%)` : '';
-      option.textContent = `${rankText}${match.name} [${bonusText}]${confidenceText}`;
-      // Apply rank color
-      if (rank) {
-        option.style.color = getRankColor(rank);
-      }
-      conditionalSelect.appendChild(option);
-    }
-
-    // Select the best match - prefer one with matching rank
-    if (result.conditional.confidence > 35) {
-      // First try to find a match with the same rank
-      const matchWithSameRank = sortedMatches.find(m =>
+      // Find best match - prefer one with matching rank
+      const matchWithSameRank = topMatches.find(m =>
         m.id && (m.rarity || m.rank) === detectedRank
       );
-      if (matchWithSameRank?.id) {
-        conditionalSelect.value = matchWithSameRank.id;
-      } else if (result.conditional.matched?.id) {
-        conditionalSelect.value = result.conditional.matched.id;
+
+      const bestMatch = matchWithSameRank || result.conditional.matched;
+      if (bestMatch) {
+        extractionConditionalSelector.setSelected(bestMatch as ConditionalBonus);
       }
     }
   }
 
+  // Show confidence indicator in debug mode
+  const conditionalConfidence = document.getElementById('conditionalConfidence');
   if (conditionalConfidence) {
     if (isDebugEnabled() && result.conditional.matched) {
       conditionalConfidence.textContent = `${Math.round(result.conditional.confidence)}%`;
       conditionalConfidence.className = `confidence ${getConfidenceClass(result.conditional.confidence / 100)}`;
+      conditionalConfidence.style.display = '';
     } else {
       conditionalConfidence.style.display = 'none';
     }
   }
-
-  // Update bonus values display
-  updateBonusValuesDisplay();
 
   // Populate debug section
   populateDebugSection(result);
 
   // Show modal
   modal.style.display = 'flex';
-}
-
-/**
- * Update bonus values display based on selected conditional
- */
-function updateBonusValuesDisplay(): void {
-  const conditionalSelect = document.getElementById('extractedConditionalMatch') as HTMLSelectElement;
-  const bonusValuesSpan = document.getElementById('extractedBonusValues');
-
-  if (!conditionalSelect || !bonusValuesSpan) return;
-
-  const selectedId = conditionalSelect.value;
-  if (!selectedId) {
-    bonusValuesSpan.textContent = '--';
-    return;
-  }
-
-  // Find the selected conditional in config
-  const state = store.getState();
-  const conditional = state.configConditionalBonuses.bonuses.find(
-    (b: ConditionalBonus) => b.id === selectedId
-  );
-
-  if (conditional) {
-    bonusValuesSpan.textContent = formatBonusValues(conditional);
-  } else {
-    bonusValuesSpan.textContent = '--';
-  }
 }
 
 /**
@@ -2415,27 +2357,74 @@ function getConfidenceClass(confidence: number): string {
 }
 
 /**
- * Get color for a rank
- */
-function getRankColor(rank: string): string {
-  switch (rank.toLowerCase()) {
-    case 'common': return '#9d9d9d';
-    case 'rare': return '#0070dd';
-    case 'epic': return '#a335ee';
-    case 'unique': return '#ff8000';
-    case 'legendary': return '#1eff00';
-    default: return '#ffffff';
-  }
-}
-
-/**
  * Setup extraction modal action buttons
  */
 function setupExtractionModalActions(): void {
-  // Update bonus values when conditional selection changes
-  const conditionalSelect = document.getElementById('extractedConditionalMatch');
-  if (conditionalSelect) {
-    conditionalSelect.addEventListener('change', updateBonusValuesDisplay);
+  // Setup extraction conditional selector
+  extractionConditionalSelector = createConditionalSelector({
+    searchInputId: 'extractedCondSearch',
+    resultsContainerId: 'extractedCondResults',
+    variantSectionId: 'extractedBonusVariantSection',
+    variantPillsId: 'extractedBonusVariantPills',
+    triggerNameId: 'extractedSelectedTriggerName',
+    displayId: 'extractedSelectedCondDisplay',
+    getRank: () => {
+      const rankSelect = document.getElementById('extractedRank') as HTMLSelectElement;
+      return rankSelect?.value || null;
+    },
+  });
+
+  // Search input event
+  const searchInput = document.getElementById('extractedCondSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      extractionConditionalSelector?.search();
+    });
+  }
+
+  // Results container click delegation
+  const resultsContainer = document.getElementById('extractedCondResults');
+  if (resultsContainer) {
+    resultsContainer.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const triggerItem = target.closest('.trigger-result-item') as HTMLElement;
+      if (triggerItem) {
+        const index = parseInt(triggerItem.getAttribute('data-trigger-index') || '0', 10);
+        extractionConditionalSelector?.selectTrigger(index);
+      }
+    });
+  }
+
+  // Variant pills click delegation
+  const variantPills = document.getElementById('extractedBonusVariantPills');
+  if (variantPills) {
+    variantPills.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const pill = target.closest('.bonus-pill') as HTMLElement;
+      if (pill) {
+        const index = parseInt(pill.getAttribute('data-variant-index') || '0', 10);
+        extractionConditionalSelector?.selectVariant(index);
+      }
+    });
+  }
+
+  // Clear trigger button
+  const clearTriggerBtn = document.querySelector('[data-action="clear-extracted-trigger"]');
+  if (clearTriggerBtn) {
+    clearTriggerBtn.addEventListener('click', () => {
+      extractionConditionalSelector?.clear();
+    });
+  }
+
+  // Remove conditional button (in selected display)
+  const selectedDisplay = document.getElementById('extractedSelectedCondDisplay');
+  if (selectedDisplay) {
+    selectedDisplay.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.getAttribute('data-action') === 'remove-conditional') {
+        extractionConditionalSelector?.clear();
+      }
+    });
   }
 
   // Add to Collection button
@@ -2459,7 +2448,6 @@ function addFamiliarFromScan(): void {
   const rankSelect = document.getElementById('extractedRank') as HTMLSelectElement;
   const elementSelect = document.getElementById('extractedElement') as HTMLSelectElement;
   const typeSelect = document.getElementById('extractedType') as HTMLSelectElement;
-  const conditionalSelect = document.getElementById('extractedConditionalMatch') as HTMLSelectElement;
 
   const name = nameInput?.value?.trim();
   if (!name) {
@@ -2467,14 +2455,8 @@ function addFamiliarFromScan(): void {
     return;
   }
 
-  // Get conditional if selected
-  let conditional: ConditionalBonus | null = null;
-  if (conditionalSelect?.value) {
-    const state = store.getState();
-    conditional = state.configConditionalBonuses.bonuses.find(
-      (b: ConditionalBonus) => b.id === conditionalSelect.value
-    ) || null;
-  }
+  // Get conditional from selector
+  const conditional = extractionConditionalSelector?.getSelected() || null;
 
   // Add to roster
   addFamiliarToRoster({
@@ -2511,7 +2493,6 @@ function fillFormFromScan(): void {
   const rankSelect = document.getElementById('extractedRank') as HTMLSelectElement;
   const elementSelect = document.getElementById('extractedElement') as HTMLSelectElement;
   const typeSelect = document.getElementById('extractedType') as HTMLSelectElement;
-  const conditionalSelect = document.getElementById('extractedConditionalMatch') as HTMLSelectElement;
 
   // Fill roster form
   const rosterNameInput = document.getElementById('rosterName') as HTMLInputElement;
@@ -2535,14 +2516,9 @@ function fillFormFromScan(): void {
   }
 
   // Set conditional if selected
-  if (conditionalSelect?.value && rosterConditionalSelector) {
-    const state = store.getState();
-    const conditional = state.configConditionalBonuses.bonuses.find(
-      (b: ConditionalBonus) => b.id === conditionalSelect.value
-    );
-    if (conditional) {
-      rosterConditionalSelector.setSelected(conditional);
-    }
+  const selectedConditional = extractionConditionalSelector?.getSelected();
+  if (selectedConditional && rosterConditionalSelector) {
+    rosterConditionalSelector.setSelected(selectedConditional);
   }
 
   // Close modal

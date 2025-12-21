@@ -16,4 +16,5 @@ export {
   formatConditionalDisplay,
   formatPercent,
   getConfidenceClass,
+  isBuggedConditional,
 } from './format.js';

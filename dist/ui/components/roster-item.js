@@ -2,7 +2,7 @@
  * Roster item component
  */
 import { escapeHtml } from '../../utils/html.js';
-import { formatBonusValues } from '../../utils/format.js';
+import { formatBonusValues, isBuggedConditional } from '../../utils/format.js';
 /**
  * Render a roster item
  */
@@ -12,7 +12,9 @@ export function renderRosterItem(fam) {
     let condText = '';
     if (fam.conditional) {
         const stats = formatBonusValues(fam.conditional);
-        condText = `<div class="roster-conditional">${escapeHtml(fam.conditional.name)} (${stats})</div>`;
+        const bugWarning = isBuggedConditional(fam.conditional);
+        const warningHtml = bugWarning ? `<span class="bugged-badge" title="${escapeHtml(bugWarning)}">BUGGED</span>` : '';
+        condText = `<div class="roster-conditional">${escapeHtml(fam.conditional.name)} (${stats}) ${warningHtml}</div>`;
     }
     const waveText = fam.wave ? `Wave ${fam.wave}` : 'No wave';
     return `

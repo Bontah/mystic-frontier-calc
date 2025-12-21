@@ -4,7 +4,7 @@
 
 import type { CalcFamiliar } from '../../types/index.js';
 import { escapeHtml } from '../../utils/html.js';
-import { formatConditionalDisplay } from '../../utils/format.js';
+import { formatConditionalDisplay, isBuggedConditional } from '../../utils/format.js';
 
 /**
  * Render an empty familiar slot
@@ -24,9 +24,13 @@ export function renderFamiliarCard(fam: CalcFamiliar, index: number): string {
   const rankClass = `rank-${fam.rank.toLowerCase()}`;
 
   let condText: string | null = null;
+  let bugWarning: string | false = false;
   if (fam.conditional) {
     condText = formatConditionalDisplay(fam.conditional);
+    bugWarning = isBuggedConditional(fam.conditional);
   }
+
+  const warningHtml = bugWarning ? `<span class="bugged-badge" title="${escapeHtml(bugWarning)}">BUGGED</span>` : '';
 
   return `
     <div class="familiar-card ${rankClass}" data-slot="${index}">
@@ -36,7 +40,7 @@ export function renderFamiliarCard(fam: CalcFamiliar, index: number): string {
           ${fam.rank} · ${fam.element !== 'None' ? fam.element + ' · ' : ''}${fam.type}
         </div>
         <div class="familiar-card-conditional ${condText ? '' : 'none'}">
-          ${condText ? escapeHtml(condText) : 'No conditional'}
+          ${condText ? escapeHtml(condText) : 'No conditional'} ${warningHtml}
         </div>
       </div>
       <div class="familiar-card-actions">

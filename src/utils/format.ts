@@ -48,3 +48,25 @@ export function getConfidenceClass(confidence: number): string {
   if (confidence >= 50) return 'confidence-medium';
   return 'confidence-low';
 }
+
+/**
+ * Detect conditionals that are bugged in-game
+ * Returns warning message if bugged, false if not
+ */
+export function isBuggedConditional(cond: ConditionalBonus | null | undefined): string | false {
+  if (!cond) return false;
+  const name = (cond.name || '').toLowerCase();
+  const condition = (cond.condition || '').toLowerCase();
+
+  // Bug 1: Non-elemental/None element conditionals don't work in-game
+  if (name.includes('non-elemental') || condition.includes("element === 'none'")) {
+    return 'Non-elemental conditionals are bugged in-game';
+  }
+
+  // Bug 2: "Dice add up to" conditionals don't work in-game
+  if (name.includes('dice add up to') || /dice\[\d\]\s*\+\s*dice\[\d\]/.test(condition)) {
+    return 'Dice add-up conditionals are bugged in-game';
+  }
+
+  return false;
+}

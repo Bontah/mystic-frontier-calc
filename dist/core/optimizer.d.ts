@@ -12,12 +12,25 @@ export declare function generateCombinations<T>(arr: T[], size: number): T[][];
  */
 export declare function findBestLineup(combinations: CalcFamiliar[][], bonuses: ConditionalBonus[], strategy: ScoringStrategy): OptimizedLineup | null;
 /**
+ * Fast synchronous lineup finder
+ * Uses average dice for 'overall' strategy instead of calculating all combinations
+ */
+export declare function findBestLineupFast(combinations: CalcFamiliar[][], bonuses: ConditionalBonus[], strategy: ScoringStrategy): OptimizedLineup | null;
+/**
  * Async version of findBestLineup with progress reporting
  * Allows UI to remain responsive during long computations
  */
 export declare function findBestLineupAsync(combinations: CalcFamiliar[][], bonuses: ConditionalBonus[], strategy: ScoringStrategy, onProgress?: ProgressCallback, shouldCancel?: () => boolean): Promise<OptimizedLineup | null>;
 /**
- * Run all strategies and return results
+ * Run all strategies and return results (fast synchronous version)
+ */
+export declare function runAllStrategiesFast(combinations: CalcFamiliar[][], bonuses: ConditionalBonus[]): {
+    bestOverall: OptimizedLineup | null;
+    bestLow: OptimizedLineup | null;
+    bestHigh: OptimizedLineup | null;
+};
+/**
+ * Run all strategies and return results (async version with progress)
  */
 export declare function runAllStrategies(combinations: CalcFamiliar[][], bonuses: ConditionalBonus[], onProgress?: ProgressCallback, shouldCancel?: () => boolean): Promise<{
     bestOverall: OptimizedLineup | null;

@@ -26,7 +26,7 @@ import { createIconDropdown, RANK_OPTIONS, ELEMENT_OPTIONS, TYPE_OPTIONS } from 
 import { saveState } from '../state/persistence.js';
 import { createConditionalSelector } from './conditional-selector/index.js';
 import { showToast } from './toast.js';
-import { generateCombinations, runAllStrategies } from '../core/optimizer.js';
+import { generateCombinations, runAllStrategiesFast } from '../core/optimizer.js';
 import { escapeHtml } from '../utils/html.js';
 import type { Wave, Rank, CalcFamiliar, Familiar, OptimizedLineup } from '../types/index.js';
 
@@ -1018,7 +1018,7 @@ function setupOptimizerEvents(): void {
 /**
  * Run the lineup optimizer
  */
-async function runOptimizer(): Promise<void> {
+function runOptimizer(): void {
   const state = store.getState();
   const roster = selectors.getCurrentRoster(state);
 
@@ -1041,50 +1041,44 @@ async function runOptimizer(): Promise<void> {
     runBtn.textContent = 'Finding best lineups...';
   }
 
-  resultsContainer.innerHTML = '<div class="optimizer-loading">Analyzing combinations... <span id="optimizerProgress">0%</span></div>';
+  resultsContainer.innerHTML = '<div class="optimizer-loading">Analyzing combinations...</div>';
 
-  try {
-    // Convert roster familiars to CalcFamiliars
-    const calcFamiliars: CalcFamiliar[] = availableFamiliars.map((f) => ({
-      name: f.name,
-      rank: f.rank,
-      element: f.element,
-      type: f.type,
-      conditional: f.conditional,
-    }));
+  // Use setTimeout to allow UI to update before heavy computation
+  setTimeout(() => {
+    try {
+      // Convert roster familiars to CalcFamiliars
+      const calcFamiliars: CalcFamiliar[] = availableFamiliars.map((f) => ({
+        name: f.name,
+        rank: f.rank,
+        element: f.element,
+        type: f.type,
+        conditional: f.conditional,
+      }));
 
-    // Get bonus items
-    const bonusItems = state.bonusItems;
-    const bonuses = calcFamiliars
-      .map((f) => f.conditional)
-      .filter((c): c is NonNullable<typeof c> => c !== null);
+      // Get bonuses from familiars
+      const bonuses = calcFamiliars
+        .map((f) => f.conditional)
+        .filter((c): c is NonNullable<typeof c> => c !== null);
 
-    // Generate all 3-familiar combinations
-    const combinations = generateCombinations(calcFamiliars, 3);
+      // Generate all 3-familiar combinations
+      const combinations = generateCombinations(calcFamiliars, 3);
 
-    // Progress callback
-    const onProgress = (percent: number) => {
-      const progressEl = document.getElementById('optimizerProgress');
-      if (progressEl) {
-        progressEl.textContent = `${percent}%`;
+      // Run all strategies (fast synchronous version)
+      const results = runAllStrategiesFast(combinations, bonuses);
+
+      // Render results
+      resultsContainer.innerHTML = renderOptimizerResults(results);
+    } catch (error) {
+      console.error('Optimizer error:', error);
+      resultsContainer.innerHTML = '<div class="optimizer-error">An error occurred during optimization.</div>';
+    } finally {
+      // Re-enable button
+      if (runBtn) {
+        runBtn.disabled = false;
+        runBtn.textContent = 'Find Best Lineups';
       }
-    };
-
-    // Run all strategies
-    const results = await runAllStrategies(combinations, bonuses, onProgress);
-
-    // Render results
-    resultsContainer.innerHTML = renderOptimizerResults(results);
-  } catch (error) {
-    console.error('Optimizer error:', error);
-    resultsContainer.innerHTML = '<div class="optimizer-error">An error occurred during optimization.</div>';
-  } finally {
-    // Re-enable button
-    if (runBtn) {
-      runBtn.disabled = false;
-      runBtn.textContent = 'Find Best Lineups';
     }
-  }
+  }, 10);
 }
 
 /**

@@ -89,6 +89,30 @@ export function findBestLineup(combinations, bonuses, strategy) {
     return best;
 }
 /**
+ * Fast synchronous lineup finder
+ * Uses average dice for 'overall' strategy instead of calculating all combinations
+ */
+export function findBestLineupFast(combinations, bonuses, strategy) {
+    let best = null;
+    let bestScore = -Infinity;
+    for (const combo of combinations) {
+        const testDice = getDiceForStrategy(combo, strategy);
+        const result = evaluateLineup(combo, bonuses, testDice);
+        const score = result.score;
+        if (score > bestScore) {
+            bestScore = score;
+            best = {
+                ...result,
+                familiars: combo,
+                score: Math.round(score),
+                scoreLabel: getScoreLabel(combo, strategy),
+                testDice,
+            };
+        }
+    }
+    return best;
+}
+/**
  * Async version of findBestLineup with progress reporting
  * Allows UI to remain responsive during long computations
  */
@@ -97,26 +121,15 @@ export async function findBestLineupAsync(combinations, bonuses, strategy, onPro
     let bestScore = -Infinity;
     const total = combinations.length;
     let processed = 0;
-    const batchSize = 100;
+    const batchSize = 500; // Larger batch for less overhead
     for (const combo of combinations) {
         // Check for cancellation
         if (shouldCancel?.()) {
             return best;
         }
-        const maxDice = getMaxDiceForFamiliars(combo);
-        let score;
-        let testDice;
-        let result;
-        if (strategy === 'overall') {
-            score = calculateExpectedScore(combo, bonuses, maxDice);
-            testDice = getAverageDiceForFamiliars(combo);
-            result = evaluateLineup(combo, bonuses, testDice);
-        }
-        else {
-            testDice = getDiceForStrategy(combo, strategy);
-            result = evaluateLineup(combo, bonuses, testDice);
-            score = result.score;
-        }
+        const testDice = getDiceForStrategy(combo, strategy);
+        const result = evaluateLineup(combo, bonuses, testDice);
+        const score = result.score;
         if (score > bestScore) {
             bestScore = score;
             best = {
@@ -138,7 +151,16 @@ export async function findBestLineupAsync(combinations, bonuses, strategy, onPro
     return best;
 }
 /**
- * Run all strategies and return results
+ * Run all strategies and return results (fast synchronous version)
+ */
+export function runAllStrategiesFast(combinations, bonuses) {
+    const bestOverall = findBestLineupFast(combinations, bonuses, 'overall');
+    const bestLow = findBestLineupFast(combinations, bonuses, 'lowRolls');
+    const bestHigh = findBestLineupFast(combinations, bonuses, 'highRolls');
+    return { bestOverall, bestLow, bestHigh };
+}
+/**
+ * Run all strategies and return results (async version with progress)
  */
 export async function runAllStrategies(combinations, bonuses, onProgress, shouldCancel) {
     const totalPhases = 3;

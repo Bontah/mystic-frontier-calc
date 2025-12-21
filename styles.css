@@ -3641,3 +3641,18 @@ select:focus, input:focus, textarea:focus {
     transform: translateX(100%);
   }
 }
+
+/* Rank text colors */
+.rank-text.rank-common { color: #9d9d9d; }
+.rank-text.rank-rare { color: #0070dd; }
+.rank-text.rank-epic { color: #a335ee; }
+.rank-text.rank-unique { color: #ff8000; }
+.rank-text.rank-legendary { color: #1eff00; }
+
+/* Element text colors */
+.element-text.element-fire { color: #ff6b35; }
+.element-text.element-ice { color: #4fc3f7; }
+.element-text.element-lightning { color: #ffeb3b; }
+.element-text.element-poison { color: #8bc34a; }
+.element-text.element-dark { color: #9c27b0; }
+.element-text.element-holy { color: #fff176; }

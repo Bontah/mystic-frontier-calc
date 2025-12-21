@@ -39,7 +39,7 @@ export function renderFamiliarCard(fam: CalcFamiliar, index: number): string {
       <div class="familiar-card-info">
         <div class="familiar-card-name">${escapeHtml(fam.name || `Familiar ${index + 1}`)}</div>
         <div class="familiar-card-details">
-          ${fam.rank} · ${fam.element !== 'None' ? fam.element + ' · ' : ''}${fam.type}
+          <span class="rank-text ${rankClass}">${fam.rank}</span>${fam.element !== 'None' ? ` · <span class="element-text element-${fam.element.toLowerCase()}">${fam.element}</span>` : ''} · ${fam.type}
         </div>
         <div class="familiar-card-conditional ${condText ? '' : 'none'}">
           ${condText ? escapeHtml(condText) : 'No conditional'}

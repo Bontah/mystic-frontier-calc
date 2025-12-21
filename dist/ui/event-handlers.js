@@ -1739,7 +1739,8 @@ function showExtractionModal(result) {
                 continue; // Skip matches without ID
             const option = document.createElement('option');
             option.value = match.id;
-            option.textContent = `${match.name} (${match.matchScore}%)`;
+            const bonusText = formatBonusValues(match);
+            option.textContent = `${match.name} [${bonusText}] (${match.matchScore}%)`;
             conditionalSelect.appendChild(option);
         }
         // Select the best match if confidence is good enough

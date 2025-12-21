@@ -2004,7 +2004,8 @@ function showExtractionModal(result: ScanResult): void {
       if (!match.id) continue; // Skip matches without ID
       const option = document.createElement('option');
       option.value = match.id;
-      option.textContent = `${match.name} (${match.matchScore}%)`;
+      const bonusText = formatBonusValues(match);
+      option.textContent = `${match.name} [${bonusText}] (${match.matchScore}%)`;
       conditionalSelect.appendChild(option);
     }
 

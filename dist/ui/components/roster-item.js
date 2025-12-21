@@ -40,7 +40,7 @@ export function renderRosterItem(fam) {
  */
 export function renderRosterList(roster) {
     if (roster.length === 0) {
-        return '<div class="roster-empty">No familiars in roster. Add one below or use the scanner.</div>';
+        return '<div class="roster-empty">No familiars in collection. Add one below or use the scanner.</div>';
     }
     // Sort by wave, then by name
     const sorted = [...roster].sort((a, b) => {

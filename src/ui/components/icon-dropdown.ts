@@ -182,6 +182,14 @@ export function createIconDropdown(config: IconDropdownConfig): {
   };
   document.addEventListener('click', closeHandler);
 
+  // Close on scroll
+  const scrollHandler = () => {
+    if (isOpen) {
+      close();
+    }
+  };
+  window.addEventListener('scroll', scrollHandler, true);
+
   // Initial render
   renderSelected();
   renderOptions();
@@ -196,6 +204,7 @@ export function createIconDropdown(config: IconDropdownConfig): {
     },
     destroy: () => {
       document.removeEventListener('click', closeHandler);
+      window.removeEventListener('scroll', scrollHandler, true);
       wrapper.remove();
       optionsList.remove();
     },

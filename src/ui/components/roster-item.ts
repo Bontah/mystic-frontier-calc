@@ -47,7 +47,7 @@ export function renderRosterItem(fam: Familiar): string {
  */
 export function renderRosterList(roster: Familiar[]): string {
   if (roster.length === 0) {
-    return '<div class="roster-empty">No familiars in roster. Add one below or use the scanner.</div>';
+    return '<div class="roster-empty">No familiars in collection. Add one below or use the scanner.</div>';
   }
 
   // Sort by wave, then by name

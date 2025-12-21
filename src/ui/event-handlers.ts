@@ -679,7 +679,7 @@ function clearRosterForm(): void {
 
   if (nameInput) nameInput.value = '';
   if (cancelBtn) cancelBtn.style.display = 'none';
-  if (addBtn) addBtn.textContent = 'Add to Roster';
+  if (addBtn) addBtn.textContent = 'Add to Collection';
 
   // Reset dropdowns
   rosterRankDropdown?.setValue('Common');

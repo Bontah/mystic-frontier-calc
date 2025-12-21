@@ -12,7 +12,7 @@
   <!-- Navigation Bar -->
   <nav class="top-nav">
     <button class="nav-btn active" data-page="calculator">Calculator</button>
-    <button class="nav-btn" data-page="roster">My Roster</button>
+    <button class="nav-btn" data-page="roster">Familiar Collection</button>
     <button class="nav-btn" data-page="info">Additional Information</button>
     <button class="nav-btn" data-page="howtouse">How to Use</button>
   </nav>
@@ -182,7 +182,7 @@
     </div>
   </div>
 
-  <!-- My Roster Page -->
+  <!-- Familiar Collection Page -->
   <div id="page-roster" class="page">
     <!-- Character Selector -->
     <div class="character-selector-wrapper">
@@ -190,10 +190,10 @@
       <div id="characterSelector" class="character-selector"></div>
     </div>
 
-    <!-- Familiar Roster Section -->
+    <!-- Familiar Collection Section -->
     <div class="section">
-      <h2>My Familiar Roster</h2>
-      <p class="section-description">Add all the familiars you own. The optimizer will suggest the best lineups from your roster.</p>
+      <h2>My Familiar Collection</h2>
+      <p class="section-description">Add all the familiars you own. The optimizer will suggest the best lineups from your collection.</p>
 
       <div class="roster-add-form">
         <div class="roster-inputs">
@@ -201,7 +201,7 @@
           <div id="rosterRankContainer"></div>
           <div id="rosterElementContainer"></div>
           <div id="rosterTypeContainer"></div>
-          <button id="rosterAddBtn" class="add-btn" data-action="add-to-roster">Add to Roster</button>
+          <button id="rosterAddBtn" class="add-btn" data-action="add-to-roster">Add to Collection</button>
           <button id="rosterCancelBtn" class="cancel-btn" data-action="cancel-edit" style="display: none;">Cancel</button>
         </div>
         <div class="roster-conditional-search">
@@ -225,7 +225,7 @@
 
       <div id="rosterList" class="roster-list"></div>
       <div class="roster-stats">
-        <span id="rosterCount">0 familiars in roster</span>
+        <span id="rosterCount">0 familiars in collection</span>
         <div class="roster-actions">
           <button class="free-wave-btn wave-1" data-action="free-wave" data-wave="1">Free W1</button>
           <button class="free-wave-btn wave-2" data-action="free-wave" data-wave="2">Free W2</button>
@@ -356,7 +356,7 @@
 
       <div class="info-block">
         <h3>Conditional Bonuses</h3>
-        <p>Conditional bonuses activate based on specific conditions like dice values, familiar types, or elements. Each familiar in your roster can have one conditional bonus attached to them.</p>
+        <p>Conditional bonuses activate based on specific conditions like dice values, familiar types, or elements. Each familiar in your collection can have one conditional bonus attached to them.</p>
       </div>
 
       <div class="info-block">
@@ -374,14 +374,14 @@
 
       <div class="howtouse-section">
         <h3>Welcome</h3>
-        <p>Mystic Frontier Calculator helps you calculate expedition scores, manage your familiar roster, and find the best lineup combinations for your expeditions.</p>
+        <p>Mystic Frontier Calculator helps you calculate expedition scores, manage your familiar collection, and find the best lineup combinations for your expeditions.</p>
       </div>
 
       <div class="howtouse-section">
         <h3>Calculator</h3>
         <p>The Calculator tab lets you simulate expedition outcomes:</p>
         <ul>
-          <li>Select 3 familiars from your roster (or enter manually)</li>
+          <li>Select 3 familiars from your collection (or enter manually)</li>
           <li>Each familiar contributes their dice roll based on rank</li>
           <li>Adjust the dice values to see different outcomes</li>
           <li>Add bonus items for extra flat bonuses or multipliers</li>
@@ -390,7 +390,7 @@
       </div>
 
       <div class="howtouse-section">
-        <h3>My Roster</h3>
+        <h3>Familiar Collection</h3>
         <p>Build and manage your familiar collection:</p>
         <ul>
           <li>Add familiars manually by filling out the form</li>
@@ -409,7 +409,7 @@
           <li>Upload the screenshot to the Image Scanner</li>
           <li>The scanner will extract: Name, Rank, Element, Type, and Conditional bonus</li>
           <li>Review and adjust the extracted data if needed</li>
-          <li>Click "Add to Roster" to add directly, or "Fill Form" to review first</li>
+          <li>Click "Add to Collection" to add directly, or "Fill Form" to review first</li>
         </ol>
         <p><strong>How to capture the card in-game:</strong></p>
         <div class="howtouse-images">
@@ -426,7 +426,7 @@
 
       <div class="howtouse-section">
         <h3>Lineup Optimizer</h3>
-        <p>Find the best familiar combinations from your roster:</p>
+        <p>Find the best familiar combinations from your collection:</p>
         <ul>
           <li>The optimizer analyzes all possible 3-familiar combinations</li>
           <li>Shows best lineups for: Expected value, Low rolls (1-1-1), and High rolls</li>
@@ -517,7 +517,7 @@
       </div>
 
       <div class="modal-actions">
-        <button class="add-btn" data-action="add-from-scan">Add to Roster</button>
+        <button class="add-btn" data-action="add-from-scan">Add to Collection</button>
         <button class="secondary-btn" data-action="fill-form">Fill Form</button>
         <button class="cancel-btn" data-action="close-modal">Cancel</button>
       </div>

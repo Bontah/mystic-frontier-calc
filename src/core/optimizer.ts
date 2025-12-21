@@ -70,7 +70,8 @@ function getScoreLabel(
     case 'overall':
     default: {
       const avgDice = getAverageDiceForFamiliars(familiars);
-      return `Avg dice: ${avgDice.map(d => d.toFixed(1)).join('-')}`;
+      const formatted = avgDice.map(d => Number.isInteger(d) ? d.toString() : d.toFixed(1));
+      return `Avg dice: ${formatted.join('-')}`;
     }
   }
 }

@@ -1197,14 +1197,6 @@ function setupOptimizerEvents(): void {
       }
     }
 
-    // Use lineup buttons
-    if (target.classList.contains('use-lineup-btn')) {
-      const lineupId = target.getAttribute('data-lineup-id');
-      if (lineupId) {
-        applyLineupToCalculator(lineupId);
-      }
-    }
-
     // Assign lineup to wave buttons
     if (target.getAttribute('data-action') === 'assign-wave') {
       const lineupId = target.getAttribute('data-lineup-id');
@@ -1242,30 +1234,6 @@ function setupOptimizerEvents(): void {
 
   // Show strategy cards on initial load
   showOptimizerStrategies();
-}
-
-/**
- * Apply a lineup from the optimizer to the calculator
- */
-function applyLineupToCalculator(lineupId: string): void {
-  const familiars = lineupCache.get(lineupId);
-  if (!familiars || familiars.length !== 3) {
-    showToast('Lineup not found');
-    return;
-  }
-
-  // Set all 3 familiars to the calculator slots
-  for (let i = 0; i < 3; i++) {
-    setCalcFamiliar(i, familiars[i]);
-  }
-
-  // Switch to calculator page
-  const calcNav = document.querySelector('[data-page="calculator"]') as HTMLElement;
-  if (calcNav) {
-    calcNav.click();
-  }
-
-  showToast('Lineup applied to calculator');
 }
 
 /**
@@ -1743,7 +1711,6 @@ function renderLineupCard(strategy: StrategyType, title: string, subtitle: strin
       </div>
       ${bonusesHtml}
       <div class="lineup-card-actions">
-        <button class="use-lineup-btn" data-lineup-id="${lineupId}">Use Lineup</button>
         <div class="lineup-wave-buttons">
           <span class="wave-label">Assign:</span>
           <button class="wave-btn" data-action="assign-wave" data-lineup-id="${lineupId}" data-wave="1">W1</button>
@@ -1834,7 +1801,6 @@ function renderLineupCardBalanced(lineup: ExtendedOptimizedLineup): string {
       </div>
       ${bonusesHtml}
       <div class="lineup-card-actions">
-        <button class="use-lineup-btn" data-lineup-id="${lineupId}">Use Lineup</button>
         <div class="lineup-wave-buttons">
           <span class="wave-label">Assign:</span>
           <button class="wave-btn" data-action="assign-wave" data-lineup-id="${lineupId}" data-wave="1">W1</button>

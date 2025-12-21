@@ -9,6 +9,7 @@ import {
   calculate,
   setCalcFamiliar,
   deleteCalcFamiliar,
+  emptyCalculator,
   resetAllFamiliars,
   loadWave,
   saveToWave,
@@ -26,9 +27,27 @@ import { createIconDropdown, RANK_OPTIONS, ELEMENT_OPTIONS, TYPE_OPTIONS } from 
 import { saveState } from '../state/persistence.js';
 import { createConditionalSelector } from './conditional-selector/index.js';
 import { showToast } from './toast.js';
-import { generateCombinations, runAllStrategiesFast } from '../core/optimizer.js';
+import {
+  generateCombinations,
+  findBestLineupFast,
+  findBestLineupMedian,
+  findBestLineupFloorGuarantee,
+  findBestLineupBalanced,
+} from '../core/optimizer.js';
 import { escapeHtml } from '../utils/html.js';
-import type { Wave, Rank, CalcFamiliar, Familiar, OptimizedLineup, ExtendedOptimizedLineup, OptimizerConfig } from '../types/index.js';
+import { isBuggedConditional, formatBonusValues } from '../utils/format.js';
+import {
+  processImage,
+  findTopMatches,
+  getReferenceImages,
+  isDebugEnabled,
+  recalculateTypeWithTuning,
+  getLastTypeDetails,
+  getLastTypeIconData,
+  generateMaskPreviews,
+} from '../scanner/index.js';
+import type { ScanResult, ReferenceImages, TuningParameters } from '../scanner/types.js';
+import type { Wave, Rank, CalcFamiliar, Familiar, OptimizedLineup, ExtendedOptimizedLineup, OptimizerConfig, ConditionalBonus } from '../types/index.js';
 
 // Module-level conditional selector instances
 let modalConditionalSelector: ReturnType<typeof createConditionalSelector> | null = null;
@@ -60,6 +79,7 @@ export function setupEventHandlers(): void {
   setupBonusItemEvents();
   setupPassingCombosButton();
   setupOptimizerEvents();
+  setupScannerEvents();
 
   // Initial render of bonus items list
   renderBonusItemsList();
@@ -144,6 +164,14 @@ function setupCalculatorEvents(): void {
           openFamiliarModal(cardSlot);
         }
       }
+    });
+  }
+
+  // Empty wave button - just clears calculator without affecting saved waves
+  const emptyBtn = document.querySelector('[data-action="empty-wave"]');
+  if (emptyBtn) {
+    emptyBtn.addEventListener('click', () => {
+      emptyCalculator();
     });
   }
 
@@ -1149,143 +1177,484 @@ function showStrategyModal(strategy: string): void {
  * Setup optimizer event handlers
  */
 function setupOptimizerEvents(): void {
-  const runBtn = document.querySelector('[data-action="run-optimizer"]');
-  if (runBtn) {
-    runBtn.addEventListener('click', runOptimizer);
-  }
-
-  // Event delegation for strategy help buttons (they're dynamically created)
+  // Event delegation for dynamically created buttons
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
+
+    // Strategy help buttons
     if (target.classList.contains('strategy-help-btn')) {
       const strategy = target.getAttribute('data-strategy');
       if (strategy) {
         showStrategyModal(strategy);
       }
     }
+
+    // Strategy calculate buttons
+    if (target.classList.contains('strategy-calculate-btn')) {
+      const strategy = target.getAttribute('data-strategy');
+      if (strategy) {
+        calculateStrategy(strategy);
+      }
+    }
+
+    // Use lineup buttons
+    if (target.classList.contains('use-lineup-btn')) {
+      const lineupId = target.getAttribute('data-lineup-id');
+      if (lineupId) {
+        applyLineupToCalculator(lineupId);
+      }
+    }
+
+    // Assign lineup to wave buttons
+    if (target.getAttribute('data-action') === 'assign-wave') {
+      const lineupId = target.getAttribute('data-lineup-id');
+      const waveAttr = target.getAttribute('data-wave');
+      if (lineupId && waveAttr) {
+        const wave = parseInt(waveAttr) as Wave;
+        assignLineupToWave(lineupId, wave);
+      }
+    }
   });
+
+  // Optimizer filter change handlers
+  const filterElement = document.getElementById('filterElement');
+  const filterType = document.getElementById('filterType');
+  const filterRequireMatch = document.getElementById('filterRequireMatch');
+
+  if (filterElement) {
+    filterElement.addEventListener('change', () => {
+      invalidateCombinationsCache();
+      showOptimizerStrategies();
+    });
+  }
+  if (filterType) {
+    filterType.addEventListener('change', () => {
+      invalidateCombinationsCache();
+      showOptimizerStrategies();
+    });
+  }
+  if (filterRequireMatch) {
+    filterRequireMatch.addEventListener('change', () => {
+      invalidateCombinationsCache();
+      showOptimizerStrategies();
+    });
+  }
+
+  // Show strategy cards on initial load
+  showOptimizerStrategies();
 }
 
 /**
- * Run the lineup optimizer
+ * Apply a lineup from the optimizer to the calculator
  */
-function runOptimizer(): void {
-  const state = store.getState();
-  const roster = selectors.getCurrentRoster(state);
-
-  // Filter out disabled familiars
-  const availableFamiliars = roster.filter((f) => !f.disabled);
-
-  if (availableFamiliars.length < 3) {
-    showToast('Need at least 3 enabled familiars to optimize');
+function applyLineupToCalculator(lineupId: string): void {
+  const familiars = lineupCache.get(lineupId);
+  if (!familiars || familiars.length !== 3) {
+    showToast('Lineup not found');
     return;
   }
 
-  const resultsContainer = document.getElementById('optimizerResults');
-  const runBtn = document.querySelector('[data-action="run-optimizer"]') as HTMLButtonElement;
-
-  if (!resultsContainer) return;
-
-  // Disable button and show loading
-  if (runBtn) {
-    runBtn.disabled = true;
-    runBtn.textContent = 'Finding best lineups...';
+  // Set all 3 familiars to the calculator slots
+  for (let i = 0; i < 3; i++) {
+    setCalcFamiliar(i, familiars[i]);
   }
 
-  // Calculate combination count for display
-  const n = availableFamiliars.length;
-  const combinationCount = (n * (n - 1) * (n - 2)) / 6;
+  // Switch to calculator page
+  const calcNav = document.querySelector('[data-page="calculator"]') as HTMLElement;
+  if (calcNav) {
+    calcNav.click();
+  }
 
-  resultsContainer.innerHTML = `<div class="optimizer-loading">Analyzing ${combinationCount.toLocaleString()} combinations...</div>`;
+  showToast('Lineup applied to calculator');
+}
 
-  // Use setTimeout to allow UI to update before heavy computation
+/**
+ * Assign a lineup's familiars to a wave in the roster
+ */
+function assignLineupToWave(lineupId: string, wave: Wave): void {
+  const familiars = lineupCache.get(lineupId);
+  if (!familiars || familiars.length !== 3) {
+    showToast('Lineup not found');
+    return;
+  }
+
+  const state = store.getState();
+  const charIdx = state.characters.findIndex((c) => c.id === state.currentCharacterId);
+  if (charIdx < 0) return;
+
+  // Check if wave already has familiars assigned
+  const existingWaveFams = state.characters[charIdx].roster.filter(f => f.wave === wave);
+  if (existingWaveFams.length > 0) {
+    if (!confirm(`Wave ${wave} already has ${existingWaveFams.length} familiar(s) assigned. Replace them?`)) {
+      return;
+    }
+  }
+
+  const characters = [...state.characters];
+  let roster = [...characters[charIdx].roster];
+
+  // Clear existing wave assignments first
+  if (existingWaveFams.length > 0) {
+    roster = roster.map(f => f.wave === wave ? { ...f, wave: null } : f);
+  }
+
+  // Find and assign each familiar by ID
+  const assignedIndices = new Set<number>();
+
+  for (const fam of familiars) {
+    // Find by ID if available, otherwise fall back to matching attributes
+    const matchIdx = roster.findIndex((r, idx) =>
+      !assignedIndices.has(idx) &&
+      !r.wave &&
+      (fam.id ? r.id === fam.id : (
+        r.name === fam.name &&
+        r.rank === fam.rank &&
+        r.element === fam.element &&
+        r.type === fam.type
+      ))
+    );
+
+    if (matchIdx !== -1) {
+      roster[matchIdx] = { ...roster[matchIdx], wave };
+      assignedIndices.add(matchIdx);
+    }
+  }
+
+  if (assignedIndices.size === 0) {
+    showToast('Familiars not found in roster or already assigned');
+    return;
+  }
+
+  characters[charIdx] = { ...characters[charIdx], roster };
+
+  // Also update savedWaves so the calculator page can load them
+  const savedWaves = {
+    ...state.savedWaves,
+    [wave]: [...familiars] as [CalcFamiliar | null, CalcFamiliar | null, CalcFamiliar | null],
+  };
+
+  store.setState({ characters, savedWaves });
+  saveState();
+
+  // Refresh roster list to show wave badges
+  updateRosterList(roster);
+
+  // Refresh optimizer since available familiars changed
+  showOptimizerStrategies();
+
+  showToast(`Assigned ${assignedIndices.size} familiars to Wave ${wave}`);
+
+  // Switch to calculator page and load the wave
+  const calcNav = document.querySelector('[data-page="calculator"]') as HTMLElement;
+  if (calcNav) {
+    calcNav.click();
+  }
+  loadWave(wave);
+}
+
+// Cache for optimizer combinations
+let cachedCombinations: CalcFamiliar[][] | null = null;
+let cachedRosterHash = '';
+let cachedFilterHash = '';
+
+/**
+ * Invalidate the combinations cache (called when filters change)
+ */
+function invalidateCombinationsCache(): void {
+  cachedCombinations = null;
+  cachedRosterHash = '';
+  cachedFilterHash = '';
+}
+
+/**
+ * Get current optimizer filter values
+ */
+function getOptimizerFilters(): { element: string; type: string; requireMatch: boolean } {
+  const elementSelect = document.getElementById('filterElement') as HTMLSelectElement;
+  const typeSelect = document.getElementById('filterType') as HTMLSelectElement;
+  const requireMatchCheckbox = document.getElementById('filterRequireMatch') as HTMLInputElement;
+
+  return {
+    element: elementSelect?.value || '',
+    type: typeSelect?.value || '',
+    requireMatch: requireMatchCheckbox?.checked || false,
+  };
+}
+
+// Cache for lineup results (to apply to calculator)
+const lineupCache = new Map<string, CalcFamiliar[]>();
+let lineupIdCounter = 0;
+
+/**
+ * Strategy configuration for rendering
+ */
+interface StrategyInfo {
+  key: string;
+  configKey: 'overall' | 'lowRolls' | 'highRolls' | 'median' | 'floorGuarantee' | 'balanced';
+  title: string;
+  subtitle: string;
+  renderType: StrategyType;
+}
+
+const STRATEGIES: StrategyInfo[] = [
+  { key: 'overall', configKey: 'overall', title: 'Best Overall', subtitle: 'Expected average across all dice outcomes', renderType: 'overall' },
+  { key: 'lowRolls', configKey: 'lowRolls', title: 'Best for Low Rolls', subtitle: 'Optimal when dice roll minimum values', renderType: 'low' },
+  { key: 'highRolls', configKey: 'highRolls', title: 'Best for High Rolls', subtitle: 'Optimal when dice roll maximum values', renderType: 'high' },
+  { key: 'median', configKey: 'median', title: 'Median Score', subtitle: '50th percentile of all outcomes', renderType: 'median' },
+  { key: 'floorGuarantee', configKey: 'floorGuarantee', title: 'Floor Guarantee', subtitle: '80%+ of rolls meet minimum', renderType: 'floorGuarantee' },
+  { key: 'balanced', configKey: 'balanced', title: 'Balanced', subtitle: 'Weighted 25% low + 50% avg + 25% high', renderType: 'balanced' },
+];
+
+/**
+ * Generate a simple hash of roster for cache invalidation
+ */
+function getRosterHash(roster: Familiar[]): string {
+  return roster
+    .filter(f => !f.disabled && !f.wave && !isBuggedConditional(f.conditional))
+    .map(f => `${f.id}-${f.name}-${f.conditional?.id || 'none'}`)
+    .join('|');
+}
+
+/**
+ * Get or generate combinations (lazy generation with cache)
+ */
+function getOrGenerateCombinations(): CalcFamiliar[][] | null {
+  const state = store.getState();
+  const roster = selectors.getCurrentRoster(state);
+  const availableFamiliars = roster.filter((f) => !f.disabled && !f.wave && !isBuggedConditional(f.conditional));
+
+  if (availableFamiliars.length < 3) {
+    return null;
+  }
+
+  // Get filter values
+  const filters = getOptimizerFilters();
+  const filterHash = `${filters.element}|${filters.type}|${filters.requireMatch}`;
+
+  // Check if cache is valid
+  const currentHash = getRosterHash(roster);
+  if (cachedCombinations && cachedRosterHash === currentHash && cachedFilterHash === filterHash) {
+    return cachedCombinations;
+  }
+
+  // Generate new combinations
+  const calcFamiliars: CalcFamiliar[] = availableFamiliars.map((f) => ({
+    id: f.id,
+    name: f.name,
+    rank: f.rank,
+    element: f.element,
+    type: f.type,
+    conditional: f.conditional,
+  }));
+
+  let combinations = generateCombinations(calcFamiliars, 3);
+
+  // Apply filters if "Require at least one matching familiar" is checked
+  if (filters.requireMatch && (filters.element || filters.type)) {
+    combinations = combinations.filter((combo) => {
+      return combo.some((fam) => {
+        const elementMatch = !filters.element || fam.element === filters.element;
+        const typeMatch = !filters.type || fam.type === filters.type;
+        // If both filters are set, require both to match on at least one familiar
+        if (filters.element && filters.type) {
+          return elementMatch && typeMatch;
+        }
+        // If only one filter is set, require that one to match
+        return (filters.element && elementMatch) || (filters.type && typeMatch);
+      });
+    });
+  }
+
+  cachedCombinations = combinations;
+  cachedRosterHash = currentHash;
+  cachedFilterHash = filterHash;
+
+  return cachedCombinations;
+}
+
+/**
+ * Show optimizer strategy cards
+ */
+export function showOptimizerStrategies(): void {
+  const resultsContainer = document.getElementById('optimizerResults');
+  if (!resultsContainer) return;
+
+  const state = store.getState();
+  const roster = selectors.getCurrentRoster(state);
+  const availableFamiliars = roster.filter((f) => !f.disabled && !f.wave && !isBuggedConditional(f.conditional));
+
+  // Get optimizer config
+  const optimizerConfig = state.configOptimizer;
+
+  if (availableFamiliars.length < 3) {
+    resultsContainer.innerHTML = '<div class="optimizer-empty">Need at least 3 available familiars to optimize (not disabled, assigned to a wave, or bugged).</div>';
+    return;
+  }
+
+  // Get actual combination count (respecting filters)
+  const combinations = getOrGenerateCombinations();
+  const combinationCount = combinations?.length || 0;
+
+  if (combinationCount === 0) {
+    resultsContainer.innerHTML = '<div class="optimizer-empty">No lineups match the current filters. Try adjusting the element/type filters.</div>';
+    return;
+  }
+
+  // Render strategy cards with Calculate buttons
+  resultsContainer.innerHTML = renderStrategyCards(optimizerConfig, combinationCount);
+}
+
+/**
+ * Render strategy cards with Calculate buttons
+ */
+function renderStrategyCards(config: OptimizerConfig, combinationCount: number): string {
+  const enabledStrategies = STRATEGIES.filter(s => config.strategies[s.configKey]?.enabled !== false);
+
+  if (enabledStrategies.length === 0) {
+    return '<div class="optimizer-empty">No strategies enabled. Check config/optimizer-config.json</div>';
+  }
+
+  let html = `<div class="optimizer-info">Ready to analyze ${combinationCount.toLocaleString()} combinations</div>`;
+  html += '<div class="optimizer-results-grid">';
+
+  for (const strategy of enabledStrategies) {
+    html += renderEmptyStrategyCard(strategy);
+  }
+
+  html += '</div>';
+  return html;
+}
+
+/**
+ * Render an empty strategy card with Calculate button
+ */
+function renderEmptyStrategyCard(strategy: StrategyInfo): string {
+  return `
+    <div class="lineup-card strategy-card-empty" id="strategy-card-${strategy.key}">
+      <div class="lineup-card-header">
+        <div class="lineup-card-titles">
+          <h3 class="lineup-card-title">${strategy.title}</h3>
+          <span class="lineup-card-subtitle">${strategy.subtitle}</span>
+        </div>
+        <button class="strategy-help-btn" data-strategy="${strategy.renderType}" title="How is this calculated?">?</button>
+      </div>
+      <div class="strategy-card-action">
+        <button class="strategy-calculate-btn" data-strategy="${strategy.key}">Calculate</button>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Calculate a single strategy and update its card
+ */
+function calculateStrategy(strategyKey: string): void {
+  const card = document.getElementById(`strategy-card-${strategyKey}`);
+  if (!card) return;
+
+  // Get or generate combinations (lazy)
+  const baseCombinations = getOrGenerateCombinations();
+  if (!baseCombinations || baseCombinations.length === 0) {
+    showToast('Need at least 3 enabled familiars to optimize.');
+    return;
+  }
+
+  const btn = card.querySelector('.strategy-calculate-btn') as HTMLButtonElement;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Calculating...';
+  }
+
+  // Get config for ignored conditionals
+  const config = store.getState().configOptimizer;
+  const strategyConfig = config.strategies[strategyKey as keyof typeof config.strategies];
+  const ignoredIds = strategyConfig?.ignoredConditionalIds ?? [];
+
+  // Filter combinations for ignored conditionals
+  const combinations = filterCombinationsForIgnored(baseCombinations, ignoredIds);
+
+  // Use setTimeout to allow UI to update
   setTimeout(() => {
     try {
-      // Convert roster familiars to CalcFamiliars
-      const calcFamiliars: CalcFamiliar[] = availableFamiliars.map((f) => ({
-        name: f.name,
-        rank: f.rank,
-        element: f.element,
-        type: f.type,
-        conditional: f.conditional,
-      }));
+      let result: OptimizedLineup | ExtendedOptimizedLineup | null = null;
+      const strategy = STRATEGIES.find(s => s.key === strategyKey);
 
-      // Generate all 3-familiar combinations
-      const combinations = generateCombinations(calcFamiliars, 3);
+      if (!strategy) return;
 
-      // Get optimizer config
-      const optimizerConfig = store.getState().configOptimizer;
+      // Run the appropriate strategy
+      switch (strategyKey) {
+        case 'overall':
+          result = findBestLineupFast(combinations, [], 'overall');
+          break;
+        case 'lowRolls':
+          result = findBestLineupFast(combinations, [], 'lowRolls');
+          break;
+        case 'highRolls':
+          result = findBestLineupFast(combinations, [], 'highRolls');
+          break;
+        case 'median':
+          result = findBestLineupMedian(combinations, []);
+          break;
+        case 'floorGuarantee':
+          result = findBestLineupFloorGuarantee(combinations, []);
+          break;
+        case 'balanced':
+          result = findBestLineupBalanced(combinations, []);
+          break;
+      }
 
-      // Run all strategies (no additional bonuses - familiars already have their conditionals)
-      const results = runAllStrategiesFast(combinations, [], optimizerConfig);
-
-      // Render results
-      resultsContainer.innerHTML = renderOptimizerResults(results, optimizerConfig);
+      // Update the card with results
+      if (result) {
+        if (strategyKey === 'balanced') {
+          card.outerHTML = renderLineupCardBalanced(result as ExtendedOptimizedLineup);
+        } else {
+          card.outerHTML = renderLineupCard(strategy.renderType, strategy.title, strategy.subtitle, result);
+        }
+      } else {
+        card.innerHTML = `
+          <div class="lineup-card-header">
+            <div class="lineup-card-titles">
+              <h3 class="lineup-card-title">${strategy.title}</h3>
+              <span class="lineup-card-subtitle">No valid lineup found</span>
+            </div>
+          </div>
+        `;
+      }
     } catch (error) {
-      console.error('Optimizer error:', error);
-      resultsContainer.innerHTML = '<div class="optimizer-error">An error occurred during optimization.</div>';
-    } finally {
-      // Re-enable button
-      if (runBtn) {
-        runBtn.disabled = false;
-        runBtn.textContent = 'Find Best Lineups';
+      console.error(`Error calculating ${strategyKey}:`, error);
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Retry';
       }
     }
   }, 10);
 }
 
 /**
+ * Filter combinations to remove ignored conditional IDs
+ */
+function filterCombinationsForIgnored(
+  combinations: CalcFamiliar[][],
+  ignoredIds: string[]
+): CalcFamiliar[][] {
+  if (ignoredIds.length === 0) return combinations;
+
+  const ignoredSet = new Set(ignoredIds);
+
+  return combinations.map((combo) =>
+    combo.map((fam) => {
+      if (fam.conditional?.id && ignoredSet.has(fam.conditional.id)) {
+        return { ...fam, conditional: null };
+      }
+      return fam;
+    })
+  );
+}
+
+/**
  * Strategy type for rendering
  */
 type StrategyType = 'overall' | 'low' | 'high' | 'median' | 'minVariance' | 'floorGuarantee' | 'balanced';
-
-/**
- * Render optimizer results
- */
-function renderOptimizerResults(results: {
-  bestOverall: OptimizedLineup | null;
-  bestLow: OptimizedLineup | null;
-  bestHigh: OptimizedLineup | null;
-  bestMedian: ExtendedOptimizedLineup | null;
-  bestMinVariance: ExtendedOptimizedLineup | null;
-  bestFloorGuarantee: ExtendedOptimizedLineup | null;
-  bestBalanced: ExtendedOptimizedLineup | null;
-}, _config?: OptimizerConfig): string {
-  const { bestOverall, bestLow, bestHigh, bestMedian, bestMinVariance, bestFloorGuarantee, bestBalanced } = results;
-
-  const hasAny = bestOverall || bestLow || bestHigh || bestMedian || bestMinVariance || bestFloorGuarantee || bestBalanced;
-
-  if (!hasAny) {
-    return '<div class="optimizer-empty">No valid lineups found.</div>';
-  }
-
-  let html = '<div class="optimizer-results-grid">';
-
-  // Basic strategies
-  if (bestOverall) {
-    html += renderLineupCard('overall', 'Best Overall', 'Expected average across all dice outcomes', bestOverall);
-  }
-  if (bestLow) {
-    html += renderLineupCard('low', 'Best for Low Rolls', 'Optimal when dice roll minimum values', bestLow);
-  }
-  if (bestHigh) {
-    html += renderLineupCard('high', 'Best for High Rolls', 'Optimal when dice roll maximum values', bestHigh);
-  }
-
-  // Advanced strategies
-  if (bestMedian) {
-    html += renderLineupCard('median', 'Median Score', '50th percentile of all outcomes', bestMedian);
-  }
-  if (bestFloorGuarantee) {
-    html += renderLineupCard('floorGuarantee', 'Floor Guarantee', '80%+ of rolls meet minimum', bestFloorGuarantee);
-  }
-  if (bestBalanced) {
-    html += renderLineupCardBalanced(bestBalanced);
-  }
-
-  html += '</div>';
-  return html;
-}
 
 /**
  * Get strategy icon SVG
@@ -1319,6 +1688,10 @@ function getStrategyIcon(strategy: StrategyType): string {
  * Render a single lineup card
  */
 function renderLineupCard(strategy: StrategyType, title: string, subtitle: string, lineup: OptimizedLineup): string {
+  // Store lineup in cache for later use
+  const lineupId = `lineup-${++lineupIdCounter}`;
+  lineupCache.set(lineupId, lineup.familiars);
+
   const familiarsHtml = lineup.familiars.map((f) => {
     const rankClass = `rank-${f.rank.toLowerCase()}`;
     const elementClass = `element-${f.element.toLowerCase()}`;
@@ -1369,6 +1742,15 @@ function renderLineupCard(strategy: StrategyType, title: string, subtitle: strin
         ${familiarsHtml}
       </div>
       ${bonusesHtml}
+      <div class="lineup-card-actions">
+        <button class="use-lineup-btn" data-lineup-id="${lineupId}">Use Lineup</button>
+        <div class="lineup-wave-buttons">
+          <span class="wave-label">Assign:</span>
+          <button class="wave-btn" data-action="assign-wave" data-lineup-id="${lineupId}" data-wave="1">W1</button>
+          <button class="wave-btn" data-action="assign-wave" data-lineup-id="${lineupId}" data-wave="2">W2</button>
+          <button class="wave-btn" data-action="assign-wave" data-lineup-id="${lineupId}" data-wave="3">W3</button>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -1377,6 +1759,10 @@ function renderLineupCard(strategy: StrategyType, title: string, subtitle: strin
  * Render balanced strategy card with component breakdown
  */
 function renderLineupCardBalanced(lineup: ExtendedOptimizedLineup): string {
+  // Store lineup in cache for later use
+  const lineupId = `lineup-${++lineupIdCounter}`;
+  lineupCache.set(lineupId, lineup.familiars);
+
   const familiarsHtml = lineup.familiars.map((f: CalcFamiliar) => {
     const rankClass = `rank-${f.rank.toLowerCase()}`;
     const elementClass = `element-${f.element.toLowerCase()}`;
@@ -1447,6 +1833,800 @@ function renderLineupCardBalanced(lineup: ExtendedOptimizedLineup): string {
         ${familiarsHtml}
       </div>
       ${bonusesHtml}
+      <div class="lineup-card-actions">
+        <button class="use-lineup-btn" data-lineup-id="${lineupId}">Use Lineup</button>
+        <div class="lineup-wave-buttons">
+          <span class="wave-label">Assign:</span>
+          <button class="wave-btn" data-action="assign-wave" data-lineup-id="${lineupId}" data-wave="1">W1</button>
+          <button class="wave-btn" data-action="assign-wave" data-lineup-id="${lineupId}" data-wave="2">W2</button>
+          <button class="wave-btn" data-action="assign-wave" data-lineup-id="${lineupId}" data-wave="3">W3</button>
+        </div>
+      </div>
     </div>
   `;
+}
+
+// ============================================================================
+// SCANNER EVENT HANDLERS
+// ============================================================================
+
+// Store last scan result for modal actions
+let lastScanResult: ScanResult | null = null;
+
+/**
+ * Setup scanner event handlers
+ */
+function setupScannerEvents(): void {
+  const dropZone = document.getElementById('scannerDropZone');
+  const fileInput = document.getElementById('cardImageInput') as HTMLInputElement;
+
+  if (!dropZone || !fileInput) return;
+
+  // Click to select file
+  dropZone.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  // File input change
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files?.[0];
+    if (file) {
+      handleScanFile(file);
+      fileInput.value = ''; // Reset for re-upload
+    }
+  });
+
+  // Drag and drop
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.add('drag-over');
+  });
+
+  dropZone.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.remove('drag-over');
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.remove('drag-over');
+
+    const file = e.dataTransfer?.files[0];
+    if (file && file.type.startsWith('image/')) {
+      handleScanFile(file);
+    }
+  });
+
+  // Paste handler (Ctrl+V) - only when on roster page
+  document.addEventListener('paste', (e) => {
+    // Only handle paste when on roster page
+    const rosterPage = document.getElementById('page-roster');
+    if (!rosterPage || !rosterPage.classList.contains('active')) return;
+
+    // Don't intercept paste in input fields
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          handleScanFile(file);
+        }
+        break;
+      }
+    }
+  });
+
+  // Extraction modal action buttons
+  setupExtractionModalActions();
+
+  // Tuning panel event handlers (sliders for live adjustment)
+  setupTuningPanelEvents();
+}
+
+/**
+ * Handle file for scanning
+ */
+async function handleScanFile(file: File): Promise<void> {
+  const preview = document.getElementById('scannerPreview');
+  const status = document.getElementById('scannerStatus');
+
+  if (!preview || !status) return;
+
+  // Show preview area
+  preview.style.display = 'block';
+  status.textContent = 'Processing...';
+  status.className = 'scanner-status processing';
+
+  try {
+    // Process the image
+    const result = await processImage(file, (statusText) => {
+      status.textContent = statusText;
+    });
+
+    lastScanResult = result;
+    status.textContent = 'Scan complete!';
+    status.className = 'scanner-status success';
+
+    // Show extraction modal with results
+    showExtractionModal(result);
+  } catch (error) {
+    console.error('Scan failed:', error);
+    status.textContent = error instanceof Error ? error.message : 'Scan failed';
+    status.className = 'scanner-status error';
+    lastScanResult = null;
+  }
+}
+
+/**
+ * Show extraction modal with scan results
+ */
+function showExtractionModal(result: ScanResult): void {
+  const modal = document.getElementById('extractionModal');
+  if (!modal) return;
+
+  // Set card preview image
+  const previewImg = document.getElementById('extractedCardPreview') as HTMLImageElement;
+  if (previewImg && result.croppedImage) {
+    previewImg.src = result.croppedImage;
+  }
+
+  // Set name
+  const nameInput = document.getElementById('extractedName') as HTMLInputElement;
+  if (nameInput) {
+    nameInput.value = result.name || '';
+  }
+
+  // Set rank (confidence is already 0-100)
+  const rankSelect = document.getElementById('extractedRank') as HTMLSelectElement;
+  const rankConfidence = document.getElementById('rankConfidence');
+  if (rankSelect) {
+    rankSelect.value = result.rank.rank;
+  }
+  if (rankConfidence) {
+    rankConfidence.textContent = `${Math.round(result.rank.confidence)}%`;
+    rankConfidence.className = `confidence ${getConfidenceClass(result.rank.confidence / 100)}`;
+  }
+
+  // Set element (confidence is already 0-100)
+  const elementSelect = document.getElementById('extractedElement') as HTMLSelectElement;
+  const elementConfidence = document.getElementById('elementConfidence');
+  if (elementSelect) {
+    elementSelect.value = result.element.element;
+  }
+  if (elementConfidence) {
+    elementConfidence.textContent = `${Math.round(result.element.confidence)}%`;
+    elementConfidence.className = `confidence ${getConfidenceClass(result.element.confidence / 100)}`;
+  }
+
+  // Set type (confidence is already 0-100)
+  const typeSelect = document.getElementById('extractedType') as HTMLSelectElement;
+  const typeConfidence = document.getElementById('typeConfidence');
+  if (typeSelect) {
+    typeSelect.value = result.type.type;
+  }
+  if (typeConfidence) {
+    typeConfidence.textContent = `${Math.round(result.type.confidence)}%`;
+    typeConfidence.className = `confidence ${getConfidenceClass(result.type.confidence / 100)}`;
+  }
+
+  // Set conditional text (raw OCR result)
+  const conditionalText = document.getElementById('extractedConditionalText');
+  if (conditionalText) {
+    conditionalText.textContent = result.conditional.rawText || '(No text detected)';
+  }
+
+  // Populate conditional match dropdown with top matches
+  const conditionalSelect = document.getElementById('extractedConditionalMatch') as HTMLSelectElement;
+  const conditionalConfidence = document.getElementById('conditionalConfidence');
+  if (conditionalSelect) {
+    // Clear existing options
+    conditionalSelect.innerHTML = '<option value="">-- No conditional --</option>';
+
+    // Get top matches for the raw text
+    const topMatches = findTopMatches(result.conditional.rawText, 10);
+
+    for (const match of topMatches) {
+      if (!match.id) continue; // Skip matches without ID
+      const option = document.createElement('option');
+      option.value = match.id;
+      option.textContent = `${match.name} (${match.matchScore}%)`;
+      conditionalSelect.appendChild(option);
+    }
+
+    // Select the best match if confidence is good enough
+    if (result.conditional.matched?.id && result.conditional.confidence > 35) {
+      conditionalSelect.value = result.conditional.matched.id;
+    }
+  }
+
+  if (conditionalConfidence) {
+    if (result.conditional.matched) {
+      conditionalConfidence.textContent = `${Math.round(result.conditional.confidence)}%`;
+      conditionalConfidence.className = `confidence ${getConfidenceClass(result.conditional.confidence / 100)}`;
+    } else {
+      conditionalConfidence.textContent = '';
+    }
+  }
+
+  // Update bonus values display
+  updateBonusValuesDisplay();
+
+  // Populate debug section
+  populateDebugSection(result);
+
+  // Show modal
+  modal.style.display = 'flex';
+}
+
+/**
+ * Update bonus values display based on selected conditional
+ */
+function updateBonusValuesDisplay(): void {
+  const conditionalSelect = document.getElementById('extractedConditionalMatch') as HTMLSelectElement;
+  const bonusValuesSpan = document.getElementById('extractedBonusValues');
+
+  if (!conditionalSelect || !bonusValuesSpan) return;
+
+  const selectedId = conditionalSelect.value;
+  if (!selectedId) {
+    bonusValuesSpan.textContent = '--';
+    return;
+  }
+
+  // Find the selected conditional in config
+  const state = store.getState();
+  const conditional = state.configConditionalBonuses.bonuses.find(
+    (b: ConditionalBonus) => b.id === selectedId
+  );
+
+  if (conditional) {
+    bonusValuesSpan.textContent = formatBonusValues(conditional);
+  } else {
+    bonusValuesSpan.textContent = '--';
+  }
+}
+
+/**
+ * Get confidence class for styling
+ */
+function getConfidenceClass(confidence: number): string {
+  if (confidence >= 0.8) return 'high';
+  if (confidence >= 0.5) return 'medium';
+  return 'low';
+}
+
+/**
+ * Setup extraction modal action buttons
+ */
+function setupExtractionModalActions(): void {
+  // Update bonus values when conditional selection changes
+  const conditionalSelect = document.getElementById('extractedConditionalMatch');
+  if (conditionalSelect) {
+    conditionalSelect.addEventListener('change', updateBonusValuesDisplay);
+  }
+
+  // Add to Collection button
+  const addBtn = document.querySelector('[data-action="add-from-scan"]');
+  if (addBtn) {
+    addBtn.addEventListener('click', addFamiliarFromScan);
+  }
+
+  // Fill Form button
+  const fillBtn = document.querySelector('[data-action="fill-form"]');
+  if (fillBtn) {
+    fillBtn.addEventListener('click', fillFormFromScan);
+  }
+}
+
+/**
+ * Add familiar directly from scan results
+ */
+function addFamiliarFromScan(): void {
+  const nameInput = document.getElementById('extractedName') as HTMLInputElement;
+  const rankSelect = document.getElementById('extractedRank') as HTMLSelectElement;
+  const elementSelect = document.getElementById('extractedElement') as HTMLSelectElement;
+  const typeSelect = document.getElementById('extractedType') as HTMLSelectElement;
+  const conditionalSelect = document.getElementById('extractedConditionalMatch') as HTMLSelectElement;
+
+  const name = nameInput?.value?.trim();
+  if (!name) {
+    showToast('Please enter a familiar name');
+    return;
+  }
+
+  // Get conditional if selected
+  let conditional: ConditionalBonus | null = null;
+  if (conditionalSelect?.value) {
+    const state = store.getState();
+    conditional = state.configConditionalBonuses.bonuses.find(
+      (b: ConditionalBonus) => b.id === conditionalSelect.value
+    ) || null;
+  }
+
+  // Add to roster
+  addFamiliarToRoster({
+    name,
+    rank: (rankSelect?.value || 'Common') as Rank,
+    element: (elementSelect?.value || 'None') as CalcFamiliar['element'],
+    type: (typeSelect?.value || 'Human') as CalcFamiliar['type'],
+    conditional,
+    wave: null,
+    disabled: false,
+  });
+
+  // Close modal
+  const modal = document.getElementById('extractionModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+
+  // Hide preview
+  const preview = document.getElementById('scannerPreview');
+  if (preview) {
+    preview.style.display = 'none';
+  }
+
+  showToast(`Added ${name} to collection`);
+  lastScanResult = null;
+}
+
+/**
+ * Fill roster form with scan results
+ */
+function fillFormFromScan(): void {
+  const nameInput = document.getElementById('extractedName') as HTMLInputElement;
+  const rankSelect = document.getElementById('extractedRank') as HTMLSelectElement;
+  const elementSelect = document.getElementById('extractedElement') as HTMLSelectElement;
+  const typeSelect = document.getElementById('extractedType') as HTMLSelectElement;
+  const conditionalSelect = document.getElementById('extractedConditionalMatch') as HTMLSelectElement;
+
+  // Fill roster form
+  const rosterNameInput = document.getElementById('rosterName') as HTMLInputElement;
+  if (rosterNameInput && nameInput) {
+    rosterNameInput.value = nameInput.value;
+  }
+
+  // Set rank dropdown
+  if (rankSelect && rosterRankDropdown) {
+    rosterRankDropdown.setValue(rankSelect.value);
+  }
+
+  // Set element dropdown
+  if (elementSelect && rosterElementDropdown) {
+    rosterElementDropdown.setValue(elementSelect.value);
+  }
+
+  // Set type dropdown
+  if (typeSelect && rosterTypeDropdown) {
+    rosterTypeDropdown.setValue(typeSelect.value);
+  }
+
+  // Set conditional if selected
+  if (conditionalSelect?.value && rosterConditionalSelector) {
+    const state = store.getState();
+    const conditional = state.configConditionalBonuses.bonuses.find(
+      (b: ConditionalBonus) => b.id === conditionalSelect.value
+    );
+    if (conditional) {
+      rosterConditionalSelector.setSelected(conditional);
+    }
+  }
+
+  // Close modal
+  const modal = document.getElementById('extractionModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+
+  // Hide preview
+  const preview = document.getElementById('scannerPreview');
+  if (preview) {
+    preview.style.display = 'none';
+  }
+
+  // Focus name input
+  if (rosterNameInput) {
+    rosterNameInput.focus();
+  }
+
+  showToast('Form filled with scan data');
+  lastScanResult = null;
+}
+
+/**
+ * Populate debug section with element/type detection details
+ */
+function populateDebugSection(result: ScanResult): void {
+  const debugSection = document.getElementById('scannerDebugSection');
+  if (!debugSection) return;
+
+  // Hide debug section when debug is off
+  if (!isDebugEnabled()) {
+    debugSection.style.display = 'none';
+    return;
+  }
+
+  debugSection.style.display = '';
+  const referenceImages = getReferenceImages();
+
+  // Draw extracted element icon
+  const elemCanvas = document.getElementById('debugElementExtracted') as HTMLCanvasElement;
+  if (elemCanvas && result.element.iconData) {
+    const ctx = elemCanvas.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, 64, 64);
+      ctx.drawImage(result.element.iconData.canvas, 0, 0, 64, 64);
+    }
+  }
+
+  // Draw extracted type icon
+  const typeCanvas = document.getElementById('debugTypeExtracted') as HTMLCanvasElement;
+  if (typeCanvas && result.type.iconData) {
+    const ctx = typeCanvas.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, 64, 64);
+      ctx.drawImage(result.type.iconData.canvas, 0, 0, 64, 64);
+    }
+  }
+
+  // Populate element references with scores
+  const elemRefsContainer = document.getElementById('debugElementReferences');
+  if (elemRefsContainer && result.element.allScores) {
+    elemRefsContainer.innerHTML = '';
+    const sortedElements = Object.entries(result.element.allScores)
+      .sort((a, b) => b[1] - a[1]);
+
+    for (const [name, score] of sortedElements) {
+      const refImg = referenceImages.elements[name];
+      if (!refImg) continue;
+
+      const item = document.createElement('div');
+      item.className = 'debug-ref-item' + (name === result.element.element ? ' best-match' : '');
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 48;
+      canvas.height = 48;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(refImg, 0, 0, 48, 48);
+      }
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'ref-name';
+      nameSpan.textContent = name;
+
+      const scoreSpan = document.createElement('span');
+      scoreSpan.className = 'ref-score ' + getScoreClass(score);
+      scoreSpan.textContent = `${Math.round(score)}%`;
+
+      item.appendChild(canvas);
+      item.appendChild(nameSpan);
+      item.appendChild(scoreSpan);
+      elemRefsContainer.appendChild(item);
+    }
+  }
+
+  // Populate type references with scores (using the detailed method from tuning handlers)
+  updateDebugTypeReferences(result.type.allScores, result.type.type, referenceImages);
+
+  // Show initial mask previews with default parameters
+  const defaultParams = collectTuningParams();
+  updateMaskPreviews(defaultParams);
+}
+
+/**
+ * Get CSS class for score display
+ */
+function getScoreClass(score: number): string {
+  if (score >= 70) return 'high';
+  if (score >= 40) return 'medium';
+  return 'low';
+}
+
+// ============================================================================
+// TUNING PANEL EVENT HANDLERS
+// ============================================================================
+
+// Debounce timer for tuning sliders
+let tuningDebounceTimer: number | null = null;
+
+/**
+ * Setup tuning panel event handlers
+ */
+function setupTuningPanelEvents(): void {
+  // Background tolerance slider
+  const bgTolSlider = document.getElementById('tuneBgTolerance') as HTMLInputElement;
+  const bgTolValue = document.getElementById('tuneBgTolValue');
+  if (bgTolSlider) {
+    bgTolSlider.addEventListener('input', () => {
+      if (bgTolValue) bgTolValue.textContent = bgTolSlider.value;
+      debouncedRecalculate();
+    });
+  }
+
+  // Morphology kernel slider
+  const morphSlider = document.getElementById('tuneMorphology') as HTMLInputElement;
+  const morphValue = document.getElementById('tuneMorphValue');
+  if (morphSlider) {
+    morphSlider.addEventListener('input', () => {
+      if (morphValue) morphValue.textContent = morphSlider.value;
+      debouncedRecalculate();
+    });
+  }
+
+  // Adaptive background checkbox
+  const adaptiveBgCheckbox = document.getElementById('tuneAdaptiveBg') as HTMLInputElement;
+  if (adaptiveBgCheckbox) {
+    adaptiveBgCheckbox.addEventListener('change', () => {
+      debouncedRecalculate();
+    });
+  }
+
+  // Weight sliders with total validation
+  const weightSliders = ['tuneMaskWeight', 'tuneHuWeight', 'tuneEdgeWeight', 'tuneColorWeight'];
+  const valueDisplays = ['tuneMaskValue', 'tuneHuValue', 'tuneEdgeValue', 'tuneColorValue'];
+
+  weightSliders.forEach((sliderId, index) => {
+    const slider = document.getElementById(sliderId) as HTMLInputElement;
+    const valueDisplay = document.getElementById(valueDisplays[index]);
+
+    if (slider) {
+      slider.addEventListener('input', () => {
+        if (valueDisplay) valueDisplay.textContent = slider.value;
+        updateWeightTotal();
+        debouncedRecalculate();
+      });
+    }
+  });
+}
+
+/**
+ * Debounced recalculation (300ms delay)
+ */
+function debouncedRecalculate(): void {
+  if (tuningDebounceTimer !== null) {
+    window.clearTimeout(tuningDebounceTimer);
+  }
+
+  tuningDebounceTimer = window.setTimeout(() => {
+    tuningDebounceTimer = null;
+    recalculateWithCurrentParams();
+  }, 300);
+}
+
+/**
+ * Collect current tuning parameters from sliders
+ */
+function collectTuningParams(): TuningParameters {
+  const bgTolSlider = document.getElementById('tuneBgTolerance') as HTMLInputElement;
+  const morphSlider = document.getElementById('tuneMorphology') as HTMLInputElement;
+  const adaptiveBgCheckbox = document.getElementById('tuneAdaptiveBg') as HTMLInputElement;
+  const maskSlider = document.getElementById('tuneMaskWeight') as HTMLInputElement;
+  const huSlider = document.getElementById('tuneHuWeight') as HTMLInputElement;
+  const edgeSlider = document.getElementById('tuneEdgeWeight') as HTMLInputElement;
+  const colorSlider = document.getElementById('tuneColorWeight') as HTMLInputElement;
+
+  return {
+    backgroundTolerance: parseInt(bgTolSlider?.value || '45', 10),
+    morphologyKernel: parseInt(morphSlider?.value || '1', 10),
+    useAdaptiveBackground: adaptiveBgCheckbox?.checked ?? true,
+    maskWeight: parseInt(maskSlider?.value || '40', 10) / 100,
+    huWeight: parseInt(huSlider?.value || '25', 10) / 100,
+    edgeWeight: parseInt(edgeSlider?.value || '20', 10) / 100,
+    colorWeight: parseInt(colorSlider?.value || '15', 10) / 100,
+  };
+}
+
+/**
+ * Update weight total display and show warning if not 100%
+ */
+function updateWeightTotal(): void {
+  const maskSlider = document.getElementById('tuneMaskWeight') as HTMLInputElement;
+  const huSlider = document.getElementById('tuneHuWeight') as HTMLInputElement;
+  const edgeSlider = document.getElementById('tuneEdgeWeight') as HTMLInputElement;
+  const colorSlider = document.getElementById('tuneColorWeight') as HTMLInputElement;
+  const totalDisplay = document.getElementById('tuneWeightTotal');
+
+  if (!totalDisplay) return;
+
+  const total =
+    parseInt(maskSlider?.value || '40', 10) +
+    parseInt(huSlider?.value || '25', 10) +
+    parseInt(edgeSlider?.value || '20', 10) +
+    parseInt(colorSlider?.value || '15', 10);
+
+  totalDisplay.textContent = `${total}%`;
+
+  // Add warning class if not 100%
+  if (total !== 100) {
+    totalDisplay.classList.add('warning');
+  } else {
+    totalDisplay.classList.remove('warning');
+  }
+}
+
+/**
+ * Recalculate type detection with current parameters
+ */
+function recalculateWithCurrentParams(): void {
+  const iconData = getLastTypeIconData();
+  if (!iconData) {
+    console.log('No icon data to recalculate');
+    return;
+  }
+
+  const referenceImages = getReferenceImages();
+  if (!referenceImages || Object.keys(referenceImages.types).length === 0) {
+    console.log('No reference images');
+    return;
+  }
+
+  const params = collectTuningParams();
+  console.log('Recalculating with params:', params);
+
+  // Recalculate type detection (only takes params, uses stored data)
+  const newResult = recalculateTypeWithTuning(params);
+  if (!newResult) {
+    console.log('Recalculation returned null');
+    return;
+  }
+
+  // Find best type from scores
+  const sortedScores = Object.entries(newResult.allScores).sort((a, b) => b[1] - a[1]);
+  const bestType = sortedScores[0]?.[0] || '';
+  const bestScore = sortedScores[0]?.[1] || 0;
+
+  // Update the type result display
+  const typeSelect = document.getElementById('extractedType') as HTMLSelectElement;
+  const typeConfidence = document.getElementById('typeConfidence');
+
+  if (typeSelect) {
+    typeSelect.value = bestType;
+  }
+
+  if (typeConfidence) {
+    typeConfidence.textContent = `${Math.round(bestScore)}%`;
+    typeConfidence.className = `confidence ${getConfidenceClass(bestScore / 100)}`;
+  }
+
+  // Update debug type references with new scores
+  updateDebugTypeReferences(newResult.allScores, bestType, referenceImages);
+
+  // Update mask previews
+  updateMaskPreviews(params);
+}
+
+/**
+ * Update the debug type references with new scores
+ */
+function updateDebugTypeReferences(
+  allScores: Record<string, number>,
+  bestType: string,
+  referenceImages: ReferenceImages
+): void {
+  const typeRefsContainer = document.getElementById('debugTypeReferences');
+  if (!typeRefsContainer) return;
+
+  typeRefsContainer.innerHTML = '';
+  const sortedTypes = Object.entries(allScores).sort((a, b) => b[1] - a[1]);
+
+  for (const [name, score] of sortedTypes) {
+    const refImg = referenceImages.types[name];
+    if (!refImg) continue;
+
+    const item = document.createElement('div');
+    item.className = 'debug-ref-item' + (name === bestType ? ' best-match' : '');
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 48;
+    canvas.height = 48;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(refImg, 0, 0, 48, 48);
+    }
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'ref-name';
+    nameSpan.textContent = name;
+
+    const scoreSpan = document.createElement('span');
+    scoreSpan.className = 'ref-score ' + getScoreClass(score);
+    scoreSpan.textContent = `${Math.round(score)}%`;
+
+    // Show detailed breakdown on hover
+    const details = getLastTypeDetails()[name];
+    if (details) {
+      const detailSpan = document.createElement('span');
+      detailSpan.className = 'ref-details';
+      detailSpan.textContent = `M:${Math.round(details.mask * 100)} H:${Math.round(details.hu * 100)} E:${Math.round(details.edge * 100)} C:${Math.round(details.color * 100)}`;
+      item.appendChild(canvas);
+      item.appendChild(nameSpan);
+      item.appendChild(scoreSpan);
+      item.appendChild(detailSpan);
+    } else {
+      item.appendChild(canvas);
+      item.appendChild(nameSpan);
+      item.appendChild(scoreSpan);
+    }
+
+    typeRefsContainer.appendChild(item);
+  }
+}
+
+/**
+ * Update mask preview canvases
+ */
+function updateMaskPreviews(params: TuningParameters): void {
+  const previews = generateMaskPreviews(params);
+  if (!previews) return;
+
+  // The masks are Uint8Arrays of size 32x32 = 1024 bytes
+  const COMPARE_SIZE = 32;
+
+  // Raw mask
+  const rawCanvas = document.getElementById('debugTypeMaskRaw') as HTMLCanvasElement;
+  if (rawCanvas) {
+    drawMaskToCanvas(rawCanvas, previews.rawMask, COMPARE_SIZE);
+  }
+
+  // Cleaned mask
+  const cleanedCanvas = document.getElementById('debugTypeMaskCleaned') as HTMLCanvasElement;
+  if (cleanedCanvas) {
+    drawMaskToCanvas(cleanedCanvas, previews.cleanedMask, COMPARE_SIZE);
+  }
+
+  // Edge mask
+  const edgesCanvas = document.getElementById('debugTypeEdges') as HTMLCanvasElement;
+  if (edgesCanvas) {
+    drawMaskToCanvas(edgesCanvas, previews.edges, COMPARE_SIZE);
+  }
+}
+
+/**
+ * Draw a binary mask Uint8Array to a canvas
+ * Mask values can be 0/1 (binary) or 0-255 (grayscale)
+ */
+function drawMaskToCanvas(canvas: HTMLCanvasElement, mask: Uint8Array, size: number): void {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  // Check if mask is binary (0/1) or already 0-255
+  // If max value is 1, scale to 255
+  let maxVal = 0;
+  for (let i = 0; i < mask.length; i++) {
+    if (mask[i] > maxVal) maxVal = mask[i];
+  }
+  const scale = maxVal <= 1 ? 255 : 1;
+
+  // Create ImageData at the mask's native size
+  const imageData = ctx.createImageData(size, size);
+  for (let i = 0; i < mask.length; i++) {
+    const val = mask[i] * scale;
+    const pixelIdx = i * 4;
+    imageData.data[pixelIdx] = val;     // R
+    imageData.data[pixelIdx + 1] = val; // G
+    imageData.data[pixelIdx + 2] = val; // B
+    imageData.data[pixelIdx + 3] = 255; // A
+  }
+
+  // Draw at native size, then scale up to canvas size
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = size;
+  tempCanvas.height = size;
+  const tempCtx = tempCanvas.getContext('2d')!;
+  tempCtx.putImageData(imageData, 0, 0);
+
+  // Clear and draw scaled
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
 }

@@ -2,11 +2,20 @@
  * Icon matching for element and type detection
  */
 
-import type { IconData, ElementResult, TypeResult, ReferenceImages } from './types.js';
+import type {
+  IconData, ElementResult, TypeResult, ReferenceImages,
+  RGB, MaskOptions, TuningParameters, ShapeSimilarityOptions, ShapeSimilarityResult,
+  DEFAULT_MASK_OPTIONS
+} from './types.js';
 import type { Element, FamiliarType } from '../types/index.js';
-import { CARD_BACKGROUND, BACKGROUND_TOLERANCE } from './config.js';
+import { CARD_BACKGROUND, BACKGROUND_TOLERANCE, ICON_MATCHER_CONFIG } from './config.js';
 
 const COMPARE_SIZE = 32;
+
+// Store last scan data for live recalculation
+let lastTypeIconData: IconData | null = null;
+let lastReferenceImages: ReferenceImages | null = null;
+let lastTypeAllDetails: Record<string, { mask: number; hu: number; edge: number; color: number }> = {};
 
 /**
  * Check if a color is similar to the card background
@@ -107,7 +116,7 @@ function calculateColorHistogramSimilarity(
 }
 
 /**
- * Create binary mask from image
+ * Create binary mask from image (legacy)
  */
 function createBinaryMask(
   imageData: ImageData,
@@ -132,6 +141,368 @@ function createBinaryMask(
   }
 
   return mask;
+}
+
+// ============================================================================
+// ENHANCED MASK CREATION
+// ============================================================================
+
+/**
+ * Sample background color from icon corners (adaptive)
+ */
+function sampleIconBackground(imageData: ImageData, width: number, height: number): RGB {
+  const cornerPixels: RGB[] = [];
+  const margin = 2;
+
+  // Sample corners (4 pixels from each corner)
+  const positions = [
+    // Top-left
+    [0, 0], [1, 0], [0, 1], [1, 1],
+    // Top-right
+    [width - margin, 0], [width - 1, 0], [width - margin, 1], [width - 1, 1],
+    // Bottom-left
+    [0, height - margin], [1, height - margin], [0, height - 1], [1, height - 1],
+    // Bottom-right
+    [width - margin, height - margin], [width - 1, height - margin],
+    [width - margin, height - 1], [width - 1, height - 1],
+  ];
+
+  for (const [x, y] of positions) {
+    if (x >= 0 && x < width && y >= 0 && y < height) {
+      const idx = (y * width + x) * 4;
+      cornerPixels.push({
+        r: imageData.data[idx],
+        g: imageData.data[idx + 1],
+        b: imageData.data[idx + 2],
+      });
+    }
+  }
+
+  if (cornerPixels.length === 0) return CARD_BACKGROUND;
+
+  // Calculate average
+  const avg = cornerPixels.reduce(
+    (acc, c) => ({ r: acc.r + c.r, g: acc.g + c.g, b: acc.b + c.b }),
+    { r: 0, g: 0, b: 0 }
+  );
+
+  return {
+    r: Math.round(avg.r / cornerPixels.length),
+    g: Math.round(avg.g / cornerPixels.length),
+    b: Math.round(avg.b / cornerPixels.length),
+  };
+}
+
+/**
+ * Calculate color distance
+ */
+function colorDistance(c1: RGB, c2: RGB): number {
+  return Math.sqrt(
+    Math.pow(c1.r - c2.r, 2) +
+    Math.pow(c1.g - c2.g, 2) +
+    Math.pow(c1.b - c2.b, 2)
+  );
+}
+
+/**
+ * Morphological erosion (shrink foreground)
+ */
+function morphologicalErode(mask: Uint8Array, width: number, height: number, kernelSize: number): Uint8Array {
+  const result = new Uint8Array(width * height);
+  const halfK = kernelSize;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let allForeground = true;
+      for (let ky = -halfK; ky <= halfK && allForeground; ky++) {
+        for (let kx = -halfK; kx <= halfK && allForeground; kx++) {
+          const nx = x + kx;
+          const ny = y + ky;
+          if (nx < 0 || nx >= width || ny < 0 || ny >= height || mask[ny * width + nx] === 0) {
+            allForeground = false;
+          }
+        }
+      }
+      result[y * width + x] = allForeground ? 1 : 0;
+    }
+  }
+  return result;
+}
+
+/**
+ * Morphological dilation (expand foreground)
+ */
+function morphologicalDilate(mask: Uint8Array, width: number, height: number, kernelSize: number): Uint8Array {
+  const result = new Uint8Array(width * height);
+  const halfK = kernelSize;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let anyForeground = false;
+      for (let ky = -halfK; ky <= halfK && !anyForeground; ky++) {
+        for (let kx = -halfK; kx <= halfK && !anyForeground; kx++) {
+          const nx = x + kx;
+          const ny = y + ky;
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height && mask[ny * width + nx] === 1) {
+            anyForeground = true;
+          }
+        }
+      }
+      result[y * width + x] = anyForeground ? 1 : 0;
+    }
+  }
+  return result;
+}
+
+/**
+ * Create enhanced binary mask with adaptive background and morphology
+ */
+function createBinaryMaskEnhanced(
+  imageData: ImageData,
+  width: number,
+  height: number,
+  options: Partial<MaskOptions> = {}
+): Uint8Array {
+  const opts: MaskOptions = {
+    backgroundTolerance: options.backgroundTolerance ?? ICON_MATCHER_CONFIG.backgroundTolerance,
+    useAdaptiveBackground: options.useAdaptiveBackground ?? ICON_MATCHER_CONFIG.useAdaptiveBackground,
+    morphologyKernel: options.morphologyKernel ?? ICON_MATCHER_CONFIG.morphologyKernel,
+    alphaThreshold: options.alphaThreshold ?? 128,
+  };
+
+  // Get background color (adaptive or fixed)
+  const bgColor = opts.useAdaptiveBackground
+    ? sampleIconBackground(imageData, width, height)
+    : CARD_BACKGROUND;
+
+  // Create initial mask
+  const mask = new Uint8Array(width * height);
+  for (let i = 0; i < width * height; i++) {
+    const idx = i * 4;
+    const r = imageData.data[idx];
+    const g = imageData.data[idx + 1];
+    const b = imageData.data[idx + 2];
+    const a = imageData.data[idx + 3];
+
+    const dist = colorDistance({ r, g, b }, bgColor);
+    mask[i] = a > opts.alphaThreshold && dist > opts.backgroundTolerance ? 1 : 0;
+  }
+
+  // Apply morphological operations if enabled (erosion then dilation = opening)
+  if (opts.morphologyKernel > 0) {
+    const eroded = morphologicalErode(mask, width, height, opts.morphologyKernel);
+    return morphologicalDilate(eroded, width, height, opts.morphologyKernel);
+  }
+
+  return mask;
+}
+
+// ============================================================================
+// EDGE DETECTION
+// ============================================================================
+
+/**
+ * Create edge mask using Sobel operator
+ */
+function createEdgeMask(imageData: ImageData, width: number, height: number): Uint8Array {
+  // Convert to grayscale
+  const gray = new Float32Array(width * height);
+  for (let i = 0; i < width * height; i++) {
+    const idx = i * 4;
+    gray[i] = imageData.data[idx] * 0.299 + imageData.data[idx + 1] * 0.587 + imageData.data[idx + 2] * 0.114;
+  }
+
+  // Sobel kernels
+  const sobelX = [-1, 0, 1, -2, 0, 2, -1, 0, 1];
+  const sobelY = [-1, -2, -1, 0, 0, 0, 1, 2, 1];
+
+  const edges = new Uint8Array(width * height);
+
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      let gx = 0, gy = 0;
+      let k = 0;
+      for (let ky = -1; ky <= 1; ky++) {
+        for (let kx = -1; kx <= 1; kx++) {
+          const pixel = gray[(y + ky) * width + (x + kx)];
+          gx += pixel * sobelX[k];
+          gy += pixel * sobelY[k];
+          k++;
+        }
+      }
+      const magnitude = Math.sqrt(gx * gx + gy * gy);
+      edges[y * width + x] = magnitude > 50 ? 1 : 0;  // Edge threshold
+    }
+  }
+
+  return edges;
+}
+
+/**
+ * Calculate edge similarity using Dice coefficient
+ */
+function calculateEdgeSimilarity(edges1: Uint8Array, edges2: Uint8Array): number {
+  let intersection = 0, sum1 = 0, sum2 = 0;
+  for (let i = 0; i < edges1.length; i++) {
+    if (edges1[i] && edges2[i]) intersection++;
+    sum1 += edges1[i];
+    sum2 += edges2[i];
+  }
+  return sum1 + sum2 > 0 ? (2 * intersection) / (sum1 + sum2) * 100 : 0;
+}
+
+// ============================================================================
+// COLOR ANALYSIS
+// ============================================================================
+
+/**
+ * Convert RGB to HSL
+ */
+function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0;
+  const l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+      case g: h = ((b - r) / d + 2) / 6; break;
+      case b: h = ((r - g) / d + 4) / 6; break;
+    }
+  }
+  return { h: h * 360, s: s * 100, l: l * 100 };
+}
+
+/**
+ * Extract dominant color from foreground pixels
+ */
+function extractDominantColor(
+  imageData: ImageData,
+  mask: Uint8Array,
+  width: number,
+  height: number
+): { h: number; s: number; l: number } | null {
+  const pixels: Array<{ h: number; s: number; l: number }> = [];
+
+  for (let i = 0; i < width * height; i++) {
+    if (mask[i] === 0) continue;
+    const idx = i * 4;
+    const hsl = rgbToHsl(imageData.data[idx], imageData.data[idx + 1], imageData.data[idx + 2]);
+    pixels.push(hsl);
+  }
+
+  if (pixels.length === 0) return null;
+
+  // Calculate average HSL
+  const avgH = pixels.reduce((a, p) => a + p.h, 0) / pixels.length;
+  const avgS = pixels.reduce((a, p) => a + p.s, 0) / pixels.length;
+  const avgL = pixels.reduce((a, p) => a + p.l, 0) / pixels.length;
+
+  return { h: avgH, s: avgS, l: avgL };
+}
+
+/**
+ * Calculate color similarity between two HSL colors
+ */
+function calculateColorSimilarity(
+  color1: { h: number; s: number; l: number } | null,
+  color2: { h: number; s: number; l: number } | null
+): number {
+  if (!color1 || !color2) return 0;
+
+  // Hue difference (circular, 0-180 max)
+  let hueDiff = Math.abs(color1.h - color2.h);
+  if (hueDiff > 180) hueDiff = 360 - hueDiff;
+  hueDiff /= 180;  // Normalize to 0-1
+
+  const satDiff = Math.abs(color1.s - color2.s) / 100;
+  const lumDiff = Math.abs(color1.l - color2.l) / 100;
+
+  // Weighted combination
+  const distance = hueDiff * 0.5 + satDiff * 0.3 + lumDiff * 0.2;
+  return Math.max(0, (1 - distance) * 100);
+}
+
+// ============================================================================
+// ENHANCED SHAPE SIMILARITY
+// ============================================================================
+
+/**
+ * Calculate enhanced shape similarity with all methods
+ */
+function calculateShapeSimilarityEnhanced(
+  sourceIcon: IconData,
+  referenceImage: HTMLImageElement,
+  options: Partial<ShapeSimilarityOptions> = {}
+): ShapeSimilarityResult {
+  const weights = {
+    mask: options.maskWeight ?? ICON_MATCHER_CONFIG.weights.mask,
+    hu: options.huWeight ?? ICON_MATCHER_CONFIG.weights.hu,
+    edge: options.edgeWeight ?? ICON_MATCHER_CONFIG.weights.edge,
+    color: options.colorWeight ?? ICON_MATCHER_CONFIG.weights.color,
+  };
+
+  const maskOptions = options.maskOptions ?? {};
+
+  // Resize both to standard size
+  const srcCanvas = document.createElement('canvas');
+  srcCanvas.width = COMPARE_SIZE;
+  srcCanvas.height = COMPARE_SIZE;
+  const srcCtx = srcCanvas.getContext('2d')!;
+  srcCtx.drawImage(sourceIcon.canvas, 0, 0, COMPARE_SIZE, COMPARE_SIZE);
+  const srcData = srcCtx.getImageData(0, 0, COMPARE_SIZE, COMPARE_SIZE);
+
+  const refCanvas = document.createElement('canvas');
+  refCanvas.width = COMPARE_SIZE;
+  refCanvas.height = COMPARE_SIZE;
+  const refCtx = refCanvas.getContext('2d')!;
+  refCtx.drawImage(referenceImage, 0, 0, COMPARE_SIZE, COMPARE_SIZE);
+  const refData = refCtx.getImageData(0, 0, COMPARE_SIZE, COMPARE_SIZE);
+
+  // Create enhanced masks
+  const srcMask = createBinaryMaskEnhanced(srcData, COMPARE_SIZE, COMPARE_SIZE, maskOptions);
+  const refMask = createBinaryMaskEnhanced(refData, COMPARE_SIZE, COMPARE_SIZE, maskOptions);
+
+  // 1. Mask overlap (IoU + Dice)
+  const iou = calculateIoU(srcMask, refMask);
+  const dice = calculateDice(srcMask, refMask);
+  const maskScore = (iou * 0.4 + dice * 0.6) * 100;
+
+  // 2. Hu moments
+  const srcHu = calculateHuMoments(srcMask, COMPARE_SIZE, COMPARE_SIZE);
+  const refHu = calculateHuMoments(refMask, COMPARE_SIZE, COMPARE_SIZE);
+  const huDistance = huMomentDistance(srcHu, refHu);
+  const huScore = Math.max(0, 100 - huDistance * 20);
+
+  // 3. Edge similarity
+  const srcEdges = createEdgeMask(srcData, COMPARE_SIZE, COMPARE_SIZE);
+  const refEdges = createEdgeMask(refData, COMPARE_SIZE, COMPARE_SIZE);
+  const edgeScore = calculateEdgeSimilarity(srcEdges, refEdges);
+
+  // 4. Color similarity
+  const srcColor = extractDominantColor(srcData, srcMask, COMPARE_SIZE, COMPARE_SIZE);
+  const refColor = extractDominantColor(refData, refMask, COMPARE_SIZE, COMPARE_SIZE);
+  const colorScore = calculateColorSimilarity(srcColor, refColor);
+
+  // Weighted combination
+  const finalScore =
+    maskScore * weights.mask +
+    huScore * weights.hu +
+    edgeScore * weights.edge +
+    colorScore * weights.color;
+
+  return {
+    score: finalScore,
+    details: {
+      mask: Math.round(maskScore),
+      hu: Math.round(huScore),
+      edge: Math.round(edgeScore),
+      color: Math.round(colorScore),
+    },
+  };
 }
 
 /**
@@ -346,12 +717,17 @@ export function detectElement(
 }
 
 /**
- * Detect type from icon
+ * Detect type from icon (using enhanced multi-method matching)
  */
 export function detectType(
   iconData: IconData,
   referenceImages: ReferenceImages
 ): TypeResult {
+  // Store for recalculation
+  lastTypeIconData = iconData;
+  lastReferenceImages = referenceImages;
+  lastTypeAllDetails = {};
+
   let bestMatch: TypeResult = {
     type: 'Human',
     confidence: 0,
@@ -362,13 +738,15 @@ export function detectType(
   const allScores: Record<string, number> = {};
 
   for (const [type, refImage] of Object.entries(referenceImages.types)) {
-    const similarity = calculateShapeSimilarity(iconData, refImage);
-    allScores[type] = Math.round(similarity);
+    // Use enhanced similarity with all methods
+    const result = calculateShapeSimilarityEnhanced(iconData, refImage);
+    allScores[type] = Math.round(result.score);
+    lastTypeAllDetails[type] = result.details;
 
-    if (similarity > bestMatch.confidence) {
+    if (result.score > bestMatch.confidence) {
       bestMatch = {
         type: type as FamiliarType,
-        confidence: Math.round(similarity),
+        confidence: Math.round(result.score),
         allScores,
         iconData,
       };
@@ -378,3 +756,91 @@ export function detectType(
   bestMatch.allScores = allScores;
   return bestMatch;
 }
+
+/**
+ * Recalculate type detection with custom tuning parameters
+ * Returns updated scores and details for live tuning UI
+ */
+export function recalculateTypeWithTuning(
+  params: TuningParameters
+): { allScores: Record<string, number>; allDetails: Record<string, { mask: number; hu: number; edge: number; color: number }> } | null {
+  if (!lastTypeIconData || !lastReferenceImages) {
+    console.warn('No scan data available for recalculation');
+    return null;
+  }
+
+  const options: Partial<ShapeSimilarityOptions> = {
+    maskWeight: params.maskWeight,
+    huWeight: params.huWeight,
+    edgeWeight: params.edgeWeight,
+    colorWeight: params.colorWeight,
+    maskOptions: {
+      backgroundTolerance: params.backgroundTolerance,
+      morphologyKernel: params.morphologyKernel,
+      useAdaptiveBackground: params.useAdaptiveBackground,
+    },
+  };
+
+  const allScores: Record<string, number> = {};
+  const allDetails: Record<string, { mask: number; hu: number; edge: number; color: number }> = {};
+
+  for (const [type, refImage] of Object.entries(lastReferenceImages.types)) {
+    const result = calculateShapeSimilarityEnhanced(lastTypeIconData, refImage, options);
+    allScores[type] = Math.round(result.score);
+    allDetails[type] = result.details;
+  }
+
+  // Update stored details
+  lastTypeAllDetails = allDetails;
+
+  return { allScores, allDetails };
+}
+
+/**
+ * Get the last type detection details for debug display
+ */
+export function getLastTypeDetails(): Record<string, { mask: number; hu: number; edge: number; color: number }> {
+  return lastTypeAllDetails;
+}
+
+/**
+ * Get stored icon data for mask preview rendering
+ */
+export function getLastTypeIconData(): IconData | null {
+  return lastTypeIconData;
+}
+
+/**
+ * Generate mask preview data for debug display
+ */
+export function generateMaskPreviews(params: TuningParameters): {
+  rawMask: Uint8Array;
+  cleanedMask: Uint8Array;
+  edges: Uint8Array;
+} | null {
+  if (!lastTypeIconData) return null;
+
+  // Resize to compare size
+  const srcCanvas = document.createElement('canvas');
+  srcCanvas.width = COMPARE_SIZE;
+  srcCanvas.height = COMPARE_SIZE;
+  const srcCtx = srcCanvas.getContext('2d')!;
+  srcCtx.drawImage(lastTypeIconData.canvas, 0, 0, COMPARE_SIZE, COMPARE_SIZE);
+  const srcData = srcCtx.getImageData(0, 0, COMPARE_SIZE, COMPARE_SIZE);
+
+  // Raw mask (no morphology)
+  const rawMask = createBinaryMaskEnhanced(srcData, COMPARE_SIZE, COMPARE_SIZE, {
+    ...params,
+    morphologyKernel: 0,
+  });
+
+  // Cleaned mask (with morphology)
+  const cleanedMask = createBinaryMaskEnhanced(srcData, COMPARE_SIZE, COMPARE_SIZE, params);
+
+  // Edge mask
+  const edges = createEdgeMask(srcData, COMPARE_SIZE, COMPARE_SIZE);
+
+  return { rawMask, cleanedMask, edges };
+}
+
+export { COMPARE_SIZE };

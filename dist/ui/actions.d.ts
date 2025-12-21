@@ -21,7 +21,11 @@ export declare function setCalcFamiliar(slot: number, familiar: CalcFamiliar | n
  */
 export declare function deleteCalcFamiliar(slot: number): void;
 /**
- * Reset all calculator familiars
+ * Empty calculator slots (without clearing saved waves)
+ */
+export declare function emptyCalculator(): void;
+/**
+ * Reset all calculator familiars and saved waves
  */
 export declare function resetAllFamiliars(): void;
 /**

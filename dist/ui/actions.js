@@ -174,9 +174,9 @@ export function deleteCalcFamiliar(slot) {
     setCalcFamiliar(slot, null);
 }
 /**
- * Reset all calculator familiars
+ * Empty calculator slots (without clearing saved waves)
  */
-export function resetAllFamiliars() {
+export function emptyCalculator() {
     store.setState({
         calcFamiliars: [null, null, null],
         currentWave: null,
@@ -185,8 +185,33 @@ export function resetAllFamiliars() {
     updateDiceDropdowns();
     calculate();
     // Clear wave selection UI
-    document.querySelectorAll('.wave-tab').forEach((tab) => {
-        tab.classList.remove('active');
+    document.querySelectorAll('.load-wave-btn').forEach((btn) => {
+        btn.classList.remove('active');
+    });
+    const label = document.getElementById('currentWaveLabel');
+    if (label)
+        label.textContent = '';
+}
+/**
+ * Reset all calculator familiars and saved waves
+ */
+export function resetAllFamiliars() {
+    store.setState({
+        calcFamiliars: [null, null, null],
+        currentWave: null,
+        savedWaves: {
+            1: [null, null, null],
+            2: [null, null, null],
+            3: [null, null, null],
+        },
+    });
+    saveState();
+    updateFamiliarsGrid(store.getState().calcFamiliars);
+    updateDiceDropdowns();
+    calculate();
+    // Clear wave selection UI
+    document.querySelectorAll('.load-wave-btn').forEach((btn) => {
+        btn.classList.remove('active');
     });
     const label = document.getElementById('currentWaveLabel');
     if (label)
@@ -227,6 +252,13 @@ export function loadWave(wave) {
     const label = document.getElementById('currentWaveLabel');
     if (label)
         label.textContent = `(Wave ${wave})`;
+    // Update wave button active states
+    document.querySelectorAll('.load-wave-btn').forEach((btn) => {
+        btn.classList.remove('active');
+    });
+    const activeBtn = document.querySelector(`[data-action="load-wave"][data-wave="${wave}"]`);
+    if (activeBtn)
+        activeBtn.classList.add('active');
     calculate();
 }
 /**
@@ -293,8 +325,8 @@ export function switchCharacter(id) {
     const roster = selectors.getCurrentRoster(store.getState());
     updateRosterList(roster);
     // Clear wave selection
-    document.querySelectorAll('.wave-tab').forEach((tab) => {
-        tab.classList.remove('active');
+    document.querySelectorAll('.load-wave-btn').forEach((btn) => {
+        btn.classList.remove('active');
     });
     const label = document.getElementById('currentWaveLabel');
     if (label)

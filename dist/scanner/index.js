@@ -148,10 +148,28 @@ export async function processImage(file, onProgress) {
     onProgress?.('Extracting conditional...');
     // OCR for conditional
     const conditionalResult = await extractConditionalText(croppedData);
+    // Debug: Draw extraction regions on canvas
+    if (scannerConfig.debug) {
+        drawDebugOverlay(croppedData);
+        // Update croppedImageUrl AFTER drawing debug overlay
+        croppedData.croppedImageUrl = croppedData.canvas.toDataURL('image/png');
+    }
     // Update canvas to show cropped result
     canvas.width = croppedData.width;
     canvas.height = croppedData.height;
     ctx.drawImage(croppedData.canvas, 0, 0);
+    // Log debug info to console
+    if (scannerConfig.debug) {
+        console.log('Scanner Results:', {
+            borderColor: croppedData.borderColor,
+            bounds: croppedData.bounds,
+            rank: rankResult,
+            element: elementResult,
+            type: typeResult,
+            name,
+            conditional: conditionalResult,
+        });
+    }
     onProgress?.('Done!');
     return {
         name,
@@ -163,12 +181,64 @@ export async function processImage(file, onProgress) {
     };
 }
 /**
+ * Draw debug overlay showing extraction regions
+ */
+function drawDebugOverlay(croppedData) {
+    const ctx = croppedData.ctx;
+    const w = croppedData.width;
+    const h = croppedData.height;
+    // Draw element region (red)
+    const elemRegion = scannerConfig.elementIconRegion;
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(w * elemRegion.x, h * elemRegion.y, w * elemRegion.w, h * elemRegion.h);
+    ctx.fillStyle = 'red';
+    ctx.font = '12px sans-serif';
+    ctx.fillText('ELEMENT', w * elemRegion.x, h * elemRegion.y - 2);
+    // Draw type region (blue)
+    const typeRegion = scannerConfig.typeIconRegion;
+    ctx.strokeStyle = 'blue';
+    ctx.strokeRect(w * typeRegion.x, h * typeRegion.y, w * typeRegion.w, h * typeRegion.h);
+    ctx.fillStyle = 'blue';
+    ctx.fillText('TYPE', w * typeRegion.x, h * typeRegion.y - 2);
+    // Draw name region (cyan)
+    const nameRegion = scannerConfig.nameRegion;
+    ctx.strokeStyle = 'cyan';
+    ctx.strokeRect(w * nameRegion.x, h * nameRegion.y, w * nameRegion.w, h * nameRegion.h);
+    ctx.fillStyle = 'cyan';
+    ctx.fillText('NAME', w * nameRegion.x, h * nameRegion.y - 2);
+    // Draw text region (green)
+    const textRegion = scannerConfig.textRegion;
+    ctx.strokeStyle = 'lime';
+    ctx.strokeRect(w * textRegion.x, h * textRegion.y, w * textRegion.w, h * textRegion.h);
+    ctx.fillStyle = 'lime';
+    ctx.fillText('TEXT/OCR', w * textRegion.x, h * textRegion.y - 2);
+    // Draw border bounds info
+    ctx.fillStyle = 'yellow';
+    ctx.font = '14px monospace';
+    ctx.fillText(`Bounds: L=${croppedData.bounds.left} T=${croppedData.bounds.top} R=${croppedData.bounds.right} B=${croppedData.bounds.bottom}`, 5, 16);
+    ctx.fillText(`Border: RGB(${croppedData.borderColor.r}, ${croppedData.borderColor.g}, ${croppedData.borderColor.b})`, 5, 32);
+}
+/**
  * Get the scanner canvas element
  */
 export function getScannerCanvas() {
     return canvas;
 }
+/**
+ * Get reference images for debug display
+ */
+export function getReferenceImages() {
+    return referenceImages;
+}
+/**
+ * Check if debug mode is enabled
+ */
+export function isDebugEnabled() {
+    return scannerConfig.debug;
+}
 export { matchConditionalText, findTopMatches } from './text-matcher.js';
 export { detectRank } from './rank-detector.js';
 export { scannerConfig } from './config.js';
+export { recalculateTypeWithTuning, getLastTypeDetails, getLastTypeIconData, generateMaskPreviews, } from './icon-matcher.js';
 //# sourceMappingURL=index.js.map

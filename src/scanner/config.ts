@@ -24,3 +24,18 @@ export const scannerConfig: ScannerConfig = {
 export const CARD_BACKGROUND = { r: 58, g: 52, b: 47 };
 export const BACKGROUND_TOLERANCE = 40;
 export const BORDER_TOLERANCE = 50;
+
+/**
+ * Icon matcher configuration with tunable weights
+ */
+export const ICON_MATCHER_CONFIG = {
+  backgroundTolerance: 45,
+  morphologyKernel: 0,
+  useAdaptiveBackground: true,
+  weights: {
+    mask: 0.80,   // Mask overlap (IoU + Dice)
+    hu: 0.00,     // Hu moments (rotation/scale invariant)
+    edge: 0.20,   // Edge detection (Sobel)
+    color: 0.00,  // Color similarity (HSL)
+  },
+};

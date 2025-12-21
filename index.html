@@ -33,6 +33,7 @@
         <div class="waves-panel">
           <div class="waves-header-row">
             <div class="waves-header">Expedition Waves</div>
+            <button class="empty-wave-btn" data-action="empty-wave">Empty</button>
             <button class="reset-all-btn" data-action="reset-all">Reset</button>
           </div>
           <div class="wave-row wave-1">
@@ -352,9 +353,6 @@
         </div>
       </div>
 
-      <div class="optimizer-controls">
-        <button class="optimize-btn" data-action="run-optimizer">Find Best Lineups</button>
-      </div>
       <div id="optimizerResults" class="optimizer-results"></div>
     </div>
   </div>
@@ -549,6 +547,89 @@
           <span id="extractedBonusValues" class="bonus-values"></span>
         </div>
       </div>
+
+      <!-- Debug Section for Element/Type -->
+      <details class="debug-section" id="scannerDebugSection" style="display: none;">
+        <summary>Debug: Element & Type Detection</summary>
+
+        <!-- Tuning Panel -->
+        <div class="debug-tuning-panel" id="debugTuningPanel">
+          <h4>Parameter Tuning</h4>
+          <div class="tuning-sliders">
+            <div class="tuning-row">
+              <label>Background Tolerance: <span id="tuneBgTolValue">45</span></label>
+              <input type="range" id="tuneBgTolerance" min="20" max="80" value="45" step="1">
+            </div>
+            <div class="tuning-row">
+              <label>Morphology Kernel: <span id="tuneMorphValue">0</span></label>
+              <input type="range" id="tuneMorphology" min="0" max="3" value="0" step="1">
+            </div>
+            <div class="tuning-row">
+              <label>
+                <input type="checkbox" id="tuneAdaptiveBg" checked> Use Adaptive Background
+              </label>
+            </div>
+            <hr>
+            <div class="tuning-row">
+              <label>Mask Weight: <span id="tuneMaskValue">80</span>%</label>
+              <input type="range" id="tuneMaskWeight" min="0" max="100" value="80" step="5">
+            </div>
+            <div class="tuning-row">
+              <label>Hu Weight: <span id="tuneHuValue">0</span>%</label>
+              <input type="range" id="tuneHuWeight" min="0" max="100" value="0" step="5">
+            </div>
+            <div class="tuning-row">
+              <label>Edge Weight: <span id="tuneEdgeValue">20</span>%</label>
+              <input type="range" id="tuneEdgeWeight" min="0" max="100" value="20" step="5">
+            </div>
+            <div class="tuning-row">
+              <label>Color Weight: <span id="tuneColorValue">0</span>%</label>
+              <input type="range" id="tuneColorWeight" min="0" max="100" value="0" step="5">
+            </div>
+            <div class="tuning-row tuning-total">
+              <label>Total: <span id="tuneWeightTotal" class="weight-total">100%</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="debug-icons-container">
+          <details class="debug-subsection" open>
+            <summary>Element Detection</summary>
+            <div class="debug-icon-section">
+              <div class="debug-extracted">
+                <span>Extracted:</span>
+                <canvas id="debugElementExtracted" width="64" height="64"></canvas>
+              </div>
+              <div class="debug-references" id="debugElementReferences"></div>
+            </div>
+          </details>
+          <details class="debug-subsection" open>
+            <summary>Type Detection</summary>
+            <div class="debug-icon-section">
+              <div class="debug-extracted">
+                <span>Extracted:</span>
+                <canvas id="debugTypeExtracted" width="64" height="64"></canvas>
+              </div>
+              <!-- Mask Previews -->
+              <div class="debug-mask-preview">
+                <div class="mask-preview-item">
+                  <span>Raw:</span>
+                  <canvas id="debugTypeMaskRaw" width="64" height="64"></canvas>
+                </div>
+                <div class="mask-preview-item">
+                  <span>Clean:</span>
+                  <canvas id="debugTypeMaskCleaned" width="64" height="64"></canvas>
+                </div>
+                <div class="mask-preview-item">
+                  <span>Edges:</span>
+                  <canvas id="debugTypeEdges" width="64" height="64"></canvas>
+                </div>
+              </div>
+              <div class="debug-references" id="debugTypeReferences"></div>
+            </div>
+          </details>
+        </div>
+      </details>
 
       <div class="modal-actions">
         <button class="add-btn" data-action="add-from-scan">Add to Collection</button>

@@ -78,4 +78,55 @@ export interface ReferenceImages {
     elements: Record<string, HTMLImageElement>;
     types: Record<string, HTMLImageElement>;
 }
+/**
+ * Options for binary mask creation
+ */
+export interface MaskOptions {
+    backgroundTolerance: number;
+    useAdaptiveBackground: boolean;
+    morphologyKernel: number;
+    alphaThreshold: number;
+}
+/**
+ * Tuning parameters for live adjustment
+ */
+export interface TuningParameters {
+    backgroundTolerance: number;
+    morphologyKernel: number;
+    maskWeight: number;
+    huWeight: number;
+    edgeWeight: number;
+    colorWeight: number;
+    useAdaptiveBackground: boolean;
+}
+/**
+ * Options for shape similarity calculation
+ */
+export interface ShapeSimilarityOptions {
+    maskWeight: number;
+    huWeight: number;
+    edgeWeight: number;
+    colorWeight: number;
+    maskOptions: Partial<MaskOptions>;
+}
+/**
+ * Result of enhanced shape similarity calculation
+ */
+export interface ShapeSimilarityResult {
+    score: number;
+    details: {
+        mask: number;
+        hu: number;
+        edge: number;
+        color: number;
+    };
+}
+/**
+ * Default mask options
+ */
+export declare const DEFAULT_MASK_OPTIONS: MaskOptions;
+/**
+ * Default tuning parameters
+ */
+export declare const DEFAULT_TUNING_PARAMS: TuningParameters;
 //# sourceMappingURL=types.d.ts.map

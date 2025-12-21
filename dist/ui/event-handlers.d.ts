@@ -19,4 +19,8 @@ export declare function getModalConditionalSelector(): ReturnType<typeof createC
  * Get the roster conditional selector instance
  */
 export declare function getRosterConditionalSelector(): ReturnType<typeof createConditionalSelector> | null;
+/**
+ * Show optimizer strategy cards
+ */
+export declare function showOptimizerStrategies(): void;
 //# sourceMappingURL=event-handlers.d.ts.map

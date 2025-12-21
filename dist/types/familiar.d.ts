@@ -36,6 +36,7 @@ export interface Familiar {
  * Familiar in calculator slots (may not have id)
  */
 export interface CalcFamiliar {
+    id?: number;
     name: string;
     rank: Rank;
     element: Element;

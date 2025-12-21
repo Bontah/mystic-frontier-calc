@@ -89,3 +89,73 @@ export interface ReferenceImages {
   elements: Record<string, HTMLImageElement>;
   types: Record<string, HTMLImageElement>;
 }
+
+/**
+ * Options for binary mask creation
+ */
+export interface MaskOptions {
+  backgroundTolerance: number;
+  useAdaptiveBackground: boolean;
+  morphologyKernel: number;  // 0=disabled, 1-3=kernel size
+  alphaThreshold: number;
+}
+
+/**
+ * Tuning parameters for live adjustment
+ */
+export interface TuningParameters {
+  backgroundTolerance: number;
+  morphologyKernel: number;
+  maskWeight: number;
+  huWeight: number;
+  edgeWeight: number;
+  colorWeight: number;
+  useAdaptiveBackground: boolean;
+}
+
+/**
+ * Options for shape similarity calculation
+ */
+export interface ShapeSimilarityOptions {
+  maskWeight: number;
+  huWeight: number;
+  edgeWeight: number;
+  colorWeight: number;
+  maskOptions: Partial<MaskOptions>;
+}
+
+/**
+ * Result of enhanced shape similarity calculation
+ */
+export interface ShapeSimilarityResult {
+  score: number;
+  details: {
+    mask: number;
+    hu: number;
+    edge: number;
+    color: number;
+  };
+}
+
+/**
+ * Default mask options
+ */
+export const DEFAULT_MASK_OPTIONS: MaskOptions = {
+  backgroundTolerance: 45,
+  useAdaptiveBackground: true,
+  morphologyKernel: 1,
+  alphaThreshold: 128,
+};
+
+/**
+ * Default tuning parameters
+ */
+export const DEFAULT_TUNING_PARAMS: TuningParameters = {
+  backgroundTolerance: 45,
+  morphologyKernel: 0,
+  maskWeight: 0.80,
+  huWeight: 0.00,
+  edgeWeight: 0.20,
+  colorWeight: 0.00,
+  useAdaptiveBackground: true,
+};

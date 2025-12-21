@@ -9,27 +9,23 @@ import { formatBonusValues, isBuggedConditional } from '../../utils/format.js';
 export function renderRosterItem(fam) {
     const rankClass = `rank-${fam.rank.toLowerCase()}`;
     const disabledClass = fam.disabled ? 'disabled' : '';
+    const buggedClass = isBuggedConditional(fam.conditional) ? 'bugged' : '';
     let condText = '';
-    let buggedBadge = '';
     if (fam.conditional) {
         const stats = formatBonusValues(fam.conditional);
-        const bugWarning = isBuggedConditional(fam.conditional);
-        if (bugWarning) {
-            buggedBadge = `<span class="bugged-badge" title="${escapeHtml(bugWarning)}">BUGGED</span>`;
-        }
         condText = `<div class="roster-conditional">${escapeHtml(fam.conditional.name)} (${stats})</div>`;
     }
-    const waveText = fam.wave ? `<div class="roster-item-wave">Wave ${fam.wave}</div>` : '';
+    const waveClass = fam.wave ? `wave-${fam.wave}` : '';
+    const waveText = fam.wave ? `<div class="roster-item-wave ${waveClass}">Wave ${fam.wave}</div>` : '';
     return `
-    <div class="roster-item ${rankClass} ${disabledClass}" data-familiar-id="${fam.id}">
-      ${buggedBadge}
+    <div class="roster-item ${rankClass} ${disabledClass} ${buggedClass} ${waveClass}" data-familiar-id="${fam.id}">
+      ${waveText}
       <div class="roster-item-info">
         <div class="roster-item-name">${escapeHtml(fam.name)}</div>
         <div class="roster-item-details">
-          <span class="rank-text ${rankClass}">${fam.rank}</span>${fam.element !== 'None' ? ` · <span class="element-text element-${fam.element.toLowerCase()}">${fam.element}</span>` : ''} · ${fam.type}
+          <span class="rank-text ${rankClass}">${fam.rank}</span> · <span class="element-text element-${fam.element.toLowerCase()}">${fam.element}</span> · ${fam.type}
         </div>
         ${condText}
-        ${waveText}
       </div>
       <div class="roster-item-actions">
         <button class="roster-btn edit" data-action="edit" data-id="${fam.id}">Edit</button>

@@ -32,7 +32,7 @@ export function renderRosterItem(fam: Familiar): string {
       <div class="roster-item-info">
         <div class="roster-item-name">${escapeHtml(fam.name)}</div>
         <div class="roster-item-details">
-          ${fam.rank} · ${fam.element !== 'None' ? fam.element + ' · ' : ''}${fam.type}
+          <span class="rank-text ${rankClass}">${fam.rank}</span>${fam.element !== 'None' ? ` · <span class="element-text element-${fam.element.toLowerCase()}">${fam.element}</span>` : ''} · ${fam.type}
         </div>
         ${condText}
         ${waveText}

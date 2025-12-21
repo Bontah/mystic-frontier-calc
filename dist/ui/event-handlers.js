@@ -926,14 +926,10 @@ function runOptimizer() {
                 type: f.type,
                 conditional: f.conditional,
             }));
-            // Get bonuses from familiars
-            const bonuses = calcFamiliars
-                .map((f) => f.conditional)
-                .filter((c) => c !== null);
             // Generate all 3-familiar combinations
             const combinations = generateCombinations(calcFamiliars, 3);
-            // Run all strategies (fast synchronous version)
-            const results = runAllStrategiesFast(combinations, bonuses);
+            // Run all strategies (no additional bonuses - familiars already have their conditionals)
+            const results = runAllStrategiesFast(combinations, []);
             // Render results
             resultsContainer.innerHTML = renderOptimizerResults(results);
         }
@@ -960,13 +956,13 @@ function renderOptimizerResults(results) {
     }
     let html = '<div class="optimizer-results-grid">';
     if (bestOverall) {
-        html += renderLineupCard('Best Overall', 'Highest score using average dice values', bestOverall);
+        html += renderLineupCard('Best Overall', bestOverall);
     }
     if (bestLow) {
-        html += renderLineupCard('Best for Low Rolls', 'Highest score when all dice roll 1', bestLow);
+        html += renderLineupCard('Best for Low Rolls', bestLow);
     }
     if (bestHigh) {
-        html += renderLineupCard('Best for High Rolls', 'Highest score when all dice roll max', bestHigh);
+        html += renderLineupCard('Best for High Rolls', bestHigh);
     }
     html += '</div>';
     return html;
@@ -974,7 +970,7 @@ function renderOptimizerResults(results) {
 /**
  * Render a single lineup card
  */
-function renderLineupCard(title, description, lineup) {
+function renderLineupCard(title, lineup) {
     const familiarsHtml = lineup.familiars.map((f) => `
     <div class="lineup-familiar">
       <span class="familiar-name">${escapeHtml(f.name)}</span>
@@ -986,7 +982,6 @@ function renderLineupCard(title, description, lineup) {
     <div class="lineup-card">
       <div class="lineup-header">
         <h3>${title}</h3>
-        <p>${description}</p>
       </div>
       <div class="lineup-score">
         <span class="score-value">${lineup.score}</span>

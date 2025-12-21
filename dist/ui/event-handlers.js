@@ -9,6 +9,7 @@ import { updateRosterList } from './components/roster-item.js';
 import { createIconDropdown, RANK_OPTIONS, ELEMENT_OPTIONS, TYPE_OPTIONS } from './components/icon-dropdown.js';
 import { saveState } from '../state/persistence.js';
 import { createConditionalSelector } from './conditional-selector/index.js';
+import { showToast } from './toast.js';
 // Module-level conditional selector instances
 let modalConditionalSelector = null;
 let rosterConditionalSelector = null;
@@ -178,6 +179,33 @@ function setupRosterEvents() {
                 switchCharacter(id);
             }
         });
+    }
+    // Export roster button
+    const exportBtn = document.querySelector('[data-action="export-roster"]');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportRoster);
+    }
+    // Import roster button
+    const importBtn = document.querySelector('[data-action="import-roster"]');
+    if (importBtn) {
+        importBtn.addEventListener('click', importRoster);
+    }
+    // Free wave buttons
+    document.querySelectorAll('[data-action="free-wave"]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const waveAttr = btn.getAttribute('data-wave');
+            if (waveAttr) {
+                const wave = parseInt(waveAttr);
+                if (wave >= 1 && wave <= 3) {
+                    freeWave(wave);
+                }
+            }
+        });
+    });
+    // Free all waves button
+    const freeAllBtn = document.querySelector('[data-action="free-all-waves"]');
+    if (freeAllBtn) {
+        freeAllBtn.addEventListener('click', freeAllWaves);
     }
 }
 /**
@@ -692,5 +720,100 @@ function setupPassingCombosButton() {
             }
         });
     }
+}
+/**
+ * Export current character's roster to JSON file
+ */
+function exportRoster() {
+    const roster = selectors.getCurrentRoster(store.getState());
+    if (roster.length === 0) {
+        showToast('No familiars to export');
+        return;
+    }
+    // Create export data (exclude ids as they'll be regenerated on import)
+    const exportData = roster.map(({ id, ...rest }) => rest);
+    const json = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'familiar-collection.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`Exported ${roster.length} familiars`);
+}
+/**
+ * Import familiars from JSON file
+ */
+function importRoster() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.addEventListener('change', async () => {
+        const file = input.files?.[0];
+        if (!file)
+            return;
+        try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+            if (!Array.isArray(data)) {
+                showToast('Invalid file format');
+                return;
+            }
+            // Add each familiar to the roster
+            let added = 0;
+            for (const fam of data) {
+                if (fam.name && fam.rank && fam.type) {
+                    addFamiliarToRoster({
+                        name: fam.name,
+                        rank: fam.rank,
+                        element: fam.element || 'None',
+                        type: fam.type,
+                        conditional: fam.conditional || null,
+                        wave: fam.wave || null,
+                        disabled: fam.disabled || false,
+                    });
+                    added++;
+                }
+            }
+            showToast(`Imported ${added} familiars`);
+        }
+        catch {
+            showToast('Failed to import file');
+        }
+    });
+    input.click();
+}
+/**
+ * Free familiars from a specific wave
+ */
+function freeWave(wave) {
+    const state = store.getState();
+    const charIdx = state.characters.findIndex((c) => c.id === state.currentCharacterId);
+    if (charIdx < 0)
+        return;
+    const characters = [...state.characters];
+    const roster = characters[charIdx].roster.map((f) => f.wave === wave ? { ...f, wave: null } : f);
+    characters[charIdx] = { ...characters[charIdx], roster };
+    store.setState({ characters });
+    saveState();
+    updateRosterList(roster);
+    showToast(`Freed Wave ${wave} familiars`);
+}
+/**
+ * Free all familiars from all waves
+ */
+function freeAllWaves() {
+    const state = store.getState();
+    const charIdx = state.characters.findIndex((c) => c.id === state.currentCharacterId);
+    if (charIdx < 0)
+        return;
+    const characters = [...state.characters];
+    const roster = characters[charIdx].roster.map((f) => ({ ...f, wave: null }));
+    characters[charIdx] = { ...characters[charIdx], roster };
+    store.setState({ characters });
+    saveState();
+    updateRosterList(roster);
+    showToast('Freed all wave assignments');
 }
 //# sourceMappingURL=event-handlers.js.map

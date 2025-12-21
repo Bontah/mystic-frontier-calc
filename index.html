@@ -357,6 +357,27 @@
       </div>
 
       <div id="optimizerResults" class="optimizer-results"></div>
+
+      <!-- Custom Dice Finder -->
+      <div class="custom-dice-section">
+        <h3>Find Lineups for Specific Dice Combination</h3>
+        <div class="custom-dice-inputs">
+          <div class="dice-input-group">
+            <label>Die 1</label>
+            <input type="number" id="customDice1" min="1" max="6" value="1" class="dice-input">
+          </div>
+          <div class="dice-input-group">
+            <label>Die 2</label>
+            <input type="number" id="customDice2" min="1" max="6" value="1" class="dice-input">
+          </div>
+          <div class="dice-input-group">
+            <label>Die 3</label>
+            <input type="number" id="customDice3" min="1" max="6" value="1" class="dice-input">
+          </div>
+          <button id="findCustomDiceLineups" class="btn btn-primary">Find Lineups</button>
+        </div>
+        <div id="customDiceResults" class="custom-dice-results"></div>
+      </div>
     </div>
   </div>
 

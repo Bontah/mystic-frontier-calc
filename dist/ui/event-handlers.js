@@ -11,6 +11,8 @@ import { saveState } from '../state/persistence.js';
 import { createConditionalSelector } from './conditional-selector/index.js';
 import { showToast } from './toast.js';
 import { generateCombinations, findBestLineupFast, findBestLineupMedian, findBestLineupFloorGuarantee, findBestLineupBalanced, } from '../core/optimizer.js';
+import { getMaxDiceForRank } from '../core/dice.js';
+import { evaluateLineup } from '../core/calculator.js';
 import { escapeHtml } from '../utils/html.js';
 import { isBuggedConditional, formatBonusValues } from '../utils/format.js';
 import { processImage, findTopMatches, getReferenceImages, isDebugEnabled, recalculateTypeWithTuning, getLastTypeDetails, getLastTypeIconData, generateMaskPreviews, } from '../scanner/index.js';
@@ -1145,6 +1147,145 @@ function setupOptimizerEvents() {
     }
     // Show strategy cards on initial load
     showOptimizerStrategies();
+    // Custom dice finder
+    const findCustomDiceBtn = document.getElementById('findCustomDiceLineups');
+    if (findCustomDiceBtn) {
+        findCustomDiceBtn.addEventListener('click', findLineupsForCustomDice);
+    }
+}
+/**
+ * Find best lineups for user-specified dice values
+ */
+function findLineupsForCustomDice() {
+    const resultsContainer = document.getElementById('customDiceResults');
+    if (!resultsContainer)
+        return;
+    // Get dice values from inputs
+    const dice1Input = document.getElementById('customDice1');
+    const dice2Input = document.getElementById('customDice2');
+    const dice3Input = document.getElementById('customDice3');
+    if (!dice1Input || !dice2Input || !dice3Input)
+        return;
+    const targetDice = [
+        parseInt(dice1Input.value) || 1,
+        parseInt(dice2Input.value) || 1,
+        parseInt(dice3Input.value) || 1,
+    ];
+    // Validate dice values
+    for (let i = 0; i < 3; i++) {
+        if (targetDice[i] < 1 || targetDice[i] > 6) {
+            resultsContainer.innerHTML = '<div class="no-results">Dice values must be between 1 and 6</div>';
+            return;
+        }
+    }
+    // Get available familiars
+    const state = store.getState();
+    const character = state.characters.find(c => c.id === state.currentCharacterId);
+    if (!character) {
+        resultsContainer.innerHTML = '<div class="no-results">No character selected</div>';
+        return;
+    }
+    // Filter available familiars (not disabled, not assigned to waves, not bugged)
+    const availableFamiliars = character.roster.filter(f => !f.disabled &&
+        !f.wave &&
+        !isBuggedConditional(f.conditional));
+    if (availableFamiliars.length < 3) {
+        resultsContainer.innerHTML = '<div class="no-results">Need at least 3 available familiars</div>';
+        return;
+    }
+    // Convert to CalcFamiliar format
+    const calcFamiliars = availableFamiliars.map(f => ({
+        id: f.id,
+        name: f.name,
+        rank: f.rank,
+        element: f.element,
+        type: f.type,
+        conditional: f.conditional || null,
+    }));
+    // Generate all 3-familiar combinations
+    const combinations = generateCombinations(calcFamiliars, 3);
+    // Filter out combinations with duplicate conditional names
+    const filteredCombinations = combinations.filter((combo) => {
+        const conditionalNames = combo
+            .map((fam) => fam.conditional?.name)
+            .filter((name) => !!name);
+        return new Set(conditionalNames).size === conditionalNames.length;
+    });
+    const scoredLineups = [];
+    for (const combo of filteredCombinations) {
+        // Check if the dice values are achievable for this combination
+        // We need to find an assignment of dice to familiars where each die <= familiar's max
+        const maxDice = combo.map(f => getMaxDiceForRank(f.rank));
+        // Try all permutations of dice assignment to find a valid one
+        const dicePermutations = [
+            [0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]
+        ];
+        let bestEval = null;
+        let bestDiceAssignment = null;
+        for (const perm of dicePermutations) {
+            const assignedDice = [targetDice[perm[0]], targetDice[perm[1]], targetDice[perm[2]]];
+            // Check if this assignment is valid
+            let valid = true;
+            for (let i = 0; i < 3; i++) {
+                if (assignedDice[i] > maxDice[i]) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid) {
+                // Score this combination with the assigned dice
+                const evaluation = evaluateLineup(combo, [], assignedDice);
+                if (!bestEval || evaluation.score > bestEval.score) {
+                    bestEval = evaluation;
+                    bestDiceAssignment = assignedDice;
+                }
+            }
+        }
+        if (bestEval && bestDiceAssignment) {
+            scoredLineups.push({
+                familiars: combo,
+                evaluation: bestEval,
+                diceAssignment: bestDiceAssignment,
+            });
+        }
+    }
+    // Sort by score descending
+    scoredLineups.sort((a, b) => b.evaluation.score - a.evaluation.score);
+    // Take top 2 with completely different familiars (no overlap)
+    const topLineups = [];
+    const usedFamiliarIds = new Set();
+    for (const lineup of scoredLineups) {
+        // Check if any familiar in this lineup was already used
+        const familiarIds = lineup.familiars.map(f => f.id ?? f.name);
+        const hasOverlap = familiarIds.some(id => usedFamiliarIds.has(id));
+        if (!hasOverlap) {
+            topLineups.push(lineup);
+            // Mark all familiars in this lineup as used
+            familiarIds.forEach(id => usedFamiliarIds.add(id));
+            if (topLineups.length >= 2)
+                break;
+        }
+    }
+    if (topLineups.length === 0) {
+        resultsContainer.innerHTML = '<div class="no-results">No lineups can achieve these dice values. Try lower values or add higher-rank familiars.</div>';
+        return;
+    }
+    // Render results
+    const diceLabel = `[${targetDice.join(', ')}]`;
+    resultsContainer.innerHTML = topLineups.map((lineup, idx) => {
+        const optimizedLineup = {
+            familiars: lineup.familiars,
+            score: lineup.evaluation.score,
+            diceSum: lineup.evaluation.diceSum,
+            totalFlat: lineup.evaluation.totalFlat,
+            totalMult: lineup.evaluation.totalMult,
+            activeBonusNames: lineup.evaluation.activeBonusNames,
+            familiarBreakdown: lineup.evaluation.familiarBreakdown,
+            scoreLabel: diceLabel,
+            testDice: lineup.diceAssignment,
+        };
+        return renderLineupCard('custom', `Result ${idx + 1}`, `Dice: ${diceLabel}`, optimizedLineup);
+    }).join('');
 }
 /**
  * Assign a lineup's familiars to a wave in the roster

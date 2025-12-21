@@ -2095,6 +2095,94 @@ select:focus, input:focus, textarea:focus {
   overflow: hidden;
 }
 
+/* Custom Dice Finder */
+.custom-dice-section {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-dice-section h3 {
+  color: var(--color-accent);
+  margin-bottom: var(--spacing-xs);
+}
+
+.custom-dice-inputs {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-sm);
+}
+
+.dice-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dice-input-group label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.dice-input {
+  width: 60px;
+  padding: var(--spacing-sm);
+  background: var(--color-bg-input);
+  border: var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  text-align: center;
+}
+
+.dice-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+#findCustomDiceLineups {
+  background: linear-gradient(135deg, var(--color-accent) 0%, #4499dd 100%);
+  border: none;
+  color: #000;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#findCustomDiceLineups:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 204, 255, 0.3);
+}
+
+#findCustomDiceLineups:active {
+  transform: translateY(0);
+}
+
+.custom-dice-results {
+  margin-top: var(--spacing-md);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.custom-dice-results:empty {
+  display: none;
+}
+
+.custom-dice-results .no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: var(--spacing-lg);
+}
+
 .optimizer-error {
   background: rgba(255, 102, 102, 0.15);
   color: #ff6666;
@@ -2625,8 +2713,24 @@ select:focus, input:focus, textarea:focus {
 
 /* Mobile responsive for optimizer cards */
 @media (max-width: 768px) {
-  .optimizer-results-grid {
+  .optimizer-results-grid,
+  .custom-dice-results {
     grid-template-columns: 1fr;
+  }
+
+  .custom-dice-inputs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dice-input-group {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .dice-input {
+    width: 80px;
   }
 
   .lineup-familiars-grid {

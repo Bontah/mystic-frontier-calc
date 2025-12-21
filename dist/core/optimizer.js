@@ -12,7 +12,8 @@ function filterIgnoredConditionals(familiars, bonuses, ignoredIds) {
     if (ignoredIds.length === 0) {
         return { familiars, bonuses };
     }
-    const ignoredSet = new Set(ignoredIds);
+    // Convert all IDs to strings for consistent comparison
+    const ignoredSet = new Set(ignoredIds.map(id => String(id)));
     // Create new familiars with ignored conditionals nulled
     const filteredFamiliars = familiars.map((fam) => {
         if (fam.conditional?.id && ignoredSet.has(fam.conditional.id)) {
@@ -31,7 +32,8 @@ function filterCombinationsForStrategy(combinations, bonuses, ignoredIds) {
     if (ignoredIds.length === 0) {
         return { combinations, bonuses };
     }
-    const ignoredSet = new Set(ignoredIds);
+    // Convert all IDs to strings for consistent comparison
+    const ignoredSet = new Set(ignoredIds.map(id => String(id)));
     // Filter each combination's familiars
     const filteredCombinations = combinations.map((combo) => combo.map((fam) => {
         if (fam.conditional?.id && ignoredSet.has(fam.conditional.id)) {

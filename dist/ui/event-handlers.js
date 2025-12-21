@@ -1149,6 +1149,7 @@ function setupOptimizerEvents() {
     const filterElement = document.getElementById('filterElement');
     const filterType = document.getElementById('filterType');
     const filterRequireMatch = document.getElementById('filterRequireMatch');
+    const filterRequireMatchAny = document.getElementById('filterRequireMatchAny');
     if (filterElement) {
         filterElement.addEventListener('change', () => {
             invalidateCombinationsCache();
@@ -1163,6 +1164,12 @@ function setupOptimizerEvents() {
     }
     if (filterRequireMatch) {
         filterRequireMatch.addEventListener('change', () => {
+            invalidateCombinationsCache();
+            showOptimizerStrategies();
+        });
+    }
+    if (filterRequireMatchAny) {
+        filterRequireMatchAny.addEventListener('change', () => {
             invalidateCombinationsCache();
             showOptimizerStrategies();
         });
@@ -1393,10 +1400,12 @@ function getOptimizerFilters() {
     const elementSelect = document.getElementById('filterElement');
     const typeSelect = document.getElementById('filterType');
     const requireMatchCheckbox = document.getElementById('filterRequireMatch');
+    const requireMatchAnyCheckbox = document.getElementById('filterRequireMatchAny');
     return {
         element: elementSelect?.value || '',
         type: typeSelect?.value || '',
         requireMatch: requireMatchCheckbox?.checked || false,
+        requireMatchAny: requireMatchAnyCheckbox?.checked || false,
     };
 }
 // Cache for lineup results (to apply to calculator)
@@ -1432,7 +1441,7 @@ function getOrGenerateCombinations() {
     }
     // Get filter values
     const filters = getOptimizerFilters();
-    const filterHash = `${filters.element}|${filters.type}|${filters.requireMatch}`;
+    const filterHash = `${filters.element}|${filters.type}|${filters.requireMatch}|${filters.requireMatchAny}`;
     // Check if cache is valid
     const currentHash = getRosterHash(roster);
     if (cachedCombinations && cachedRosterHash === currentHash && cachedFilterHash === filterHash) {
@@ -1448,7 +1457,7 @@ function getOrGenerateCombinations() {
         conditional: f.conditional,
     }));
     let combinations = generateCombinations(calcFamiliars, 3);
-    // Apply filters if "Require at least one matching familiar" is checked
+    // Apply filters if "Require type+element on same familiar" is checked
     if (filters.requireMatch && (filters.element || filters.type)) {
         combinations = combinations.filter((combo) => {
             return combo.some((fam) => {
@@ -1461,6 +1470,15 @@ function getOrGenerateCombinations() {
                 // If only one filter is set, require that one to match
                 return (filters.element && elementMatch) || (filters.type && typeMatch);
             });
+        });
+    }
+    // Apply filters if "Require type+element (any familiar)" is checked
+    if (filters.requireMatchAny && (filters.element || filters.type)) {
+        combinations = combinations.filter((combo) => {
+            const hasElementMatch = !filters.element || combo.some((fam) => fam.element === filters.element);
+            const hasTypeMatch = !filters.type || combo.some((fam) => fam.type === filters.type);
+            // Require both to be satisfied (each can be on different familiars)
+            return hasElementMatch && hasTypeMatch;
         });
     }
     // Filter out combinations with duplicate conditional names
@@ -1627,7 +1645,8 @@ function calculateStrategy(strategyKey) {
 function filterCombinationsForIgnored(combinations, ignoredIds) {
     if (ignoredIds.length === 0)
         return combinations;
-    const ignoredSet = new Set(ignoredIds);
+    // Convert all IDs to strings for consistent comparison
+    const ignoredSet = new Set(ignoredIds.map(id => String(id)));
     return combinations.map((combo) => combo.map((fam) => {
         if (fam.conditional?.id && ignoredSet.has(fam.conditional.id)) {
             return { ...fam, conditional: null };

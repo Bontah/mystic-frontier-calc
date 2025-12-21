@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimum Familiars Finder</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #eee;
+    }
+    h1 { color: #00d9ff; }
+    h2 { color: #ff6b6b; margin-top: 30px; }
+    .stats {
+      background: #16213e;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .stats p { margin: 5px 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 10px;
+    }
+    .familiar-card {
+      background: #16213e;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid #00d9ff;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .familiar-card:hover { opacity: 0.8; }
+    .familiar-card .name { font-weight: bold; color: #fff; }
+    .familiar-card .info { color: #aaa; font-size: 14px; }
+    .familiar-card .covers { color: #95d5b2; font-size: 13px; margin-top: 4px; }
+    .familiar-card .action { color: #ff6b6b; font-size: 12px; margin-top: 4px; }
+    .element-fire { border-left-color: #ff6b35; }
+    .element-ice { border-left-color: #4fc3f7; }
+    .element-poison { border-left-color: #9ccc65; }
+    .element-lightning { border-left-color: #ffeb3b; }
+    .element-dark { border-left-color: #9c27b0; }
+    .element-holy { border-left-color: #fff176; }
+    .element-none { border-left-color: #757575; }
+    .coverage {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .coverage-section {
+      background: #16213e;
+      padding: 15px;
+      border-radius: 8px;
+      min-width: 200px;
+    }
+    .coverage-section h3 { margin: 0 0 10px 0; color: #00d9ff; }
+    .tag {
+      display: inline-block;
+      padding: 4px 8px;
+      margin: 2px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .tag.covered { background: #1b4332; color: #95d5b2; }
+    .tag.missing { background: #4a1c1c; color: #ff6b6b; }
+    .ignored-section {
+      background: #2d1f1f;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .ignored-section h3 { margin: 0 0 10px 0; color: #ff6b6b; }
+    .ignored-tag {
+      display: inline-block;
+      padding: 4px 8px;
+      margin: 2px;
+      border-radius: 4px;
+      font-size: 13px;
+      background: #4a1c1c;
+      color: #ff6b6b;
+      cursor: pointer;
+    }
+    .ignored-tag:hover { background: #5a2c2c; }
+    .clear-btn {
+      background: #4a1c1c;
+      color: #ff6b6b;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .clear-btn:hover { background: #5a2c2c; }
+  </style>
+</head>
+<body>
+  <h1>Minimum Familiars for Full Coverage</h1>
+  <p>Finding the least amount of level 185-294 familiars needed to cover ALL types and ALL elements.</p>
+  <p><em>Each familiar covers its type AND element. Click a familiar to ignore it.</em></p>
+
+  <div id="ignored" class="ignored-section" style="display: none;">
+    <h3>Ignored Familiars <button class="clear-btn" onclick="clearIgnored()">Clear All</button></h3>
+    <div id="ignoredList"></div>
+  </div>
+
+  <div id="stats" class="stats">Loading...</div>
+
+  <h2>Coverage Status</h2>
+  <div id="coverage" class="coverage"></div>
+
+  <h2>Minimum Familiar Set</h2>
+  <div id="results" class="grid"></div>
+
+  <script>
+    const ELEMENTS = ['None', 'Fire', 'Poison', 'Lightning', 'Ice', 'Dark', 'Holy'];
+    const TYPES = ['Human', 'Beast', 'Plant', 'Aquatic', 'Fairy', 'Reptile', 'Devil', 'Undead', 'Machine'];
+
+    const ELEMENT_MAP = {
+      'N': 'None',
+      'F': 'Fire',
+      'P': 'Poison',
+      'L': 'Lightning',
+      'I': 'Ice',
+      'D': 'Dark',
+      'H': 'Holy'
+    };
+
+    let allFamiliars = [];
+    const ignoredIds = new Set();
+
+    async function loadFamiliars() {
+      const response = await fetch('familiars.json');
+      const familiars = await response.json();
+
+      // Filter to level 185-294 and normalize
+      allFamiliars = familiars
+        .filter(f => f.Level >= 185 && f.Level < 295)
+        .map(f => ({
+          ...f,
+          element: f.ElementName || ELEMENT_MAP[f.ElementCode] || 'None',
+          type: f.TypeName
+        }));
+
+      findMinimumFamiliars();
+    }
+
+    function ignoreFamiliar(id) {
+      ignoredIds.add(id);
+      findMinimumFamiliars();
+    }
+
+    function unignoreFamiliar(id) {
+      ignoredIds.delete(id);
+      findMinimumFamiliars();
+    }
+
+    function clearIgnored() {
+      ignoredIds.clear();
+      findMinimumFamiliars();
+    }
+
+    function findMinimumFamiliars() {
+      try {
+        // Filter out ignored familiars
+        const available = allFamiliars.filter(f => !ignoredIds.has(f.FamiliarId));
+
+        // Greedy set cover algorithm
+        const uncoveredTypes = new Set(TYPES);
+        const uncoveredElements = new Set(ELEMENTS);
+        const selectedFamiliars = [];
+        const usedIds = new Set();
+
+        // Keep selecting familiars until everything is covered
+        while (uncoveredTypes.size > 0 || uncoveredElements.size > 0) {
+          let bestFamiliar = null;
+          let bestScore = 0;
+
+          // Find familiar that covers the most uncovered items
+          for (const fam of available) {
+            if (usedIds.has(fam.FamiliarId)) continue;
+
+            let score = 0;
+            if (uncoveredTypes.has(fam.type)) score++;
+            if (uncoveredElements.has(fam.element)) score++;
+
+            // Prefer higher coverage, then higher level
+            if (score > bestScore || (score === bestScore && bestFamiliar && fam.Level > bestFamiliar.Level)) {
+              bestScore = score;
+              bestFamiliar = fam;
+            }
+          }
+
+          if (!bestFamiliar || bestScore === 0) {
+            break;
+          }
+
+          usedIds.add(bestFamiliar.FamiliarId);
+          selectedFamiliars.push({
+            ...bestFamiliar,
+            newType: uncoveredTypes.has(bestFamiliar.type),
+            newElement: uncoveredElements.has(bestFamiliar.element)
+          });
+
+          uncoveredTypes.delete(bestFamiliar.type);
+          uncoveredElements.delete(bestFamiliar.element);
+        }
+
+        // Render ignored section
+        const ignoredSection = document.getElementById('ignored');
+        const ignoredList = document.getElementById('ignoredList');
+        if (ignoredIds.size > 0) {
+          ignoredSection.style.display = 'block';
+          const ignoredFams = allFamiliars.filter(f => ignoredIds.has(f.FamiliarId));
+          ignoredList.innerHTML = ignoredFams.map(f =>
+            `<span class="ignored-tag" onclick="unignoreFamiliar(${f.FamiliarId})">${f.MobName} ✕</span>`
+          ).join('');
+        } else {
+          ignoredSection.style.display = 'none';
+        }
+
+        // Render stats
+        const coveredTypes = TYPES.filter(t => !uncoveredTypes.has(t));
+        const coveredElements = ELEMENTS.filter(e => !uncoveredElements.has(e));
+
+        document.getElementById('stats').innerHTML = `
+          <p><strong>Total level 185-294 familiars:</strong> ${available.length} (${ignoredIds.size} ignored)</p>
+          <p><strong>Need to cover:</strong> ${TYPES.length} types + ${ELEMENTS.length} elements = 16 total</p>
+          <p><strong>Minimum familiars needed:</strong> ${selectedFamiliars.length}</p>
+          <p><strong>Types covered:</strong> ${coveredTypes.length}/${TYPES.length}</p>
+          <p><strong>Elements covered:</strong> ${coveredElements.length}/${ELEMENTS.length}</p>
+        `;
+
+        // Render coverage
+        const coverageDiv = document.getElementById('coverage');
+        coverageDiv.innerHTML = `
+          <div class="coverage-section">
+            <h3>Types (${coveredTypes.length}/${TYPES.length})</h3>
+            ${TYPES.map(t => `<span class="tag ${uncoveredTypes.has(t) ? 'missing' : 'covered'}">${t}</span>`).join('')}
+          </div>
+          <div class="coverage-section">
+            <h3>Elements (${coveredElements.length}/${ELEMENTS.length})</h3>
+            ${ELEMENTS.map(e => `<span class="tag ${uncoveredElements.has(e) ? 'missing' : 'covered'}">${e}</span>`).join('')}
+          </div>
+        `;
+
+        // Render results
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = selectedFamiliars.map((fam, i) => {
+          const covers = [];
+          if (fam.newType) covers.push(fam.type);
+          if (fam.newElement) covers.push(fam.element);
+
+          return `
+            <div class="familiar-card element-${fam.element.toLowerCase()}" onclick="ignoreFamiliar(${fam.FamiliarId})">
+              <div class="name">${i + 1}. ${fam.MobName}</div>
+              <div class="info">Level ${fam.Level} | ${fam.type} | ${fam.element}</div>
+              <div class="covers">New coverage: ${covers.join(', ')}</div>
+              <div class="action">Click to ignore</div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (error) {
+        document.getElementById('stats').innerHTML = `<p style="color: #ff6b6b;">Error: ${error.message}</p>`;
+        console.error(error);
+      }
+    }
+
+    loadFamiliars();
+  </script>
+</body>
+</html>

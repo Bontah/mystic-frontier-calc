@@ -1306,6 +1306,7 @@ function setupOptimizerEvents(): void {
   const filterElement = document.getElementById('filterElement');
   const filterType = document.getElementById('filterType');
   const filterRequireMatch = document.getElementById('filterRequireMatch');
+  const filterRequireMatchAny = document.getElementById('filterRequireMatchAny');
 
   if (filterElement) {
     filterElement.addEventListener('change', () => {
@@ -1321,6 +1322,12 @@ function setupOptimizerEvents(): void {
   }
   if (filterRequireMatch) {
     filterRequireMatch.addEventListener('change', () => {
+      invalidateCombinationsCache();
+      showOptimizerStrategies();
+    });
+  }
+  if (filterRequireMatchAny) {
+    filterRequireMatchAny.addEventListener('change', () => {
       invalidateCombinationsCache();
       showOptimizerStrategies();
     });
@@ -1601,15 +1608,17 @@ function invalidateCombinationsCache(): void {
 /**
  * Get current optimizer filter values
  */
-function getOptimizerFilters(): { element: string; type: string; requireMatch: boolean } {
+function getOptimizerFilters(): { element: string; type: string; requireMatch: boolean; requireMatchAny: boolean } {
   const elementSelect = document.getElementById('filterElement') as HTMLSelectElement;
   const typeSelect = document.getElementById('filterType') as HTMLSelectElement;
   const requireMatchCheckbox = document.getElementById('filterRequireMatch') as HTMLInputElement;
+  const requireMatchAnyCheckbox = document.getElementById('filterRequireMatchAny') as HTMLInputElement;
 
   return {
     element: elementSelect?.value || '',
     type: typeSelect?.value || '',
     requireMatch: requireMatchCheckbox?.checked || false,
+    requireMatchAny: requireMatchAnyCheckbox?.checked || false,
   };
 }
 
@@ -1662,7 +1671,7 @@ function getOrGenerateCombinations(): CalcFamiliar[][] | null {
 
   // Get filter values
   const filters = getOptimizerFilters();
-  const filterHash = `${filters.element}|${filters.type}|${filters.requireMatch}`;
+  const filterHash = `${filters.element}|${filters.type}|${filters.requireMatch}|${filters.requireMatchAny}`;
 
   // Check if cache is valid
   const currentHash = getRosterHash(roster);
@@ -1682,7 +1691,7 @@ function getOrGenerateCombinations(): CalcFamiliar[][] | null {
 
   let combinations = generateCombinations(calcFamiliars, 3);
 
-  // Apply filters if "Require at least one matching familiar" is checked
+  // Apply filters if "Require type+element on same familiar" is checked
   if (filters.requireMatch && (filters.element || filters.type)) {
     combinations = combinations.filter((combo) => {
       return combo.some((fam) => {
@@ -1695,6 +1704,16 @@ function getOrGenerateCombinations(): CalcFamiliar[][] | null {
         // If only one filter is set, require that one to match
         return (filters.element && elementMatch) || (filters.type && typeMatch);
       });
+    });
+  }
+
+  // Apply filters if "Require type+element (any familiar)" is checked
+  if (filters.requireMatchAny && (filters.element || filters.type)) {
+    combinations = combinations.filter((combo) => {
+      const hasElementMatch = !filters.element || combo.some((fam) => fam.element === filters.element);
+      const hasTypeMatch = !filters.type || combo.some((fam) => fam.type === filters.type);
+      // Require both to be satisfied (each can be on different familiars)
+      return hasElementMatch && hasTypeMatch;
     });
   }
 

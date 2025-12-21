@@ -182,9 +182,9 @@ export function createIconDropdown(config: IconDropdownConfig): {
   };
   document.addEventListener('click', closeHandler);
 
-  // Close on scroll
-  const scrollHandler = () => {
-    if (isOpen) {
+  // Close on scroll (but not when scrolling inside the dropdown)
+  const scrollHandler = (e: Event) => {
+    if (isOpen && !optionsList.contains(e.target as Node)) {
       close();
     }
   };

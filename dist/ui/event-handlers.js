@@ -212,6 +212,40 @@ function setupRosterEvents() {
     if (deleteAllBtn) {
         deleteAllBtn.addEventListener('click', deleteAllRoster);
     }
+    // Roster search and filter controls
+    setupRosterFilters();
+}
+/**
+ * Setup roster search and filter event handlers
+ */
+function setupRosterFilters() {
+    const refreshRoster = () => {
+        const roster = selectors.getCurrentRoster(store.getState());
+        updateRosterList(roster);
+    };
+    // Search input with debounce
+    const searchInput = document.getElementById('rosterSearchInput');
+    if (searchInput) {
+        let debounceTimer;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = window.setTimeout(refreshRoster, 200);
+        });
+    }
+    // Filter and sort dropdowns
+    const filterIds = [
+        'rosterFilterRank',
+        'rosterFilterElement',
+        'rosterFilterType',
+        'rosterFilterWave',
+        'rosterSortBy',
+    ];
+    filterIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', refreshRoster);
+        }
+    });
 }
 /**
  * Setup dice input events

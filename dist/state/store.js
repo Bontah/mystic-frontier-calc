@@ -15,7 +15,6 @@ function createInitialState() {
             3: [null, null, null],
         },
         bonusItems: [],
-        conditionalBonuses: [],
         characters: [],
         currentCharacterId: null,
         editingFamiliarId: null,

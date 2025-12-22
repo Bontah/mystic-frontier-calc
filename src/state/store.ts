@@ -33,9 +33,6 @@ export interface AppState {
   // Active bonus items (user-selected)
   bonusItems: BonusItem[];
 
-  // Active conditional bonuses (user-added)
-  conditionalBonuses: ConditionalBonus[];
-
   // Character/Roster state
   characters: Character[];
   currentCharacterId: number | null;
@@ -79,7 +76,6 @@ function createInitialState(): AppState {
       3: [null, null, null],
     },
     bonusItems: [],
-    conditionalBonuses: [],
     characters: [],
     currentCharacterId: null,
     editingFamiliarId: null,

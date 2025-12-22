@@ -118,11 +118,10 @@ export function calculate(): void {
     rank: f.rank,
   }));
 
-  // Collect all conditionals (from familiars + user-added)
-  const allConditionals: ConditionalBonus[] = [
-    ...familiars.filter((f) => f.conditional).map((f) => f.conditional!),
-    ...state.conditionalBonuses,
-  ];
+  // Collect all conditionals from familiars
+  const allConditionals: ConditionalBonus[] = familiars
+    .filter((f) => f.conditional)
+    .map((f) => f.conditional!);
 
   // Calculate score
   const result = calculateScore(
@@ -149,15 +148,6 @@ export function calculate(): void {
         familiarName: fam.name,
       });
     }
-  }
-
-  // Add user-added conditionals (no familiar name)
-  for (const cond of state.conditionalBonuses) {
-    const evalResult = evaluateConditionalBonus(cond, dice, familiarContexts);
-    conditionalsDisplayData.push({
-      conditional: cond,
-      isActive: evalResult.isActive,
-    });
   }
 
   // Update display
@@ -577,12 +567,11 @@ export function calculatePassingCombinations(): void {
   const familiars = state.calcFamiliars;
   const difficulty = getDifficulty();
 
-  // Collect all conditionals (from familiars + user-added)
+  // Collect all conditionals from familiars
   const activeFamiliars = familiars.filter((f): f is CalcFamiliar => f !== null && f.rank !== undefined);
-  const allConditionals: ConditionalBonus[] = [
-    ...activeFamiliars.filter((f) => f.conditional).map((f) => f.conditional!),
-    ...state.conditionalBonuses,
-  ];
+  const allConditionals: ConditionalBonus[] = activeFamiliars
+    .filter((f) => f.conditional)
+    .map((f) => f.conditional!);
 
   // Find top passing combinations
   const combinations = findTopPassingCombinations(

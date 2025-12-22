@@ -5,12 +5,12 @@
 import { store } from './store.js';
 const STORAGE_KEYS = {
     BONUS_ITEMS: 'bonusItems',
-    CONDITIONAL_BONUSES: 'conditionalBonuses',
     CHARACTERS: 'characters',
     CURRENT_CHARACTER_ID: 'currentCharacterId',
     SAVED_WAVES: 'savedWaves',
-    // Legacy key for migration
+    // Legacy keys for cleanup
     FAMILIAR_ROSTER: 'familiarRoster',
+    CONDITIONAL_BONUSES_LEGACY: 'conditionalBonuses',
 };
 /**
  * Check if localStorage is available
@@ -110,11 +110,25 @@ const defaultSavedWaves = {
     3: [null, null, null],
 };
 /**
+ * Clean up legacy localStorage keys
+ */
+function cleanupLegacyKeys() {
+    if (!isStorageAvailable())
+        return;
+    try {
+        localStorage.removeItem(STORAGE_KEYS.CONDITIONAL_BONUSES_LEGACY);
+    }
+    catch {
+        // Ignore cleanup errors
+    }
+}
+/**
  * Load persisted state from localStorage
  */
 export function loadPersistedState() {
+    // Clean up legacy keys on load
+    cleanupLegacyKeys();
     const bonusItems = safeGetItem(STORAGE_KEYS.BONUS_ITEMS, []);
-    const conditionalBonuses = safeGetItem(STORAGE_KEYS.CONDITIONAL_BONUSES, []);
     const savedWaves = safeGetItem(STORAGE_KEYS.SAVED_WAVES, defaultSavedWaves);
     let characters = safeGetItem(STORAGE_KEYS.CHARACTERS, []);
     let currentCharacterId = safeGetItem(STORAGE_KEYS.CURRENT_CHARACTER_ID, null);
@@ -129,7 +143,6 @@ export function loadPersistedState() {
     }
     return {
         bonusItems,
-        conditionalBonuses,
         savedWaves,
         characters,
         currentCharacterId,
@@ -141,7 +154,6 @@ export function loadPersistedState() {
 export function saveState() {
     const state = store.getState();
     safeSetItem(STORAGE_KEYS.BONUS_ITEMS, state.bonusItems);
-    safeSetItem(STORAGE_KEYS.CONDITIONAL_BONUSES, state.conditionalBonuses);
     safeSetItem(STORAGE_KEYS.SAVED_WAVES, state.savedWaves);
     safeSetItem(STORAGE_KEYS.CHARACTERS, state.characters);
     safeSetItem(STORAGE_KEYS.CURRENT_CHARACTER_ID, state.currentCharacterId);
@@ -169,7 +181,6 @@ export function exportData() {
     const state = store.getState();
     return JSON.stringify({
         bonusItems: state.bonusItems,
-        conditionalBonuses: state.conditionalBonuses,
         characters: state.characters,
         currentCharacterId: state.currentCharacterId,
         exportedAt: new Date().toISOString(),
@@ -184,7 +195,6 @@ export function importData(jsonString) {
         if (data.characters && Array.isArray(data.characters)) {
             store.setState({
                 bonusItems: data.bonusItems ?? [],
-                conditionalBonuses: data.conditionalBonuses ?? [],
                 characters: data.characters,
                 currentCharacterId: data.currentCharacterId ?? data.characters[0]?.id ?? null,
             });

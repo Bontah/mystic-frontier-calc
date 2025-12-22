@@ -95,11 +95,10 @@ export function calculate() {
         element: f.element,
         rank: f.rank,
     }));
-    // Collect all conditionals (from familiars + user-added)
-    const allConditionals = [
-        ...familiars.filter((f) => f.conditional).map((f) => f.conditional),
-        ...state.conditionalBonuses,
-    ];
+    // Collect all conditionals from familiars
+    const allConditionals = familiars
+        .filter((f) => f.conditional)
+        .map((f) => f.conditional);
     // Calculate score
     const result = calculateScore(dice, familiarContexts, state.bonusItems, allConditionals);
     // Add pass/fail info
@@ -117,14 +116,6 @@ export function calculate() {
                 familiarName: fam.name,
             });
         }
-    }
-    // Add user-added conditionals (no familiar name)
-    for (const cond of state.conditionalBonuses) {
-        const evalResult = evaluateConditionalBonus(cond, dice, familiarContexts);
-        conditionalsDisplayData.push({
-            conditional: cond,
-            isActive: evalResult.isActive,
-        });
     }
     // Update display
     renderResultDisplay({ ...result, passed, difference });
@@ -472,12 +463,11 @@ export function calculatePassingCombinations() {
     const state = store.getState();
     const familiars = state.calcFamiliars;
     const difficulty = getDifficulty();
-    // Collect all conditionals (from familiars + user-added)
+    // Collect all conditionals from familiars
     const activeFamiliars = familiars.filter((f) => f !== null && f.rank !== undefined);
-    const allConditionals = [
-        ...activeFamiliars.filter((f) => f.conditional).map((f) => f.conditional),
-        ...state.conditionalBonuses,
-    ];
+    const allConditionals = activeFamiliars
+        .filter((f) => f.conditional)
+        .map((f) => f.conditional);
     // Find top passing combinations
     const combinations = findTopPassingCombinations(familiars, state.bonusItems, allConditionals, difficulty, 5);
     renderPassingCombinations(combinations);

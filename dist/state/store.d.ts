@@ -18,7 +18,6 @@ export interface AppState {
     currentWave: Wave | null;
     savedWaves: SavedWaves;
     bonusItems: BonusItem[];
-    conditionalBonuses: ConditionalBonus[];
     characters: Character[];
     currentCharacterId: number | null;
     editingFamiliarId: number | null;

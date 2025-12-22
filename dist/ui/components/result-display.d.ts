@@ -9,6 +9,8 @@ export interface ConditionalDisplayData {
     conditional: ConditionalBonus;
     isActive: boolean;
     familiarName?: string;
+    familiarIndex: number;
+    isManuallyDisabled: boolean;
 }
 /**
  * Update the result display

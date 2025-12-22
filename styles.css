@@ -497,6 +497,44 @@ h2 {
   opacity: 0.5;
 }
 
+/* Make conditional pills clickable */
+.conditional-pill {
+  cursor: pointer;
+  user-select: none;
+}
+
+.conditional-pill:hover {
+  opacity: 0.85;
+  transform: scale(1.02);
+}
+
+.conditional-pill:active {
+  transform: scale(0.98);
+}
+
+/* Manually disabled conditional style */
+.conditional-pill.manually-disabled {
+  background: rgba(255, 100, 100, 0.15);
+  border: 1px solid rgba(255, 100, 100, 0.3);
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+.conditional-pill.manually-disabled .cond-name {
+  text-decoration: line-through;
+}
+
+.conditional-pill.manually-disabled .cond-familiar {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.conditional-pill.manually-disabled .cond-flat,
+.conditional-pill.manually-disabled .cond-mult {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
 .no-conditionals {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);

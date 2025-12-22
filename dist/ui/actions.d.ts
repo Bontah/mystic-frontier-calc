@@ -5,6 +5,14 @@
 import type { CalcFamiliar, Wave, Familiar } from '../types/index.js';
 import type { BonusItem } from '../types/bonus.js';
 /**
+ * Check if a conditional is manually disabled
+ */
+export declare function isConditionalDisabled(familiarIndex: number, conditionalId: string | undefined): boolean;
+/**
+ * Toggle the disabled state of a conditional and recalculate
+ */
+export declare function toggleConditionalDisabled(familiarIndex: number, conditionalId: string | undefined): void;
+/**
  * Update dice dropdown options based on familiar ranks and conditional caps
  */
 export declare function updateDiceDropdowns(): void;

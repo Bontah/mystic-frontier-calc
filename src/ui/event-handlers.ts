@@ -21,6 +21,7 @@ import {
   applyBonusItemFromSearch,
   renderBonusItemsList,
   calculatePassingCombinations,
+  toggleConditionalDisabled,
 } from './actions.js';
 import { updateRosterList } from './components/roster-item.js';
 import { createIconDropdown, RANK_OPTIONS, ELEMENT_OPTIONS, TYPE_OPTIONS } from './components/icon-dropdown.js';
@@ -207,6 +208,25 @@ function setupCalculatorEvents(): void {
   if (difficultyInput) {
     difficultyInput.addEventListener('change', calculate);
     difficultyInput.addEventListener('input', calculate);
+  }
+
+  // Conditional pill toggle - click to disable/enable conditionals
+  const waveSummaryConditionals = document.getElementById('waveSummaryConditionals');
+  if (waveSummaryConditionals) {
+    waveSummaryConditionals.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const pill = target.closest('[data-action="toggle-conditional"]') as HTMLElement;
+
+      if (pill) {
+        const familiarIndexAttr = pill.getAttribute('data-familiar-index');
+        const conditionalId = pill.getAttribute('data-conditional-id');
+
+        if (familiarIndexAttr !== null) {
+          const familiarIndex = parseInt(familiarIndexAttr, 10);
+          toggleConditionalDisabled(familiarIndex, conditionalId || undefined);
+        }
+      }
+    });
   }
 }
 

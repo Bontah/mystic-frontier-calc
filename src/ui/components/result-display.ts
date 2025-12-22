@@ -12,6 +12,8 @@ export interface ConditionalDisplayData {
   conditional: ConditionalBonus;
   isActive: boolean;
   familiarName?: string;
+  familiarIndex: number;
+  isManuallyDisabled: boolean;
 }
 
 /**
@@ -93,14 +95,27 @@ export function updateActiveConditionals(conditionals: ConditionalDisplayData[])
   } else {
     container.innerHTML = conditionals
       .map((data) => {
-        const { conditional, isActive, familiarName } = data;
-        const statusClass = isActive ? 'active' : 'inactive';
+        const { conditional, isActive, familiarName, familiarIndex, isManuallyDisabled } = data;
+
+        // Determine visual state
+        let statusClass = 'active';
+        if (isManuallyDisabled) {
+          statusClass = 'manually-disabled';
+        } else if (!isActive) {
+          statusClass = 'inactive';
+        }
+
         const bonusText = formatBonusValues(conditional.flatBonus, conditional.multiplierBonus);
         const nameDisplay = familiarName
           ? `<span class="cond-familiar">${familiarName}:</span> ${conditional.name}`
           : conditional.name;
+        const tooltipText = isManuallyDisabled ? 'Click to enable' : 'Click to disable';
 
-        return `<span class="conditional-pill ${statusClass}">
+        return `<span class="conditional-pill ${statusClass}"
+                      data-action="toggle-conditional"
+                      data-familiar-index="${familiarIndex}"
+                      data-conditional-id="${conditional.id || ''}"
+                      title="${tooltipText}">
           <span class="cond-name">${nameDisplay}</span>
           ${bonusText ? `<span class="cond-values">${bonusText}</span>` : ''}
         </span>`;

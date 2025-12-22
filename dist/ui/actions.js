@@ -11,6 +11,46 @@ import { updateFamiliarsGrid } from './components/familiar-card.js';
 import { updateRosterList } from './components/roster-item.js';
 import { escapeHtml } from '../utils/html.js';
 import { showToast } from './toast.js';
+// ============================================================================
+// Manually Disabled Conditionals
+// ============================================================================
+/**
+ * Track manually disabled conditionals by key: "${familiarIndex}-${conditional.id}"
+ * This resets when familiars change.
+ */
+let disabledConditionalKeys = new Set();
+/**
+ * Generate a unique key for a conditional
+ */
+function getConditionalKey(familiarIndex, conditionalId) {
+    return `${familiarIndex}-${conditionalId || 'unknown'}`;
+}
+/**
+ * Reset all manually disabled conditionals
+ */
+function resetDisabledConditionals() {
+    disabledConditionalKeys.clear();
+}
+/**
+ * Check if a conditional is manually disabled
+ */
+export function isConditionalDisabled(familiarIndex, conditionalId) {
+    return disabledConditionalKeys.has(getConditionalKey(familiarIndex, conditionalId));
+}
+/**
+ * Toggle the disabled state of a conditional and recalculate
+ */
+export function toggleConditionalDisabled(familiarIndex, conditionalId) {
+    const key = getConditionalKey(familiarIndex, conditionalId);
+    if (disabledConditionalKeys.has(key)) {
+        disabledConditionalKeys.delete(key);
+    }
+    else {
+        disabledConditionalKeys.add(key);
+    }
+    calculate();
+}
+// ============================================================================
 /**
  * Get current dice values from the DOM
  */
@@ -79,7 +119,14 @@ function updateCalculatorDisabledState(disabled) {
  */
 export function calculate() {
     const state = store.getState();
-    const familiars = state.calcFamiliars.filter((f) => f !== null && f.rank !== undefined);
+    // Track original indices for conditionals
+    const familiarsWithIndex = [];
+    state.calcFamiliars.forEach((f, idx) => {
+        if (f !== null && f.rank !== undefined) {
+            familiarsWithIndex.push({ fam: f, originalIndex: idx });
+        }
+    });
+    const familiars = familiarsWithIndex.map((item) => item.fam);
     // Update disabled state for calculator sections
     updateCalculatorDisabledState(familiars.length === 0);
     if (familiars.length === 0) {
@@ -95,25 +142,34 @@ export function calculate() {
         element: f.element,
         rank: f.rank,
     }));
-    // Collect all conditionals from familiars
-    const allConditionals = familiars
-        .filter((f) => f.conditional)
-        .map((f) => f.conditional);
-    // Calculate score
-    const result = calculateScore(dice, familiarContexts, state.bonusItems, allConditionals);
+    // Collect all conditionals from familiars, filtering out manually disabled ones
+    const activeConditionals = [];
+    for (const { fam, originalIndex } of familiarsWithIndex) {
+        if (fam.conditional && !isConditionalDisabled(originalIndex, fam.conditional.id)) {
+            activeConditionals.push(fam.conditional);
+        }
+    }
+    // Calculate score (only with non-disabled conditionals)
+    const result = calculateScore(dice, familiarContexts, state.bonusItems, activeConditionals);
     // Add pass/fail info
     const passed = result.finalResult >= difficulty;
     const difference = result.finalResult - difficulty;
     // Build conditionals display data with active status
     const conditionalsDisplayData = [];
-    // Add familiar conditionals with their familiar names
-    for (const fam of familiars) {
+    // Add familiar conditionals with their familiar names and disabled state
+    for (const { fam, originalIndex } of familiarsWithIndex) {
         if (fam.conditional) {
-            const evalResult = evaluateConditionalBonus(fam.conditional, dice, familiarContexts);
+            const isDisabled = isConditionalDisabled(originalIndex, fam.conditional.id);
+            // Only evaluate if not manually disabled
+            const evalResult = isDisabled
+                ? { isActive: false, flatBonus: 0, multiplierBonus: 0 }
+                : evaluateConditionalBonus(fam.conditional, dice, familiarContexts);
             conditionalsDisplayData.push({
                 conditional: fam.conditional,
                 isActive: evalResult.isActive,
                 familiarName: fam.name,
+                familiarIndex: originalIndex,
+                isManuallyDisabled: isDisabled,
             });
         }
     }
@@ -136,19 +192,20 @@ export function calculate() {
             activeBonusesEl.innerHTML = '';
         }
     }
-    // Calculate reroll suggestions
+    // Calculate reroll suggestions (using only active conditionals)
     const familiarsWithRank = familiars.map((f) => ({
         type: f.type,
         element: f.element,
         rank: f.rank,
     }));
-    const rerollSuggestions = calculateRerollSuggestions(dice, familiarsWithRank, state.bonusItems, allConditionals, difficulty);
+    const rerollSuggestions = calculateRerollSuggestions(dice, familiarsWithRank, state.bonusItems, activeConditionals, difficulty);
     renderRerollSuggestions(rerollSuggestions, passed);
 }
 /**
  * Set a familiar in a calculator slot
  */
 export function setCalcFamiliar(slot, familiar) {
+    resetDisabledConditionals();
     store.setState((state) => {
         const calcFamiliars = [...state.calcFamiliars];
         calcFamiliars[slot] = familiar;
@@ -168,6 +225,7 @@ export function deleteCalcFamiliar(slot) {
  * Empty calculator slots (without clearing saved waves)
  */
 export function emptyCalculator() {
+    resetDisabledConditionals();
     store.setState({
         calcFamiliars: [null, null, null],
         currentWave: null,
@@ -187,6 +245,7 @@ export function emptyCalculator() {
  * Reset all calculator familiars and saved waves
  */
 export function resetAllFamiliars() {
+    resetDisabledConditionals();
     store.setState({
         calcFamiliars: [null, null, null],
         currentWave: null,
@@ -231,6 +290,7 @@ export function saveToWave(wave) {
  * Load a wave lineup into calculator
  */
 export function loadWave(wave) {
+    resetDisabledConditionals();
     const state = store.getState();
     // Load from saved waves
     const calcFamiliars = [...state.savedWaves[wave]];
@@ -463,13 +523,17 @@ export function calculatePassingCombinations() {
     const state = store.getState();
     const familiars = state.calcFamiliars;
     const difficulty = getDifficulty();
-    // Collect all conditionals from familiars
-    const activeFamiliars = familiars.filter((f) => f !== null && f.rank !== undefined);
-    const allConditionals = activeFamiliars
-        .filter((f) => f.conditional)
-        .map((f) => f.conditional);
+    // Collect all conditionals from familiars, filtering out manually disabled ones
+    const activeConditionals = [];
+    familiars.forEach((f, idx) => {
+        if (f !== null && f.rank !== undefined && f.conditional) {
+            if (!isConditionalDisabled(idx, f.conditional.id)) {
+                activeConditionals.push(f.conditional);
+            }
+        }
+    });
     // Find top passing combinations
-    const combinations = findTopPassingCombinations(familiars, state.bonusItems, allConditionals, difficulty, 5);
+    const combinations = findTopPassingCombinations(familiars, state.bonusItems, activeConditionals, difficulty, 5);
     renderPassingCombinations(combinations);
 }
 //# sourceMappingURL=actions.js.map

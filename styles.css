@@ -784,6 +784,12 @@ h2 {
   margin-left: 4px;
 }
 
+.bonus-pill .pill-info {
+  color: #66ccff;
+  font-size: var(--font-size-xs);
+  cursor: help;
+}
+
 /* Trigger result item in search */
 .trigger-result-item {
   padding: 10px 12px;
@@ -1196,6 +1202,52 @@ select:focus, input:focus, textarea:focus {
   border-radius: 3px;
   cursor: help;
   z-index: 1;
+}
+
+.info-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #66ccff;
+  color: #1a1a2e;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 50%;
+  cursor: help;
+  z-index: 1;
+}
+
+/* When both badges exist, offset info badge */
+.bugged-badge + .info-badge,
+.info-badge.has-bugged {
+  right: 55px;
+}
+
+.info-icon {
+  color: #66ccff;
+  cursor: help;
+  font-style: normal;
+}
+
+.info-badge-inline {
+  display: inline-block;
+  background: #66ccff;
+  color: #1a1a2e;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  cursor: help;
+  vertical-align: middle;
+}
+
+.roster-item-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .difficulty-input {

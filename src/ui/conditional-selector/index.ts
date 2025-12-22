@@ -7,7 +7,7 @@ import type { ConditionalBonus, Rank } from '../../types/index.js';
 import type { TriggerGroup } from '../../types/bonus.js';
 import { store } from '../../state/store.js';
 import { escapeHtml } from '../../utils/html.js';
-import { formatBonusValues } from '../../utils/format.js';
+import { formatBonusValues, getMisleadingWordingNote } from '../../utils/format.js';
 
 /**
  * Configuration for a conditional selector instance
@@ -172,15 +172,17 @@ export function createConditionalSelector(
         const stats = formatBonusValues(v);
         const rarity = (v.rarity || v.rank || 'Common').toLowerCase();
         const isBugged = isBuggedConditional(v);
+        const misleadingNote = getMisleadingWordingNote(v);
         const isSelected =
           state.selectedConditional && state.selectedConditional.id === v.id;
 
         return `
           <div class="bonus-pill ${rarity} ${isBugged ? 'bugged' : ''} ${isSelected ? 'selected' : ''}"
-               data-variant-index="${idx}">
+               data-variant-index="${idx}"
+               ${misleadingNote ? `title="${escapeHtml(misleadingNote)}"` : ''}>
             <span class="pill-stats">${stats}</span>
             ${isBugged ? '<span class="pill-bugged">BUGGED</span>' : ''}
-          </div>
+                      </div>
         `;
       })
       .join('');

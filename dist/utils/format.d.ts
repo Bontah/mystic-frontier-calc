@@ -23,4 +23,9 @@ export declare function getConfidenceClass(confidence: number): string;
  * Returns warning message if bugged, false if not
  */
 export declare function isBuggedConditional(cond: ConditionalBonus | null | undefined): string | false;
+/**
+ * Detect conditionals with misleading wording in-game
+ * Returns informational note if misleading, false if not
+ */
+export declare function getMisleadingWordingNote(cond: ConditionalBonus | null | undefined): string | false;
 //# sourceMappingURL=format.d.ts.map

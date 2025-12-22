@@ -2,7 +2,7 @@
  * Roster item component
  */
 import { escapeHtml } from '../../utils/html.js';
-import { formatBonusValues, isBuggedConditional } from '../../utils/format.js';
+import { formatBonusValues, isBuggedConditional, getMisleadingWordingNote } from '../../utils/format.js';
 /**
  * Render a roster item
  */
@@ -11,8 +11,13 @@ export function renderRosterItem(fam) {
     const disabledClass = fam.disabled ? 'disabled' : '';
     const buggedClass = isBuggedConditional(fam.conditional) ? 'bugged' : '';
     let condText = '';
+    let infoBadge = '';
     if (fam.conditional) {
         const stats = formatBonusValues(fam.conditional);
+        const misleadingNote = getMisleadingWordingNote(fam.conditional);
+        if (misleadingNote) {
+            infoBadge = `<span class="info-badge-inline" title="${escapeHtml(misleadingNote)}">Info</span>`;
+        }
         condText = `<div class="roster-conditional">${escapeHtml(fam.conditional.name)} (${stats})</div>`;
     }
     const waveClass = fam.wave ? `wave-${fam.wave}` : '';
@@ -21,7 +26,10 @@ export function renderRosterItem(fam) {
     <div class="roster-item ${rankClass} ${disabledClass} ${buggedClass} ${waveClass}" data-familiar-id="${fam.id}">
       ${waveText}
       <div class="roster-item-info">
-        <div class="roster-item-name">${escapeHtml(fam.name)}</div>
+        <div class="roster-item-name-row">
+          <span class="roster-item-name">${escapeHtml(fam.name)}</span>
+          ${infoBadge}
+        </div>
         <div class="roster-item-details">
           <span class="rank-text ${rankClass}">${fam.rank}</span> · <span class="element-text element-${fam.element.toLowerCase()}">${fam.element}</span> · ${fam.type}
         </div>

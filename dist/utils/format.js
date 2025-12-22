@@ -49,8 +49,22 @@ export function isBuggedConditional(cond) {
     const name = (cond.name || '').toLowerCase();
     const condition = (cond.condition || '').toLowerCase();
     // Bug 1: Non-elemental/None element conditionals don't work in-game
-    if (name.includes('non-elemental') || condition.includes("element === 'none'")) {
-        return 'Non-elemental conditionals are bugged in-game';
+    // if (name.includes('non-elemental') || condition.includes("element === 'none'")) {
+    //   return 'Non-elemental conditionals are bugged in-game';
+    // }
+    return false;
+}
+/**
+ * Detect conditionals with misleading wording in-game
+ * Returns informational note if misleading, false if not
+ */
+export function getMisleadingWordingNote(cond) {
+    if (!cond)
+        return false;
+    const name = (cond.name || '').toLowerCase();
+    // "Dice add up to X" wording is misleading - actual behavior is each die >= threshold
+    if (name.includes('dice add up to')) {
+        return 'Misleading wording: Each die must individually meet the threshold';
     }
     return false;
 }

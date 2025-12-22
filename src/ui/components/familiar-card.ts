@@ -4,7 +4,7 @@
 
 import type { CalcFamiliar } from '../../types/index.js';
 import { escapeHtml } from '../../utils/html.js';
-import { formatConditionalDisplay, isBuggedConditional } from '../../utils/format.js';
+import { formatConditionalDisplay, isBuggedConditional, getMisleadingWordingNote } from '../../utils/format.js';
 
 /**
  * Render an empty familiar slot
@@ -25,11 +25,16 @@ export function renderFamiliarCard(fam: CalcFamiliar, index: number): string {
 
   let condText: string | null = null;
   let buggedBadge = '';
+  let infoBadge = '';
   if (fam.conditional) {
     condText = formatConditionalDisplay(fam.conditional);
     const bugWarning = isBuggedConditional(fam.conditional);
     if (bugWarning) {
       buggedBadge = `<span class="bugged-badge" title="${escapeHtml(bugWarning)}">BUGGED</span>`;
+    }
+    const misleadingNote = getMisleadingWordingNote(fam.conditional);
+    if (misleadingNote) {
+      infoBadge = `<span class="info-badge-inline" title="${escapeHtml(misleadingNote)}">Info</span>`;
     }
   }
 
@@ -42,7 +47,7 @@ export function renderFamiliarCard(fam: CalcFamiliar, index: number): string {
           <span class="rank-text ${rankClass}">${fam.rank}</span>${fam.element !== 'None' ? ` · <span class="element-text element-${fam.element.toLowerCase()}">${fam.element}</span>` : ''} · ${fam.type}
         </div>
         <div class="familiar-card-conditional ${condText ? '' : 'none'}">
-          ${condText ? escapeHtml(condText) : 'No conditional'}
+          ${condText ? escapeHtml(condText) : 'No conditional'}${infoBadge}
         </div>
       </div>
       <div class="familiar-card-actions">

@@ -10,6 +10,80 @@ import { setupEventHandlers, setupModalCloseButtons, calculate, updateDiceDropdo
 import { updateFamiliarsGrid } from './ui/components/familiar-card.js';
 import { updateRosterList } from './ui/components/roster-item.js';
 /**
+ * Migrate conditional strings in stored familiars to match current config
+ * This ensures any fixes to condition logic are applied to existing data
+ */
+function migrateConditionalStrings() {
+    const state = store.getState();
+    const configBonuses = state.configConditionalBonuses?.bonuses || [];
+    if (configBonuses.length === 0)
+        return;
+    // Build lookup map by ID
+    const bonusById = new Map();
+    for (const bonus of configBonuses) {
+        if (bonus.id) {
+            bonusById.set(bonus.id, bonus);
+        }
+    }
+    // Helper to migrate a conditional
+    const migrateConditional = (cond) => {
+        if (!cond?.id)
+            return cond;
+        const configBonus = bonusById.get(cond.id);
+        if (configBonus && configBonus.condition !== cond.condition) {
+            return { ...cond, condition: configBonus.condition };
+        }
+        return cond;
+    };
+    let updated = false;
+    // Migrate characters' rosters
+    const migratedCharacters = state.characters.map((char) => {
+        const migratedRoster = char.roster.map((fam) => {
+            const migratedCond = migrateConditional(fam.conditional);
+            if (migratedCond !== fam.conditional) {
+                updated = true;
+                return { ...fam, conditional: migratedCond };
+            }
+            return fam;
+        });
+        return { ...char, roster: migratedRoster };
+    });
+    // Migrate saved waves
+    const migratedWaves = { ...state.savedWaves };
+    for (const waveKey of [1, 2, 3]) {
+        const wave = migratedWaves[waveKey];
+        migratedWaves[waveKey] = wave.map((fam) => {
+            if (!fam)
+                return fam;
+            const migratedCond = migrateConditional(fam.conditional);
+            if (migratedCond !== fam.conditional) {
+                updated = true;
+                return { ...fam, conditional: migratedCond };
+            }
+            return fam;
+        });
+    }
+    // Migrate calc familiars
+    const migratedCalcFams = state.calcFamiliars.map((fam) => {
+        if (!fam)
+            return fam;
+        const migratedCond = migrateConditional(fam.conditional);
+        if (migratedCond !== fam.conditional) {
+            updated = true;
+            return { ...fam, conditional: migratedCond };
+        }
+        return fam;
+    });
+    if (updated) {
+        console.log('Migrated conditional strings to match current config');
+        store.setState({
+            characters: migratedCharacters,
+            savedWaves: migratedWaves,
+            calcFamiliars: migratedCalcFams,
+        });
+    }
+}
+/**
  * Initialize the application
  */
 async function init() {
@@ -19,6 +93,8 @@ async function init() {
         initializePersistence();
         // Load configuration files
         await loadAllConfigs();
+        // Migrate any outdated conditional strings
+        migrateConditionalStrings();
         // Enable auto-save on state changes
         enableAutoSave();
         // Setup event handlers

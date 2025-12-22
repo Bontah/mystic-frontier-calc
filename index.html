@@ -683,6 +683,55 @@
     <div class="modal-content familiar-modal">
       <h3 id="familiarModalTitle">Add Familiar</h3>
       <input type="hidden" id="familiarEditSlot">
+
+      <!-- Pick from Collection Section -->
+      <div class="familiar-picker-section">
+        <div class="picker-header" data-action="toggle-picker">
+          <span class="picker-toggle-icon">▶</span>
+          <span>Pick from Collection</span>
+        </div>
+        <div class="picker-content" id="familiarPickerContent" style="display: none;">
+          <div class="picker-search">
+            <input type="text" id="pickerSearch" placeholder="Search by name...">
+          </div>
+          <div class="picker-filters">
+            <select id="pickerFilterRank">
+              <option value="">All Ranks</option>
+              <option value="Legendary">Legendary</option>
+              <option value="Unique">Unique</option>
+              <option value="Epic">Epic</option>
+              <option value="Rare">Rare</option>
+              <option value="Common">Common</option>
+            </select>
+            <select id="pickerFilterElement">
+              <option value="">All Elements</option>
+              <option value="Fire">Fire</option>
+              <option value="Poison">Poison</option>
+              <option value="Lightning">Lightning</option>
+              <option value="Ice">Ice</option>
+              <option value="Dark">Dark</option>
+              <option value="Holy">Holy</option>
+              <option value="None">None</option>
+            </select>
+            <select id="pickerFilterType">
+              <option value="">All Types</option>
+              <option value="Human">Human</option>
+              <option value="Beast">Beast</option>
+              <option value="Plant">Plant</option>
+              <option value="Aquatic">Aquatic</option>
+              <option value="Fairy">Fairy</option>
+              <option value="Reptile">Reptile</option>
+              <option value="Devil">Devil</option>
+              <option value="Undead">Undead</option>
+              <option value="Machine">Machine</option>
+            </select>
+          </div>
+          <div id="pickerResults" class="picker-results">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
       <div class="familiar-form">
         <div class="form-group">
           <label>Name</label>

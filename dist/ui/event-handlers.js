@@ -7,6 +7,7 @@ import { setupNavigation } from './navigation.js';
 import { calculate, setCalcFamiliar, deleteCalcFamiliar, emptyCalculator, resetAllFamiliars, loadWave, saveToWave, addFamiliarToRoster, deleteFamiliarFromRoster, toggleFamiliarDisabled, deleteBonusItem, searchBonusItems, applyBonusItemFromSearch, renderBonusItemsList, calculatePassingCombinations, toggleConditionalDisabled, } from './actions.js';
 import { updateRosterList } from './components/roster-item.js';
 import { createIconDropdown, RANK_OPTIONS, ELEMENT_OPTIONS, TYPE_OPTIONS } from './components/icon-dropdown.js';
+import { createFamiliarPicker } from './components/familiar-picker.js';
 import { saveState } from '../state/persistence.js';
 import { createConditionalSelector } from './conditional-selector/index.js';
 import { showToast } from './toast.js';
@@ -20,6 +21,8 @@ import { processImage, findTopMatches, getReferenceImages, isDebugEnabled, recal
 let modalConditionalSelector = null;
 let rosterConditionalSelector = null;
 let extractionConditionalSelector = null;
+// Module-level familiar picker instance
+let familiarPicker = null;
 // Module-level icon dropdown instances
 let modalRankDropdown = null;
 let modalElementDropdown = null;
@@ -38,6 +41,7 @@ export function setupEventHandlers() {
     setupWaveEvents();
     setupKeyboardShortcuts();
     setupIconDropdowns();
+    setupFamiliarPicker();
     setupModalConditionalSelector();
     setupRosterConditionalSelector();
     setupFamiliarModalSave();
@@ -93,6 +97,77 @@ function setupIconDropdowns() {
         options: TYPE_OPTIONS,
         defaultValue: 'Human',
     });
+}
+/**
+ * Setup familiar picker for selecting from collection
+ */
+function setupFamiliarPicker() {
+    familiarPicker = createFamiliarPicker({
+        searchInputId: 'pickerSearch',
+        resultsContainerId: 'pickerResults',
+        filterRankId: 'pickerFilterRank',
+        filterElementId: 'pickerFilterElement',
+        filterTypeId: 'pickerFilterType',
+        onSelect: (familiar) => {
+            // Get the current slot from the hidden input
+            const slotInput = document.getElementById('familiarEditSlot');
+            const slot = parseInt(slotInput?.value || '0', 10);
+            // Auto-save the familiar to the calculator slot
+            const calcFamiliar = {
+                id: familiar.id,
+                name: familiar.name,
+                rank: familiar.rank,
+                element: familiar.element,
+                type: familiar.type,
+                conditional: familiar.conditional,
+            };
+            setCalcFamiliar(slot, calcFamiliar);
+            // Close the modal
+            const modal = document.getElementById('familiarModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            showToast(`Added ${familiar.name} to slot ${slot + 1}`);
+        },
+    });
+    // Setup toggle-picker action
+    const pickerHeader = document.querySelector('[data-action="toggle-picker"]');
+    if (pickerHeader) {
+        pickerHeader.addEventListener('click', togglePickerSection);
+    }
+}
+/**
+ * Toggle the picker section expand/collapse
+ */
+function togglePickerSection() {
+    const content = document.getElementById('familiarPickerContent');
+    const toggleIcon = document.querySelector('.picker-toggle-icon');
+    if (content && toggleIcon) {
+        const isExpanded = content.style.display !== 'none';
+        if (isExpanded) {
+            content.style.display = 'none';
+            toggleIcon.classList.remove('expanded');
+        }
+        else {
+            content.style.display = 'block';
+            toggleIcon.classList.add('expanded');
+            // Refresh picker results when expanding
+            familiarPicker?.refresh();
+        }
+    }
+}
+/**
+ * Collapse the picker section (used when opening modal)
+ */
+function collapsePickerSection() {
+    const content = document.getElementById('familiarPickerContent');
+    const toggleIcon = document.querySelector('.picker-toggle-icon');
+    if (content) {
+        content.style.display = 'none';
+    }
+    if (toggleIcon) {
+        toggleIcon.classList.remove('expanded');
+    }
 }
 /**
  * Setup calculator-related events
@@ -350,6 +425,9 @@ function openFamiliarModal(slot) {
     else {
         modalConditionalSelector?.clear();
     }
+    // Reset picker section (collapsed by default, clear filters)
+    collapsePickerSection();
+    familiarPicker?.clear();
     modal.style.display = 'flex';
 }
 /**

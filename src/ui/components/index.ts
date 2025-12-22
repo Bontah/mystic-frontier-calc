@@ -33,3 +33,10 @@ export {
   ELEMENT_OPTIONS,
   TYPE_OPTIONS,
 } from './icon-dropdown.js';
+
+export {
+  createFamiliarPicker,
+  renderPickerItem,
+  type FamiliarPicker,
+  type FamiliarPickerConfig,
+} from './familiar-picker.js';

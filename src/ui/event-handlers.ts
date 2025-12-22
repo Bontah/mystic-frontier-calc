@@ -25,6 +25,7 @@ import {
 } from './actions.js';
 import { updateRosterList } from './components/roster-item.js';
 import { createIconDropdown, RANK_OPTIONS, ELEMENT_OPTIONS, TYPE_OPTIONS } from './components/icon-dropdown.js';
+import { createFamiliarPicker, type FamiliarPicker } from './components/familiar-picker.js';
 import { saveState } from '../state/persistence.js';
 import { createConditionalSelector } from './conditional-selector/index.js';
 import { showToast } from './toast.js';
@@ -58,6 +59,9 @@ let modalConditionalSelector: ReturnType<typeof createConditionalSelector> | nul
 let rosterConditionalSelector: ReturnType<typeof createConditionalSelector> | null = null;
 let extractionConditionalSelector: ReturnType<typeof createConditionalSelector> | null = null;
 
+// Module-level familiar picker instance
+let familiarPicker: FamiliarPicker | null = null;
+
 // Module-level icon dropdown instances
 let modalRankDropdown: ReturnType<typeof createIconDropdown> | null = null;
 let modalElementDropdown: ReturnType<typeof createIconDropdown> | null = null;
@@ -77,6 +81,7 @@ export function setupEventHandlers(): void {
   setupWaveEvents();
   setupKeyboardShortcuts();
   setupIconDropdowns();
+  setupFamiliarPicker();
   setupModalConditionalSelector();
   setupRosterConditionalSelector();
   setupFamiliarModalSave();
@@ -139,6 +144,87 @@ function setupIconDropdowns(): void {
     options: TYPE_OPTIONS,
     defaultValue: 'Human',
   });
+}
+
+/**
+ * Setup familiar picker for selecting from collection
+ */
+function setupFamiliarPicker(): void {
+  familiarPicker = createFamiliarPicker({
+    searchInputId: 'pickerSearch',
+    resultsContainerId: 'pickerResults',
+    filterRankId: 'pickerFilterRank',
+    filterElementId: 'pickerFilterElement',
+    filterTypeId: 'pickerFilterType',
+    onSelect: (familiar) => {
+      // Get the current slot from the hidden input
+      const slotInput = document.getElementById('familiarEditSlot') as HTMLInputElement;
+      const slot = parseInt(slotInput?.value || '0', 10);
+
+      // Auto-save the familiar to the calculator slot
+      const calcFamiliar: CalcFamiliar = {
+        id: familiar.id,
+        name: familiar.name,
+        rank: familiar.rank,
+        element: familiar.element,
+        type: familiar.type,
+        conditional: familiar.conditional,
+      };
+
+      setCalcFamiliar(slot, calcFamiliar);
+
+      // Close the modal
+      const modal = document.getElementById('familiarModal');
+      if (modal) {
+        modal.style.display = 'none';
+      }
+
+      showToast(`Added ${familiar.name} to slot ${slot + 1}`);
+    },
+  });
+
+  // Setup toggle-picker action
+  const pickerHeader = document.querySelector('[data-action="toggle-picker"]');
+  if (pickerHeader) {
+    pickerHeader.addEventListener('click', togglePickerSection);
+  }
+}
+
+/**
+ * Toggle the picker section expand/collapse
+ */
+function togglePickerSection(): void {
+  const content = document.getElementById('familiarPickerContent');
+  const toggleIcon = document.querySelector('.picker-toggle-icon');
+
+  if (content && toggleIcon) {
+    const isExpanded = content.style.display !== 'none';
+
+    if (isExpanded) {
+      content.style.display = 'none';
+      toggleIcon.classList.remove('expanded');
+    } else {
+      content.style.display = 'block';
+      toggleIcon.classList.add('expanded');
+      // Refresh picker results when expanding
+      familiarPicker?.refresh();
+    }
+  }
+}
+
+/**
+ * Collapse the picker section (used when opening modal)
+ */
+function collapsePickerSection(): void {
+  const content = document.getElementById('familiarPickerContent');
+  const toggleIcon = document.querySelector('.picker-toggle-icon');
+
+  if (content) {
+    content.style.display = 'none';
+  }
+  if (toggleIcon) {
+    toggleIcon.classList.remove('expanded');
+  }
 }
 
 /**
@@ -427,6 +513,10 @@ function openFamiliarModal(slot: number): void {
   } else {
     modalConditionalSelector?.clear();
   }
+
+  // Reset picker section (collapsed by default, clear filters)
+  collapsePickerSection();
+  familiarPicker?.clear();
 
   modal.style.display = 'flex';
 }

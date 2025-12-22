@@ -52,10 +52,6 @@ export function isBuggedConditional(cond) {
     if (name.includes('non-elemental') || condition.includes("element === 'none'")) {
         return 'Non-elemental conditionals are bugged in-game';
     }
-    // Bug 2: "Dice add up to" conditionals don't work in-game
-    if (name.includes('dice add up to') || /dice\[\d\]\s*\+\s*dice\[\d\]/.test(condition)) {
-        return 'Dice add-up conditionals are bugged in-game';
-    }
     return false;
 }
 //# sourceMappingURL=format.js.map

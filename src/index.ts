@@ -23,10 +23,25 @@ import type { Character, ConditionalBonus } from './types/index.js';
  * This ensures any fixes to condition logic are applied to existing data
  */
 function migrateConditionalStrings(): void {
+  const isDev = new URLSearchParams(window.location.search).has('is_dev');
   const state = store.getState();
   const configBonuses = state.configConditionalBonuses?.bonuses || [];
 
-  if (configBonuses.length === 0) return;
+  if (isDev) {
+    console.group('[migrateConditional] Starting migration');
+    console.log('Config bonuses loaded:', configBonuses.length);
+    console.log('Characters in state:', state.characters.length);
+    console.log('SavedWaves:', state.savedWaves);
+    console.log('CalcFamiliars:', state.calcFamiliars);
+  }
+
+  if (configBonuses.length === 0) {
+    if (isDev) {
+      console.warn('[migrateConditional] No config bonuses found, aborting');
+      console.groupEnd();
+    }
+    return;
+  }
 
   // Build lookup map by ID
   const bonusById = new Map<string, ConditionalBonus>();
@@ -36,12 +51,63 @@ function migrateConditionalStrings(): void {
     }
   }
 
+  if (isDev) {
+    console.log('[migrateConditional] Bonus lookup map size:', bonusById.size);
+    console.log('[migrateConditional] Bonus IDs in config:', [...bonusById.keys()]);
+  }
+
   // Helper to migrate a conditional
-  const migrateConditional = (cond: ConditionalBonus | null): ConditionalBonus | null => {
-    if (!cond?.id) return cond;
+  const migrateConditional = (
+    cond: ConditionalBonus | null,
+    context: string
+  ): ConditionalBonus | null => {
+    if (isDev) {
+      console.group(`[${context}]`);
+      console.log('Input conditional:', cond);
+    }
+
+    if (!cond) {
+      if (isDev) {
+        console.log('Result: null/undefined, skipping');
+        console.groupEnd();
+      }
+      return cond;
+    }
+    if (!cond.id) {
+      if (isDev) {
+        console.warn('Result: Conditional has no ID, cannot migrate');
+        console.groupEnd();
+      }
+      return cond;
+    }
+
     const configBonus = bonusById.get(cond.id);
+    if (isDev) {
+      console.log(`Looking up ID="${cond.id}" in config...`);
+      console.log('Config bonus:', configBonus);
+      if (configBonus) {
+        console.log(`Stored condition:  "${cond.condition}"`);
+        console.log(`Config condition:  "${configBonus.condition}"`);
+        console.log(`Match: ${configBonus.condition === cond.condition}`);
+      } else {
+        console.warn(`ID "${cond.id}" not found in config bonuses!`);
+      }
+    }
+
     if (configBonus && configBonus.condition !== cond.condition) {
-      return { ...cond, condition: configBonus.condition };
+      const migrated = { ...cond, condition: configBonus.condition };
+      if (isDev) {
+        console.log(`%c-> MIGRATING`, 'color: orange; font-weight: bold');
+        console.log('Before:', cond);
+        console.log('After:', migrated);
+        console.groupEnd();
+      }
+      return migrated;
+    }
+
+    if (isDev) {
+      console.log('Result: No migration needed');
+      console.groupEnd();
     }
     return cond;
   };
@@ -49,9 +115,11 @@ function migrateConditionalStrings(): void {
   let updated = false;
 
   // Migrate characters' rosters
+  if (isDev) console.group('[migrateConditional] Processing characters rosters');
   const migratedCharacters: Character[] = state.characters.map((char) => {
-    const migratedRoster = char.roster.map((fam) => {
-      const migratedCond = migrateConditional(fam.conditional);
+    if (isDev) console.log(`Character "${char.name}" has ${char.roster.length} familiars`);
+    const migratedRoster = char.roster.map((fam, idx) => {
+      const migratedCond = migrateConditional(fam.conditional, `char:${char.name}/fam:${fam.name}[${idx}]`);
       if (migratedCond !== fam.conditional) {
         updated = true;
         return { ...fam, conditional: migratedCond };
@@ -60,14 +128,17 @@ function migrateConditionalStrings(): void {
     });
     return { ...char, roster: migratedRoster };
   });
+  if (isDev) console.groupEnd();
 
   // Migrate saved waves
+  if (isDev) console.group('[migrateConditional] Processing savedWaves');
   const migratedWaves = { ...state.savedWaves };
   for (const waveKey of [1, 2, 3] as const) {
     const wave = migratedWaves[waveKey];
-    migratedWaves[waveKey] = wave.map((fam) => {
+    if (isDev) console.log(`Wave ${waveKey}:`, wave.map((f) => f?.name || 'null'));
+    migratedWaves[waveKey] = wave.map((fam, idx) => {
       if (!fam) return fam;
-      const migratedCond = migrateConditional(fam.conditional);
+      const migratedCond = migrateConditional(fam.conditional, `wave:${waveKey}/slot:${idx}/${fam.name}`);
       if (migratedCond !== fam.conditional) {
         updated = true;
         return { ...fam, conditional: migratedCond };
@@ -75,17 +146,28 @@ function migrateConditionalStrings(): void {
       return fam;
     }) as [typeof wave[0], typeof wave[1], typeof wave[2]];
   }
+  if (isDev) console.groupEnd();
 
   // Migrate calc familiars
-  const migratedCalcFams = state.calcFamiliars.map((fam) => {
-    if (!fam) return fam;
-    const migratedCond = migrateConditional(fam.conditional);
+  if (isDev) console.group('[migrateConditional] Processing calcFamiliars');
+  const migratedCalcFams = state.calcFamiliars.map((fam, idx) => {
+    if (!fam) {
+      if (isDev) console.log(`Slot ${idx}: empty`);
+      return fam;
+    }
+    if (isDev) console.log(`Slot ${idx}: ${fam.name}`);
+    const migratedCond = migrateConditional(fam.conditional, `calc:slot${idx}/${fam.name}`);
     if (migratedCond !== fam.conditional) {
       updated = true;
       return { ...fam, conditional: migratedCond };
     }
     return fam;
   }) as typeof state.calcFamiliars;
+  if (isDev) console.groupEnd();
+
+  if (isDev) {
+    console.log('[migrateConditional] Migration complete. Updated:', updated);
+  }
 
   if (updated) {
     console.log('Migrated conditional strings to match current config');
@@ -94,7 +176,12 @@ function migrateConditionalStrings(): void {
       savedWaves: migratedWaves,
       calcFamiliars: migratedCalcFams,
     });
+    if (isDev) {
+      console.log('[migrateConditional] State updated successfully');
+    }
   }
+
+  if (isDev) console.groupEnd();
 }
 
 /**

@@ -2,7 +2,7 @@
  * UI layer exports
  */
 
-export { showPage, getCurrentPage, setupNavigation } from './navigation.js';
+export { showPage, getCurrentPage, setupNavigation, checkUrlForHiddenPage } from './navigation.js';
 
 export {
   calculate,

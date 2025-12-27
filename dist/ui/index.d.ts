@@ -1,7 +1,7 @@
 /**
  * UI layer exports
  */
-export { showPage, getCurrentPage, setupNavigation } from './navigation.js';
+export { showPage, getCurrentPage, setupNavigation, checkUrlForHiddenPage } from './navigation.js';
 export { calculate, setCalcFamiliar, deleteCalcFamiliar, resetAllFamiliars, loadWave, saveToWave, addFamiliarToRoster, deleteFamiliarFromRoster, toggleFamiliarDisabled, switchCharacter, updateDiceDropdowns, } from './actions.js';
 export { setupEventHandlers, setupModalCloseButtons, } from './event-handlers.js';
 export { createConditionalSelector } from './conditional-selector/index.js';

@@ -13,7 +13,9 @@ import {
   calculate,
   updateDiceDropdowns,
   switchCharacter,
+  checkUrlForHiddenPage,
 } from './ui/index.js';
+import { initFamiliarFinder } from './ui/components/familiar-finder.js';
 import { updateFamiliarsGrid } from './ui/components/familiar-card.js';
 import { updateRosterList } from './ui/components/roster-item.js';
 import type { Character, ConditionalBonus } from './types/index.js';
@@ -204,8 +206,18 @@ async function init(): Promise<void> {
       console.warn('Scanner initialization failed:', err);
     });
 
+    // Check for hidden page in URL
+    const isHiddenPage = checkUrlForHiddenPage();
+
     // Render initial UI
     renderInitialState();
+
+    // If on familiar finder page, initialize it
+    if (isHiddenPage) {
+      initFamiliarFinder().catch((err) => {
+        console.warn('Familiar finder initialization failed:', err);
+      });
+    }
 
     // Run initial calculation
     calculate();

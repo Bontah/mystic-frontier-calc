@@ -126,12 +126,24 @@ function cleanupLegacyKeys() {
  * Load persisted state from localStorage
  */
 export function loadPersistedState() {
+    const isDev = new URLSearchParams(window.location.search).has('is_dev');
     // Clean up legacy keys on load
     cleanupLegacyKeys();
+    if (isDev) {
+        console.group('[persistence] Loading from localStorage');
+        console.log('Raw savedWaves from localStorage:', localStorage.getItem(STORAGE_KEYS.SAVED_WAVES));
+        console.log('Raw characters from localStorage:', localStorage.getItem(STORAGE_KEYS.CHARACTERS));
+    }
     const bonusItems = safeGetItem(STORAGE_KEYS.BONUS_ITEMS, []);
     const savedWaves = safeGetItem(STORAGE_KEYS.SAVED_WAVES, defaultSavedWaves);
+    if (isDev) {
+        console.log('Parsed savedWaves:', savedWaves);
+    }
     let characters = safeGetItem(STORAGE_KEYS.CHARACTERS, []);
     let currentCharacterId = safeGetItem(STORAGE_KEYS.CURRENT_CHARACTER_ID, null);
+    if (isDev) {
+        console.log('Parsed characters:', characters);
+    }
     // Run migrations
     characters = migrateOldRoster(characters);
     // Ensure default character
@@ -140,6 +152,10 @@ export function loadPersistedState() {
     // Ensure valid current character
     if (!currentCharacterId || !characters.find((c) => c.id === currentCharacterId)) {
         currentCharacterId = result.currentId;
+    }
+    if (isDev) {
+        console.log('Final loaded state:', { bonusItems, savedWaves, characters, currentCharacterId });
+        console.groupEnd();
     }
     return {
         bonusItems,
@@ -162,8 +178,15 @@ export function saveState() {
  * Initialize store with persisted state
  */
 export function initializePersistence() {
+    const isDev = new URLSearchParams(window.location.search).has('is_dev');
     const persistedState = loadPersistedState();
+    if (isDev) {
+        console.log('[persistence] Setting persisted state to store:', persistedState);
+    }
     store.setState(persistedState);
+    if (isDev) {
+        console.log('[persistence] Store state after init:', store.getState());
+    }
 }
 /**
  * Subscribe to state changes and auto-save

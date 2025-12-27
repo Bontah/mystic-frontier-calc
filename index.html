@@ -514,6 +514,39 @@
     </div>
   </div>
 
+  <!-- Familiar Finder Page (Hidden - accessible via ?page=famfinder) -->
+  <div id="page-famfinder" class="page">
+    <div class="section">
+      <h2>Minimum Familiars for Full Coverage</h2>
+      <p class="section-description">Find the minimum set of level 185-294 familiars needed to cover all types and elements. Click a familiar to see alternatives or ignore it.</p>
+
+      <div id="famfinderIgnored" class="famfinder-ignored" style="display: none;">
+        <h3>Ignored Familiars <button class="clear-btn" id="famfinderClearIgnored">Clear All</button></h3>
+        <div id="famfinderIgnoredList"></div>
+      </div>
+
+      <div id="famfinderStats" class="famfinder-stats">Loading...</div>
+
+      <h3>Coverage Status</h3>
+      <div id="famfinderCoverage" class="famfinder-coverage"></div>
+
+      <h3>Minimum Familiar Set</h3>
+      <div id="famfinderResults" class="famfinder-grid"></div>
+    </div>
+  </div>
+
+  <!-- Familiar Alternatives Modal -->
+  <div id="famfinderAlternativesModal" class="modal" style="display: none;">
+    <div class="modal-content famfinder-alternatives-modal">
+      <h3>Choose Alternative Familiar</h3>
+      <p id="famfinderAlternativesInfo" class="section-description"></p>
+      <div id="famfinderAlternativesList" class="famfinder-alternatives-list"></div>
+      <div class="modal-actions">
+        <button class="cancel-btn" data-action="close-modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Extraction Results Modal -->
   <div id="extractionModal" class="modal" style="display: none;">
     <div class="modal-content">

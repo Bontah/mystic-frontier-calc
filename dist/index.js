@@ -3,10 +3,11 @@
  * Main entry point
  */
 import { store, selectors } from './state/store.js';
-import { initializePersistence, enableAutoSave } from './state/persistence.js';
+import { initializePersistence, enableAutoSave, saveState } from './state/persistence.js';
 import { loadAllConfigs } from './services/config-loader.js';
 import { initScanner } from './scanner/index.js';
-import { setupEventHandlers, setupModalCloseButtons, calculate, updateDiceDropdowns, switchCharacter, } from './ui/index.js';
+import { setupEventHandlers, setupModalCloseButtons, calculate, updateDiceDropdowns, switchCharacter, checkUrlForHiddenPage, } from './ui/index.js';
+import { initFamiliarFinder } from './ui/components/familiar-finder.js';
 import { updateFamiliarsGrid } from './ui/components/familiar-card.js';
 import { updateRosterList } from './ui/components/roster-item.js';
 /**
@@ -14,10 +15,23 @@ import { updateRosterList } from './ui/components/roster-item.js';
  * This ensures any fixes to condition logic are applied to existing data
  */
 function migrateConditionalStrings() {
+    const isDev = new URLSearchParams(window.location.search).has('is_dev');
     const state = store.getState();
     const configBonuses = state.configConditionalBonuses?.bonuses || [];
-    if (configBonuses.length === 0)
+    if (isDev) {
+        console.group('[migrateConditional] Starting migration');
+        console.log('Config bonuses loaded:', configBonuses.length);
+        console.log('Characters in state:', state.characters.length);
+        console.log('SavedWaves:', state.savedWaves);
+        console.log('CalcFamiliars:', state.calcFamiliars);
+    }
+    if (configBonuses.length === 0) {
+        if (isDev) {
+            console.warn('[migrateConditional] No config bonuses found, aborting');
+            console.groupEnd();
+        }
         return;
+    }
     // Build lookup map by ID
     const bonusById = new Map();
     for (const bonus of configBonuses) {
@@ -25,21 +39,53 @@ function migrateConditionalStrings() {
             bonusById.set(bonus.id, bonus);
         }
     }
+    if (isDev) {
+        console.log('[migrateConditional] Bonus lookup map size:', bonusById.size);
+        console.log('[migrateConditional] Bonus IDs in config:', [...bonusById.keys()]);
+    }
     // Helper to migrate a conditional
-    const migrateConditional = (cond) => {
-        if (!cond?.id)
+    const migrateConditional = (cond, context) => {
+        if (!cond)
             return cond;
+        if (!cond.id) {
+            if (isDev) {
+                console.warn(`[${context}] Conditional has no ID, cannot migrate:`, cond);
+            }
+            return cond;
+        }
         const configBonus = bonusById.get(cond.id);
-        if (configBonus && configBonus.condition !== cond.condition) {
-            return { ...cond, condition: configBonus.condition };
+        if (!configBonus) {
+            if (isDev) {
+                console.warn(`[${context}] ID "${cond.id}" not found in config bonuses!`);
+            }
+            return cond;
+        }
+        // Check if any field differs from config
+        const needsMigration = cond.condition !== configBonus.condition ||
+            cond.multiplierBonus !== configBonus.multiplierBonus ||
+            cond.flatBonus !== configBonus.flatBonus ||
+            cond.name !== configBonus.name ||
+            cond.rarity !== configBonus.rarity ||
+            cond.color !== configBonus.color;
+        if (needsMigration) {
+            // Replace with config version entirely
+            const migrated = { ...configBonus };
+            if (isDev) {
+                console.group(`[${context}]`);
+                console.log('Stored:', cond);
+                console.log('Config:', configBonus);
+                console.log(`%c-> MIGRATING (syncing all fields)`, 'color: orange; font-weight: bold');
+                console.groupEnd();
+            }
+            return migrated;
         }
         return cond;
     };
     let updated = false;
     // Migrate characters' rosters
     const migratedCharacters = state.characters.map((char) => {
-        const migratedRoster = char.roster.map((fam) => {
-            const migratedCond = migrateConditional(fam.conditional);
+        const migratedRoster = char.roster.map((fam, idx) => {
+            const migratedCond = migrateConditional(fam.conditional, `char:${char.name}/fam:${fam.name}[${idx}]`);
             if (migratedCond !== fam.conditional) {
                 updated = true;
                 return { ...fam, conditional: migratedCond };
@@ -52,10 +98,10 @@ function migrateConditionalStrings() {
     const migratedWaves = { ...state.savedWaves };
     for (const waveKey of [1, 2, 3]) {
         const wave = migratedWaves[waveKey];
-        migratedWaves[waveKey] = wave.map((fam) => {
+        migratedWaves[waveKey] = wave.map((fam, idx) => {
             if (!fam)
                 return fam;
-            const migratedCond = migrateConditional(fam.conditional);
+            const migratedCond = migrateConditional(fam.conditional, `wave:${waveKey}/slot:${idx}/${fam.name}`);
             if (migratedCond !== fam.conditional) {
                 updated = true;
                 return { ...fam, conditional: migratedCond };
@@ -64,10 +110,10 @@ function migrateConditionalStrings() {
         });
     }
     // Migrate calc familiars
-    const migratedCalcFams = state.calcFamiliars.map((fam) => {
+    const migratedCalcFams = state.calcFamiliars.map((fam, idx) => {
         if (!fam)
             return fam;
-        const migratedCond = migrateConditional(fam.conditional);
+        const migratedCond = migrateConditional(fam.conditional, `calc:slot${idx}/${fam.name}`);
         if (migratedCond !== fam.conditional) {
             updated = true;
             return { ...fam, conditional: migratedCond };
@@ -75,18 +121,38 @@ function migrateConditionalStrings() {
         return fam;
     });
     if (updated) {
+        if (isDev) {
+            console.log('[migrateConditional] Applying migrations to store...');
+        }
         console.log('Migrated conditional strings to match current config');
         store.setState({
             characters: migratedCharacters,
             savedWaves: migratedWaves,
             calcFamiliars: migratedCalcFams,
         });
+        // Persist to localStorage immediately (autoSave not enabled yet)
+        saveState();
+        if (isDev) {
+            console.log('[migrateConditional] Saved to localStorage');
+        }
     }
+    else if (isDev) {
+        console.log('[migrateConditional] No migrations needed');
+    }
+    if (isDev)
+        console.groupEnd();
 }
 /**
  * Initialize the application
  */
 async function init() {
+    const isDev = new URLSearchParams(window.location.search).has('is_dev');
+    if (isDev) {
+        console.group('[init] IMMEDIATE localStorage snapshot (before anything runs)');
+        console.log('savedWaves:', localStorage.getItem('savedWaves'));
+        console.log('characters:', localStorage.getItem('characters'));
+        console.groupEnd();
+    }
     console.log('Mystic Frontier Calculator v2.0.0 initializing...');
     try {
         // Load persisted state from localStorage
@@ -104,8 +170,16 @@ async function init() {
         initScanner().catch((err) => {
             console.warn('Scanner initialization failed:', err);
         });
+        // Check for hidden page in URL
+        const isHiddenPage = checkUrlForHiddenPage();
         // Render initial UI
         renderInitialState();
+        // If on familiar finder page, initialize it
+        if (isHiddenPage) {
+            initFamiliarFinder().catch((err) => {
+                console.warn('Familiar finder initialization failed:', err);
+            });
+        }
         // Run initial calculation
         calculate();
         console.log('Mystic Frontier Calculator ready!');

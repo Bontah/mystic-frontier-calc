@@ -28,6 +28,42 @@ interface SelectedFamiliar extends NormalizedFamiliar {
 const ELEMENTS = ['None', 'Fire', 'Poison', 'Lightning', 'Ice', 'Dark', 'Holy'];
 const TYPES = ['Human', 'Beast', 'Plant', 'Aquatic', 'Fairy', 'Reptile', 'Devil', 'Undead', 'Machine'];
 
+// Familiars that are unobtainable or should be excluded from coverage calculations
+const EXCLUDED_FAMILIARS = new Set([
+  'Corrupted Stormcaster',
+  'Stormcaster Caeneus',
+  'Ghostwood Stumpy',
+  'Royal Guard',
+  'Imperial Guard',
+  'Enhanced Maverick Beta',
+  'Maverick Alpha',
+  'Afterlord',
+  'Prototype Lord',
+  'Overlord',
+  'Romantic Slime',
+  'Spirit Debris',
+  'Chosen Seren',
+  'Thralled Warhammer Knight',
+  'Thralled Guard',
+  'Mihile',
+  'Guard Captain Darknell',
+  'Dark Miscreation',
+  'Entangled Fragment',
+  'Faith Fragment',
+  'Red-eyed Gargoyle',
+  'Dreamkeeper',
+  'Dark Demon Wolfmaster',
+  'Dark Demon Shieldmaster',
+  'Dark Demon Shieldbearer',
+  'Dark Demon Axeman',
+  'Dark Demon Swordmaster',
+  'Damien',
+  'Normal Damien',
+  'Master Specter',
+  'Permeating Vanity',
+  'Permeating Anxiety',
+]);
+
 const ELEMENT_MAP: Record<string, string> = {
   'N': 'None',
   'F': 'Fire',
@@ -53,9 +89,9 @@ export async function initFamiliarFinder(): Promise<void> {
     const response = await fetch('familiars.json');
     const familiars: FamiliarData[] = await response.json();
 
-    // Filter to level 185-294 and normalize
+    // Filter to level 185-294, exclude unobtainable, and normalize
     allFamiliars = familiars
-      .filter(f => f.Level >= 185 && f.Level < 295)
+      .filter(f => f.Level >= 185 && f.Level < 295 && !EXCLUDED_FAMILIARS.has(f.MobName))
       .map(f => ({
         ...f,
         element: f.ElementName || ELEMENT_MAP[f.ElementCode] || 'None',

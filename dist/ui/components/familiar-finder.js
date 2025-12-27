@@ -17,6 +17,7 @@ const ELEMENT_MAP = {
 let allFamiliars = [];
 const ignoredIds = new Set();
 const lockedSelections = new Map(); // key: "type-element", value: FamiliarId
+let currentMode = 'both';
 /**
  * Initialize the familiar finder
  */
@@ -54,6 +55,29 @@ function setupEventHandlers() {
     if (clearBtn) {
         clearBtn.addEventListener('click', clearIgnored);
     }
+    // Mode selector buttons
+    document.querySelectorAll('.famfinder-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const mode = btn.getAttribute('data-mode');
+            if (mode) {
+                setMode(mode);
+            }
+        });
+    });
+}
+/**
+ * Set the coverage mode
+ */
+function setMode(mode) {
+    currentMode = mode;
+    // Update button states
+    document.querySelectorAll('.famfinder-mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
+    });
+    // Clear locked selections when changing mode
+    lockedSelections.clear();
+    // Recalculate
+    findMinimumFamiliars();
 }
 /**
  * Add a familiar to ignored list
@@ -87,17 +111,30 @@ function clearIgnored() {
  * Lock a specific familiar choice for a type/element combo
  */
 function lockSelection(type, element, familiarId) {
-    const key = `${type}-${element}`;
+    // Lock key depends on mode
+    let key = `${type}-${element}`;
+    if (currentMode === 'types')
+        key = type;
+    if (currentMode === 'elements')
+        key = element;
     lockedSelections.set(key, familiarId);
     findMinimumFamiliars();
     closeAlternativesModal();
 }
 /**
- * Get alternatives for a specific type/element combination
+ * Get alternatives based on current mode
  */
 function getAlternatives(type, element) {
     return allFamiliars
-        .filter(f => !ignoredIds.has(f.FamiliarId) && f.type === type && f.element === element)
+        .filter(f => {
+        if (ignoredIds.has(f.FamiliarId))
+            return false;
+        if (currentMode === 'types')
+            return f.type === type;
+        if (currentMode === 'elements')
+            return f.element === element;
+        return f.type === type && f.element === element;
+    })
         .sort((a, b) => b.Level - a.Level);
 }
 /**
@@ -113,7 +150,16 @@ function showAlternatives(type, element, currentId) {
     const listEl = document.getElementById('famfinderAlternativesList');
     if (!modal || !infoEl || !listEl)
         return;
-    infoEl.textContent = `${alternatives.length} familiars with ${type} type and ${element} element:`;
+    // Set info text based on mode
+    if (currentMode === 'types') {
+        infoEl.textContent = `${alternatives.length} familiars with ${type} type:`;
+    }
+    else if (currentMode === 'elements') {
+        infoEl.textContent = `${alternatives.length} familiars with ${element} element:`;
+    }
+    else {
+        infoEl.textContent = `${alternatives.length} familiars with ${type} type and ${element} element:`;
+    }
     listEl.innerHTML = alternatives.map(fam => `
     <div class="famfinder-alternative-item element-${fam.element.toLowerCase()} ${fam.FamiliarId === currentId ? 'selected' : ''}"
          data-id="${fam.FamiliarId}" data-type="${type}" data-element="${element}">
@@ -167,8 +213,9 @@ function findMinimumFamiliars() {
         // Filter out ignored familiars
         const available = allFamiliars.filter(f => !ignoredIds.has(f.FamiliarId));
         // Greedy set cover algorithm with locked selections
-        const uncoveredTypes = new Set(TYPES);
-        const uncoveredElements = new Set(ELEMENTS);
+        // Only track what we need based on mode
+        const uncoveredTypes = currentMode !== 'elements' ? new Set(TYPES) : new Set();
+        const uncoveredElements = currentMode !== 'types' ? new Set(ELEMENTS) : new Set();
         const selectedFamiliars = [];
         const usedIds = new Set();
         // First, apply locked selections
@@ -194,9 +241,9 @@ function findMinimumFamiliars() {
                 if (usedIds.has(fam.FamiliarId))
                     continue;
                 let score = 0;
-                if (uncoveredTypes.has(fam.type))
+                if (currentMode !== 'elements' && uncoveredTypes.has(fam.type))
                     score++;
-                if (uncoveredElements.has(fam.element))
+                if (currentMode !== 'types' && uncoveredElements.has(fam.element))
                     score++;
                 // Prefer higher coverage, then higher level
                 if (score > bestScore || (score === bestScore && bestFamiliar && fam.Level > bestFamiliar.Level)) {
@@ -259,12 +306,28 @@ function renderStats(availableCount, selectedCount, uncoveredTypes, uncoveredEle
         return;
     const coveredTypes = TYPES.filter(t => !uncoveredTypes.has(t));
     const coveredElements = ELEMENTS.filter(e => !uncoveredElements.has(e));
+    let needToCover = '';
+    if (currentMode === 'both') {
+        needToCover = `${TYPES.length} types + ${ELEMENTS.length} elements = 16 total`;
+    }
+    else if (currentMode === 'types') {
+        needToCover = `${TYPES.length} types`;
+    }
+    else {
+        needToCover = `${ELEMENTS.length} elements`;
+    }
+    let coverageStats = '';
+    if (currentMode !== 'elements') {
+        coverageStats += `<p><strong>Types covered:</strong> ${coveredTypes.length}/${TYPES.length}</p>`;
+    }
+    if (currentMode !== 'types') {
+        coverageStats += `<p><strong>Elements covered:</strong> ${coveredElements.length}/${ELEMENTS.length}</p>`;
+    }
     statsDiv.innerHTML = `
     <p><strong>Total level 185-294 familiars:</strong> ${availableCount} (${ignoredIds.size} ignored)</p>
-    <p><strong>Need to cover:</strong> ${TYPES.length} types + ${ELEMENTS.length} elements = 16 total</p>
+    <p><strong>Need to cover:</strong> ${needToCover}</p>
     <p><strong>Minimum familiars needed:</strong> ${selectedCount}</p>
-    <p><strong>Types covered:</strong> ${coveredTypes.length}/${TYPES.length}</p>
-    <p><strong>Elements covered:</strong> ${coveredElements.length}/${ELEMENTS.length}</p>
+    ${coverageStats}
   `;
 }
 /**
@@ -276,16 +339,24 @@ function renderCoverage(uncoveredTypes, uncoveredElements) {
         return;
     const coveredTypes = TYPES.filter(t => !uncoveredTypes.has(t));
     const coveredElements = ELEMENTS.filter(e => !uncoveredElements.has(e));
-    coverageDiv.innerHTML = `
-    <div class="famfinder-coverage-section">
-      <h4>Types (${coveredTypes.length}/${TYPES.length})</h4>
-      ${TYPES.map(t => `<span class="famfinder-tag ${uncoveredTypes.has(t) ? 'missing' : 'covered'}">${t}</span>`).join('')}
-    </div>
-    <div class="famfinder-coverage-section">
-      <h4>Elements (${coveredElements.length}/${ELEMENTS.length})</h4>
-      ${ELEMENTS.map(e => `<span class="famfinder-tag ${uncoveredElements.has(e) ? 'missing' : 'covered'}">${e}</span>`).join('')}
-    </div>
-  `;
+    let html = '';
+    if (currentMode !== 'elements') {
+        html += `
+      <div class="famfinder-coverage-section">
+        <h4>Types (${coveredTypes.length}/${TYPES.length})</h4>
+        ${TYPES.map(t => `<span class="famfinder-tag ${uncoveredTypes.has(t) ? 'missing' : 'covered'}">${t}</span>`).join('')}
+      </div>
+    `;
+    }
+    if (currentMode !== 'types') {
+        html += `
+      <div class="famfinder-coverage-section">
+        <h4>Elements (${coveredElements.length}/${ELEMENTS.length})</h4>
+        ${ELEMENTS.map(e => `<span class="famfinder-tag ${uncoveredElements.has(e) ? 'missing' : 'covered'}">${e}</span>`).join('')}
+      </div>
+    `;
+    }
+    coverageDiv.innerHTML = html;
 }
 /**
  * Render results grid
@@ -296,13 +367,19 @@ function renderResults(selectedFamiliars) {
         return;
     resultsDiv.innerHTML = selectedFamiliars.map((fam, i) => {
         const covers = [];
-        if (fam.newType)
+        if (currentMode !== 'elements' && fam.newType)
             covers.push(fam.type);
-        if (fam.newElement)
+        if (currentMode !== 'types' && fam.newElement)
             covers.push(fam.element);
         const alternatives = getAlternatives(fam.type, fam.element);
         const hasAlternatives = alternatives.length > 1;
-        const isLocked = lockedSelections.has(`${fam.type}-${fam.element}`);
+        // Lock key depends on mode
+        let lockKey = `${fam.type}-${fam.element}`;
+        if (currentMode === 'types')
+            lockKey = fam.type;
+        if (currentMode === 'elements')
+            lockKey = fam.element;
+        const isLocked = lockedSelections.has(lockKey);
         return `
       <div class="famfinder-card element-${fam.element.toLowerCase()}" data-id="${fam.FamiliarId}">
         <div class="famfinder-card-header">

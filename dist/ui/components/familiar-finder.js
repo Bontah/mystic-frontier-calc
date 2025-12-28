@@ -63,6 +63,7 @@ let currentMode = 'both';
 const doneFamiliarIds = new Set();
 let savedPresets = [];
 let activePresetId = null;
+let showRemainingOnly = false; // Show only what's left to get based on done familiars
 /**
  * Initialize the familiar finder
  */
@@ -130,6 +131,14 @@ function setupEventHandlers() {
             if (e.key === 'Enter') {
                 handleSavePresetSubmit();
             }
+        });
+    }
+    // Show remaining only toggle
+    const remainingToggle = document.getElementById('famfinderShowRemaining');
+    if (remainingToggle) {
+        remainingToggle.addEventListener('change', () => {
+            showRemainingOnly = remainingToggle.checked;
+            findMinimumFamiliars();
         });
     }
 }
@@ -278,14 +287,30 @@ function closeAlternativesModal() {
  */
 function findMinimumFamiliars() {
     try {
-        // Filter out ignored familiars
-        const available = allFamiliars.filter(f => !ignoredIds.has(f.FamiliarId));
+        // Filter out ignored familiars, and optionally done familiars in remaining-only mode
+        const available = allFamiliars.filter(f => {
+            if (ignoredIds.has(f.FamiliarId))
+                return false;
+            if (showRemainingOnly && doneFamiliarIds.has(f.FamiliarId))
+                return false;
+            return true;
+        });
         // Greedy set cover algorithm with locked selections
         // Only track what we need based on mode
         const uncoveredTypes = currentMode !== 'elements' ? new Set(TYPES) : new Set();
         const uncoveredElements = currentMode !== 'types' ? new Set(ELEMENTS) : new Set();
         const selectedFamiliars = [];
         const usedIds = new Set();
+        // In remaining-only mode, mark types/elements covered by done familiars as already covered
+        if (showRemainingOnly) {
+            for (const doneId of doneFamiliarIds) {
+                const doneFam = allFamiliars.find(f => f.FamiliarId === doneId);
+                if (doneFam && !ignoredIds.has(doneId)) {
+                    uncoveredTypes.delete(doneFam.type);
+                    uncoveredElements.delete(doneFam.element);
+                }
+            }
+        }
         // First, apply locked selections
         for (const [key, familiarId] of lockedSelections.entries()) {
             const fam = available.find(f => f.FamiliarId === familiarId);
@@ -540,6 +565,7 @@ function savePreset(name) {
         lockedSelections: Array.from(lockedSelections.entries()),
         mode: currentMode,
         doneIds: Array.from(doneFamiliarIds),
+        showRemainingOnly,
         createdAt: new Date().toISOString()
     };
     savedPresets.push(preset);
@@ -567,6 +593,12 @@ function loadPreset(presetId) {
         preset.doneIds.forEach(id => doneFamiliarIds.add(id));
     }
     saveDoneIds();
+    // Restore showRemainingOnly toggle
+    showRemainingOnly = preset.showRemainingOnly ?? false;
+    const remainingToggle = document.getElementById('famfinderShowRemaining');
+    if (remainingToggle) {
+        remainingToggle.checked = showRemainingOnly;
+    }
     // Update mode button UI
     document.querySelectorAll('.famfinder-mode-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-mode') === currentMode);

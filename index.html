@@ -529,6 +529,14 @@
         </div>
       </div>
 
+      <div class="famfinder-presets-section">
+        <div class="famfinder-presets-header">
+          <h3>Presets</h3>
+          <button class="famfinder-btn save" id="famfinderSavePresetBtn">Save Current</button>
+        </div>
+        <div id="famfinderPresetsList" class="famfinder-presets-list"></div>
+      </div>
+
       <div id="famfinderIgnored" class="famfinder-ignored" style="display: none;">
         <h3>Ignored Familiars <button class="clear-btn" id="famfinderClearIgnored">Clear All</button></h3>
         <div id="famfinderIgnoredList"></div>
@@ -552,6 +560,21 @@
       <div id="famfinderAlternativesList" class="famfinder-alternatives-list"></div>
       <div class="modal-actions">
         <button class="cancel-btn" data-action="close-modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Preset Modal -->
+  <div id="famfinderSavePresetModal" class="modal" style="display: none;">
+    <div class="modal-content famfinder-save-preset-modal">
+      <h3>Save Preset</h3>
+      <div class="famfinder-preset-form">
+        <label for="famfinderPresetNameInput">Preset Name:</label>
+        <input type="text" id="famfinderPresetNameInput" placeholder="e.g., Main Farming" maxlength="50">
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" onclick="closeFamfinderPresetModal()">Cancel</button>
+        <button class="add-btn" id="famfinderSavePresetConfirm">Save</button>
       </div>
     </div>
   </div>

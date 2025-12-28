@@ -4,6 +4,8 @@
  * with the ability to choose between alternatives
  */
 
+import { safeGetItem, safeSetItem } from '../../state/persistence.js';
+
 interface FamiliarData {
   FamiliarId: number;
   MobId: number;
@@ -76,10 +78,31 @@ const ELEMENT_MAP: Record<string, string> = {
 
 type CoverageMode = 'both' | 'types' | 'elements';
 
+// Preset data structure for saving/loading configurations
+interface FamiliarFinderPreset {
+  id: number;
+  name: string;
+  ignoredIds: number[];
+  lockedSelections: [string, number][];
+  mode: CoverageMode;
+  createdAt: string;
+}
+
+// localStorage keys
+const STORAGE_KEYS = {
+  PRESETS: 'famfinderPresets',
+  DONE_IDS: 'famfinderDoneIds',
+} as const;
+
 let allFamiliars: NormalizedFamiliar[] = [];
 const ignoredIds = new Set<number>();
 const lockedSelections = new Map<string, number>(); // key: "type-element", value: FamiliarId
 let currentMode: CoverageMode = 'both';
+
+// New state for presets and done tracking
+const doneFamiliarIds = new Set<number>();
+let savedPresets: FamiliarFinderPreset[] = [];
+let activePresetId: number | null = null;
 
 /**
  * Initialize the familiar finder
@@ -98,8 +121,14 @@ export async function initFamiliarFinder(): Promise<void> {
         type: f.TypeName
       }));
 
+    // Load persisted state (presets and done IDs)
+    loadPersistedFamfinderState();
+
     // Setup event handlers
     setupEventHandlers();
+
+    // Render presets section
+    renderPresetsSection();
 
     // Initial render
     findMinimumFamiliars();
@@ -131,6 +160,28 @@ function setupEventHandlers(): void {
       }
     });
   });
+
+  // Save preset button
+  const savePresetBtn = document.getElementById('famfinderSavePresetBtn');
+  if (savePresetBtn) {
+    savePresetBtn.addEventListener('click', showSavePresetModal);
+  }
+
+  // Save preset confirm button
+  const savePresetConfirm = document.getElementById('famfinderSavePresetConfirm');
+  if (savePresetConfirm) {
+    savePresetConfirm.addEventListener('click', handleSavePresetSubmit);
+  }
+
+  // Enter key in preset name input
+  const presetNameInput = document.getElementById('famfinderPresetNameInput');
+  if (presetNameInput) {
+    presetNameInput.addEventListener('keypress', (e) => {
+      if ((e as KeyboardEvent).key === 'Enter') {
+        handleSavePresetSubmit();
+      }
+    });
+  }
 }
 
 /**
@@ -352,7 +403,7 @@ function findMinimumFamiliars(): void {
 
     // Render results
     renderIgnoredSection();
-    renderStats(available.length, selectedFamiliars.length, uncoveredTypes, uncoveredElements);
+    renderStats(available.length, selectedFamiliars.length, uncoveredTypes, uncoveredElements, selectedFamiliars);
     renderCoverage(uncoveredTypes, uncoveredElements);
     renderResults(selectedFamiliars);
 
@@ -396,7 +447,8 @@ function renderStats(
   availableCount: number,
   selectedCount: number,
   uncoveredTypes: Set<string>,
-  uncoveredElements: Set<string>
+  uncoveredElements: Set<string>,
+  selectedFamiliars: SelectedFamiliar[]
 ): void {
   const statsDiv = document.getElementById('famfinderStats');
   if (!statsDiv) return;
@@ -421,11 +473,18 @@ function renderStats(
     coverageStats += `<p><strong>Elements covered:</strong> ${coveredElements.length}/${ELEMENTS.length}</p>`;
   }
 
+  // Calculate done count
+  const doneInSelection = selectedFamiliars.filter(f => doneFamiliarIds.has(f.FamiliarId)).length;
+  const doneStats = doneFamiliarIds.size > 0
+    ? `<p><strong>Done:</strong> ${doneInSelection}/${selectedCount} in current set (${doneFamiliarIds.size} total marked)</p>`
+    : '';
+
   statsDiv.innerHTML = `
     <p><strong>Total level 185-294 familiars:</strong> ${availableCount} (${ignoredIds.size} ignored)</p>
     <p><strong>Need to cover:</strong> ${needToCover}</p>
     <p><strong>Minimum familiars needed:</strong> ${selectedCount}</p>
     ${coverageStats}
+    ${doneStats}
   `;
 }
 
@@ -483,16 +542,23 @@ function renderResults(selectedFamiliars: SelectedFamiliar[]): void {
     if (currentMode === 'elements') lockKey = fam.element;
     const isLocked = lockedSelections.has(lockKey);
 
+    // Check done state
+    const famIsDone = doneFamiliarIds.has(fam.FamiliarId);
+
     return `
-      <div class="famfinder-card element-${fam.element.toLowerCase()}" data-id="${fam.FamiliarId}">
+      <div class="famfinder-card element-${fam.element.toLowerCase()}${famIsDone ? ' done' : ''}" data-id="${fam.FamiliarId}">
         <div class="famfinder-card-header">
-          <span class="famfinder-card-name">${fam.MobName}</span>
+          <span class="famfinder-card-name">
+            ${famIsDone ? '<span class="famfinder-done-badge">&#10003;</span>' : ''}
+            ${fam.MobName}
+          </span>
           <span class="famfinder-card-index">#${i + 1}</span>
         </div>
         <div class="famfinder-card-info">Level ${fam.Level} | ${fam.type} | ${fam.element}</div>
         <div class="famfinder-card-covers">New coverage: ${covers.join(', ')}</div>
         ${hasAlternatives ? `<div class="famfinder-alternatives-count">${alternatives.length} alternatives available${isLocked ? ' (locked)' : ''}</div>` : ''}
         <div class="famfinder-card-actions">
+          <button class="famfinder-btn done${famIsDone ? ' active' : ''}" data-action="toggle-done" data-id="${fam.FamiliarId}">${famIsDone ? 'Undo' : 'Done'}</button>
           ${hasAlternatives ? `<button class="famfinder-btn alternatives" data-action="show-alternatives" data-type="${fam.type}" data-element="${fam.element}" data-current="${fam.FamiliarId}">Choose</button>` : ''}
           <button class="famfinder-btn ignore" data-action="ignore" data-id="${fam.FamiliarId}">Ignore</button>
         </div>
@@ -518,7 +584,207 @@ function renderResults(selectedFamiliars: SelectedFamiliar[]): void {
       ignoreFamiliar(id);
     });
   });
+
+  // Done toggle handlers
+  resultsDiv.querySelectorAll('[data-action="toggle-done"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = parseInt((e.target as HTMLElement).getAttribute('data-id') || '0');
+      toggleDone(id);
+    });
+  });
 }
 
-// Export for modal close handler
+// ============================================
+// PERSISTENCE FUNCTIONS
+// ============================================
+
+/**
+ * Load persisted state from localStorage
+ */
+function loadPersistedFamfinderState(): void {
+  savedPresets = safeGetItem<FamiliarFinderPreset[]>(STORAGE_KEYS.PRESETS, []);
+  const doneIds = safeGetItem<number[]>(STORAGE_KEYS.DONE_IDS, []);
+  doneFamiliarIds.clear();
+  doneIds.forEach(id => doneFamiliarIds.add(id));
+}
+
+/**
+ * Save presets to localStorage
+ */
+function savePresets(): void {
+  safeSetItem(STORAGE_KEYS.PRESETS, savedPresets);
+}
+
+/**
+ * Save done IDs to localStorage
+ */
+function saveDoneIds(): void {
+  safeSetItem(STORAGE_KEYS.DONE_IDS, Array.from(doneFamiliarIds));
+}
+
+// ============================================
+// PRESET MANAGEMENT FUNCTIONS
+// ============================================
+
+/**
+ * Save current state as a new preset
+ */
+function savePreset(name: string): void {
+  const preset: FamiliarFinderPreset = {
+    id: Date.now(),
+    name: name.trim(),
+    ignoredIds: Array.from(ignoredIds),
+    lockedSelections: Array.from(lockedSelections.entries()),
+    mode: currentMode,
+    createdAt: new Date().toISOString()
+  };
+  savedPresets.push(preset);
+  activePresetId = preset.id;
+  savePresets();
+  renderPresetsSection();
+}
+
+/**
+ * Load a preset by ID
+ */
+function loadPreset(presetId: number): void {
+  const preset = savedPresets.find(p => p.id === presetId);
+  if (!preset) return;
+
+  // Restore state
+  ignoredIds.clear();
+  preset.ignoredIds.forEach(id => ignoredIds.add(id));
+
+  lockedSelections.clear();
+  preset.lockedSelections.forEach(([key, id]) => lockedSelections.set(key, id));
+
+  currentMode = preset.mode;
+  activePresetId = presetId;
+
+  // Update mode button UI
+  document.querySelectorAll('.famfinder-mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-mode') === currentMode);
+  });
+
+  // Recalculate and render
+  findMinimumFamiliars();
+  renderPresetsSection();
+}
+
+/**
+ * Delete a preset by ID
+ */
+function deletePreset(presetId: number): void {
+  savedPresets = savedPresets.filter(p => p.id !== presetId);
+  if (activePresetId === presetId) {
+    activePresetId = null;
+  }
+  savePresets();
+  renderPresetsSection();
+}
+
+/**
+ * Show save preset modal
+ */
+function showSavePresetModal(): void {
+  const modal = document.getElementById('famfinderSavePresetModal');
+  const input = document.getElementById('famfinderPresetNameInput') as HTMLInputElement;
+  if (!modal || !input) return;
+  input.value = '';
+  modal.style.display = 'flex';
+  input.focus();
+}
+
+/**
+ * Close save preset modal
+ */
+function closeSavePresetModal(): void {
+  const modal = document.getElementById('famfinderSavePresetModal');
+  if (modal) modal.style.display = 'none';
+}
+
+/**
+ * Handle save preset form submission
+ */
+function handleSavePresetSubmit(): void {
+  const input = document.getElementById('famfinderPresetNameInput') as HTMLInputElement;
+  const name = input?.value.trim();
+  if (!name) return;
+  savePreset(name);
+  closeSavePresetModal();
+}
+
+/**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
+ * Render presets section
+ */
+function renderPresetsSection(): void {
+  const listEl = document.getElementById('famfinderPresetsList');
+  if (!listEl) return;
+
+  if (savedPresets.length === 0) {
+    listEl.innerHTML = '<p class="famfinder-no-presets">No saved presets</p>';
+    return;
+  }
+
+  listEl.innerHTML = savedPresets.map(preset => `
+    <div class="famfinder-preset-item ${preset.id === activePresetId ? 'active' : ''}" data-id="${preset.id}">
+      <div class="famfinder-preset-info">
+        <span class="famfinder-preset-name">${escapeHtml(preset.name)}</span>
+        <span class="famfinder-preset-meta">${preset.mode} mode | ${preset.ignoredIds.length} ignored</span>
+      </div>
+      <div class="famfinder-preset-actions">
+        <button class="famfinder-btn load" data-action="load-preset" data-id="${preset.id}">Load</button>
+        <button class="famfinder-btn delete" data-action="delete-preset" data-id="${preset.id}">Delete</button>
+      </div>
+    </div>
+  `).join('');
+
+  // Add event listeners
+  listEl.querySelectorAll('[data-action="load-preset"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = parseInt((e.target as HTMLElement).getAttribute('data-id') || '0');
+      loadPreset(id);
+    });
+  });
+
+  listEl.querySelectorAll('[data-action="delete-preset"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = parseInt((e.target as HTMLElement).getAttribute('data-id') || '0');
+      deletePreset(id);
+    });
+  });
+}
+
+// ============================================
+// DONE STATE FUNCTIONS
+// ============================================
+
+/**
+ * Toggle done state for a familiar
+ */
+function toggleDone(familiarId: number): void {
+  if (doneFamiliarIds.has(familiarId)) {
+    doneFamiliarIds.delete(familiarId);
+  } else {
+    doneFamiliarIds.add(familiarId);
+  }
+  saveDoneIds();
+  // Re-render to update visual indicators
+  findMinimumFamiliars();
+}
+
+// Export for modal close handlers
 (window as unknown as { closeFamfinderModal: () => void }).closeFamfinderModal = closeAlternativesModal;
+(window as unknown as { closeFamfinderPresetModal: () => void }).closeFamfinderPresetModal = closeSavePresetModal;

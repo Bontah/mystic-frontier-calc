@@ -267,3 +267,6 @@ export function importData(jsonString: string): boolean {
     return false;
   }
 }
+
+// Export safe storage helpers for use in other modules
+export { safeGetItem, safeSetItem };

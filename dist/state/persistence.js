@@ -230,4 +230,6 @@ export function importData(jsonString) {
         return false;
     }
 }
+// Export safe storage helpers for use in other modules
+export { safeGetItem, safeSetItem };
 //# sourceMappingURL=persistence.js.map

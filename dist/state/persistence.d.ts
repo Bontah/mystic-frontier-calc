@@ -4,6 +4,14 @@
  */
 import type { AppState } from './store.js';
 /**
+ * Safely parse JSON from localStorage
+ */
+declare function safeGetItem<T>(key: string, defaultValue: T): T;
+/**
+ * Safely set item in localStorage
+ */
+declare function safeSetItem(key: string, value: unknown): void;
+/**
  * Load persisted state from localStorage
  */
 export declare function loadPersistedState(): Partial<AppState>;
@@ -28,4 +36,5 @@ export declare function exportData(): string;
  * Import data from JSON string
  */
 export declare function importData(jsonString: string): boolean;
+export { safeGetItem, safeSetItem };
 //# sourceMappingURL=persistence.d.ts.map

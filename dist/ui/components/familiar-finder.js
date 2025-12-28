@@ -539,6 +539,7 @@ function savePreset(name) {
         ignoredIds: Array.from(ignoredIds),
         lockedSelections: Array.from(lockedSelections.entries()),
         mode: currentMode,
+        doneIds: Array.from(doneFamiliarIds),
         createdAt: new Date().toISOString()
     };
     savedPresets.push(preset);
@@ -560,6 +561,12 @@ function loadPreset(presetId) {
     preset.lockedSelections.forEach(([key, id]) => lockedSelections.set(key, id));
     currentMode = preset.mode;
     activePresetId = presetId;
+    // Restore done state (handle legacy presets without doneIds)
+    doneFamiliarIds.clear();
+    if (preset.doneIds) {
+        preset.doneIds.forEach(id => doneFamiliarIds.add(id));
+    }
+    saveDoneIds();
     // Update mode button UI
     document.querySelectorAll('.famfinder-mode-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-mode') === currentMode);
@@ -629,18 +636,21 @@ function renderPresetsSection() {
         listEl.innerHTML = '<p class="famfinder-no-presets">No saved presets</p>';
         return;
     }
-    listEl.innerHTML = savedPresets.map(preset => `
+    listEl.innerHTML = savedPresets.map(preset => {
+        const doneCount = preset.doneIds?.length || 0;
+        return `
     <div class="famfinder-preset-item ${preset.id === activePresetId ? 'active' : ''}" data-id="${preset.id}">
       <div class="famfinder-preset-info">
         <span class="famfinder-preset-name">${escapeHtml(preset.name)}</span>
-        <span class="famfinder-preset-meta">${preset.mode} mode | ${preset.ignoredIds.length} ignored</span>
+        <span class="famfinder-preset-meta">${preset.mode} mode | ${preset.ignoredIds.length} ignored | ${doneCount} done</span>
       </div>
       <div class="famfinder-preset-actions">
         <button class="famfinder-btn load" data-action="load-preset" data-id="${preset.id}">Load</button>
         <button class="famfinder-btn delete" data-action="delete-preset" data-id="${preset.id}">Delete</button>
       </div>
     </div>
-  `).join('');
+  `;
+    }).join('');
     // Add event listeners
     listEl.querySelectorAll('[data-action="load-preset"]').forEach(btn => {
         btn.addEventListener('click', (e) => {
